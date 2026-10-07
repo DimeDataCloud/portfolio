@@ -1,0 +1,10 @@
+name = "portfolio"
+compatibility_date = "2026-01-01"
+# account_id comes from CLOUDFLARE_ACCOUNT_ID at deploy time.
+
+routes = [
+  { pattern = "portfolio.dimedata.cloud/*", zone_name = "dimedata.cloud" }
+]
+
+[assets]
+directory = "./dist"

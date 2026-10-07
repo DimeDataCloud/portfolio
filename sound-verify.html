@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<body>
+<script type="module">
+  // Shim AudioContext to an offline context so the ambient graph can be
+  // rendered and measured instead of listened to.
+  window.AudioContext = class {
+    constructor() { return new OfflineAudioContext(2, 44100 * 8, 44100); }
+  };
+  try {
+    const { sound } = await import('/src/audio/sound.js');
+    sound.enable();
+    await new Promise((r) => setTimeout(r, 100)); // let the resume().catch path run
+    const buf = await sound.ctx.startRendering();
+
+    const SKIP = 44100 * 2; // skip the fade-in
+    async function bandRms(type, freq) {
+      const oc = new OfflineAudioContext(1, buf.length, buf.sampleRate);
+      const src = oc.createBufferSource();
+      src.buffer = buf;
+      const f = oc.createBiquadFilter();
+      f.type = type;
+      f.frequency.value = freq;
+      src.connect(f).connect(oc.destination);
+      src.start();
+      const out = await oc.startRendering();
+      const d = out.getChannelData(0);
+      let s = 0;
+      for (let i = SKIP; i < d.length; i++) s += d[i] * d[i];
+      return Math.sqrt(s / (d.length - SKIP));
+    }
+
+    const d0 = buf.getChannelData(0);
+    let s = 0, peak = 0;
+    for (let i = SKIP; i < d0.length; i++) {
+      s += d0[i] * d0[i];
+      const a = Math.abs(d0[i]);
+      if (a > peak) peak = a;
+    }
+    const result = {
+      totalRms: Math.sqrt(s / (d0.length - SKIP)),
+      peak,
+      low: await bandRms('lowpass', 500),   // pad + air live here
+      mid: await bandRms('highpass', 800),  // where "static" is most audible
+      high: await bandRms('highpass', 2000),
+    };
+    result.hissRatio = result.high / result.low;
+    result.midRatio = result.mid / result.low;
+    window.__result = result;
+    console.log('RESULT ' + JSON.stringify(result));
+  } catch (e) {
+    console.log('RESULT ' + JSON.stringify({ error: String(e) }));
+    window.__result = { error: String(e) };
+  }
+</script>
+</body>
+</html>

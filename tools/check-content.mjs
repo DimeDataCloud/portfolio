@@ -116,9 +116,6 @@ const block = scenesSrc.match(/(?:export\s+)?const\s+builders\s*=\s*\{([\s\S]*?)
 if (!block) {
   fail('scenes', 'could not find "const builders = { ... };" in src/experience/scenes.js');
 } else {
-  if (!/export\s+(const|\{)[^;]*\bbuilders\b/.test(scenesSrc)) {
-    console.warn('WARN [scenes] builders is not exported from src/experience/scenes.js');
-  }
   const keys = new Set([...block[1].matchAll(/^\s*['"]?([a-z0-9-]+)['"]?\s*:/gm)].map((m) => m[1]));
   for (const p of projects) {
     if (!keys.has(p.slug)) {

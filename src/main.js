@@ -55,7 +55,25 @@ function enter(withSound) {
   mark?.stop();
   document.body.classList.add('entered');
   experience?.begin();
+  startDeepLinks();
+}
+
+// Reduced motion or no WebGL: there is nothing to wait for, so the gate is
+// skipped entirely and the static project list, About and menu are the site.
+function skipGate() {
+  enterShown = true; // the gate's enter buttons never appear
+  mark?.stop();
+  loaderEl.hidden = true;
+  loaderEl.setAttribute('aria-hidden', 'true');
+  document.body.classList.add('entered');
+  startDeepLinks();
+}
+
+let deepLinksOn = false;
+function startDeepLinks() {
   ui.openFromHash();
+  if (deepLinksOn) return;
+  deepLinksOn = true;
   window.addEventListener('hashchange', () => ui.openFromHash());
 }
 
@@ -71,8 +89,9 @@ async function boot() {
   setProgress(0.35);
 
   if (reducedMotion) {
-    // calm path: no WebGL scene at all
+    // calm path: no WebGL scene and no entry gate
     document.body.classList.add('no-webgl');
+    skipGate();
     setProgress(1);
     return;
   }
@@ -157,6 +176,7 @@ async function boot() {
   } catch (err) {
     console.error('WebGL unavailable, falling back to static list', err);
     document.body.classList.add('no-webgl');
+    skipGate();
     setProgress(1);
   }
 }

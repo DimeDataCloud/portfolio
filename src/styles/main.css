@@ -89,6 +89,7 @@ h1, h2, h3, p { margin: 0; }
   transition: opacity 0.7s var(--inout), visibility 0.7s;
 }
 .loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader[hidden] { display: none; }
 
 .loader-mark { width: clamp(120px, 18vw, 200px); height: auto; }
 
@@ -560,7 +561,7 @@ body.no-webgl .site-title {
   position: static; width: auto; height: auto; clip-path: none; overflow: visible; white-space: normal;
   font-family: var(--font-display); font-weight: 600;
   font-size: var(--text-l); line-height: 1.1; letter-spacing: -0.02em;
-  margin: 0 0 var(--gap-l); max-width: 22ch;
+  margin: 0 0 var(--gap-l); width: min(720px, 100%);
 }
 body.no-webgl .project-list { align-items: stretch; gap: 22px; width: min(720px, 100%); }
 body.no-webgl .project-list a { flex-wrap: wrap; align-items: baseline; font-size: var(--text-l); }

@@ -55,12 +55,12 @@
     </a>
 
     <div class="mode-switch" id="mode-switch" role="group" aria-label="Site mode">
-      <button class="mode-btn active" id="mode-motion" type="button" aria-pressed="true">
-        <span class="mode-label"><span>Motion</span><span aria-hidden="true">Motion</span></span>
+      <button class="mode-btn active" id="mode-motion" type="button" aria-pressed="true" aria-label="Motion">
+        <span class="mode-label"><span aria-hidden="true">Motion</span><span aria-hidden="true">Motion</span></span>
       </button>
       <span class="mode-dot" aria-hidden="true"></span>
-      <button class="mode-btn" id="mode-sound" type="button" aria-pressed="false">
-        <span class="mode-label"><span>Sound</span><span aria-hidden="true">Sound</span></span>
+      <button class="mode-btn" id="mode-sound" type="button" aria-pressed="false" aria-label="Sound">
+        <span class="mode-label"><span aria-hidden="true">Sound</span><span aria-hidden="true">Sound</span></span>
       </button>
     </div>
 
@@ -68,7 +68,7 @@
   </header>
 
   <!-- Menu panel: projects, About, email, and the two social links from contact.links -->
-  <nav class="menu-panel" id="menu-panel" aria-hidden="true" aria-label="Site menu">
+  <nav class="menu-panel" id="menu-panel" aria-hidden="true" inert aria-label="Site menu">
     <ul class="menu-links" id="menu-links"><!-- populated by JS from data --></ul>
     <button class="menu-about-link" id="menu-about" type="button">About</button>
     <div class="menu-footer">
@@ -87,7 +87,7 @@
   </main>
 
   <!-- Project detail overlay: case study -->
-  <section class="detail" id="detail" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+  <section class="detail" id="detail" aria-hidden="true" inert role="dialog" aria-modal="true" aria-labelledby="detail-title">
     <div class="detail-panel" id="detail-panel">
       <button class="detail-close" id="detail-close" type="button" aria-label="Close project">
         <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -108,7 +108,7 @@
   </section>
 
   <!-- Profile overlay: rendered from src/data/profile.js -->
-  <section class="about" id="about" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Profile">
+  <section class="about" id="about" aria-hidden="true" inert role="dialog" aria-modal="true" aria-label="Profile">
     <div class="about-panel" id="about-panel">
       <button class="about-close" id="about-close" type="button" aria-label="Close profile">
         <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>

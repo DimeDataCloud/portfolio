@@ -558,6 +558,17 @@ body:not(.entered) .skip-link { display: none; }
   .metric:last-child { border-bottom: none; }
 }
 
+/* ============ touch targets: 44 x 44 CSS px minimum on coarse pointers ============ */
+@media (pointer: coarse) {
+  .logo, .mode-btn, .menu-btn, .detail-close, .about-close, .menu-close,
+  .menu-about-link, .menu-mail, .menu-socials a, .contact-link, .enter-alt {
+    min-width: 44px; min-height: 44px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .menu-socials a { width: 44px; height: 44px; }
+  .detail-close, .about-close { width: 44px; height: 44px; }
+}
+
 /* ============ reduced motion ============ */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

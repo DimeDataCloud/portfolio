@@ -1,4 +1,4 @@
-// Screenshot harness for the polish loop — captures every key state
+// Screenshot harness for the polish loop - captures every key state
 // at desktop + mobile sizes. Run: node tools/shots.mjs [url]
 import { chromium } from "playwright";
 import { mkdirSync } from "fs";
@@ -37,7 +37,7 @@ async function enter(p) {
 await capture('02-main-desktop', D, enter);
 await capture('03-main-mobile', M, enter);
 
-// 3. hovered card on the spiral (desktop) — pointer over the front card
+// 3. hovered card on the spiral (desktop) - pointer over the front card
 await capture('04-hover-desktop', D, async (p) => {
   await enter(p);
   await p.mouse.move(720, 580);
@@ -56,7 +56,7 @@ await capture('06-menu-mobile', M, async (p) => {
   await p.waitForTimeout(1100);
 });
 
-// 5. project detail overlay — desktop opens by clicking the hovered front card,
+// 5. project detail overlay - desktop opens by clicking the hovered front card,
 // mobile opens through the menu (list is carousel-only now)
 await capture('07-detail-desktop', D, async (p) => {
   await enter(p);

@@ -1,4 +1,4 @@
-// Hologram v2 verification pass — captures each of the 9 projects
+// Hologram v2 verification pass - captures each of the 9 projects
 // front-center (arrow keys step the ring), a hover state, a mobile
 // viewport, and logs a rough fps average. Run: node tools/holo-shots.mjs [url]
 import { chromium } from 'playwright';

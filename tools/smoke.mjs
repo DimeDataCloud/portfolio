@@ -105,10 +105,19 @@ async function main() {
       await page.keyboard.press('Tab');
       const firstStop = await page.evaluate(() => document.activeElement?.className);
       check(firstStop === 'skip-link', `${name}: first Tab after entry lands on skip link (got "${firstStop}")`);
+      // identity: one h1 holds the name and role; each is one line and the name is the largest first-screen text
       const idBox = await boxOf(page, '#id-line');
-      if (name === '390') {
-        check(idBox && idBox.height < 30, `${name}: identity line is one line (height ${idBox && Math.round(idBox.height)}px)`);
-      }
+      const nameBox = await boxOf(page, '#id-line .id-name');
+      const roleBox = await boxOf(page, '#id-line .id-role');
+      const sizes = await page.evaluate(() => ({
+        name: parseFloat(getComputedStyle(document.querySelector('.id-name')).fontSize),
+        role: parseFloat(getComputedStyle(document.querySelector('.id-role')).fontSize),
+      }));
+      check(nameBox && nameBox.height < 40 && roleBox && roleBox.height < 28, `${name}: name and role are one line each (name ${nameBox && Math.round(nameBox.height)}px, role ${roleBox && Math.round(roleBox.height)}px)`);
+      check(sizes.name >= 24 && sizes.role >= 15, `${name}: name ${sizes.name}px and role ${sizes.role}px are legible`);
+      check(nameBox && roleBox && roleBox.y >= nameBox.y + nameBox.height - 0.5, `${name}: role sits below the name without overlap`);
+      const h1s = await page.evaluate(() => [...document.querySelectorAll('h1')].map((h) => h.textContent.replace(/\s+/g, ' ').trim()));
+      check(h1s.length === 1 && h1s[0] === 'Christian Dixon Applied AI & Machine Learning Engineer', `${name}: exactly one h1 (${JSON.stringify(h1s)})`);
       const valueBox = await boxOf(page, '#value-line');
       check(within(valueBox, viewport), `${name}: value proposition is visible inside the viewport`);
 
@@ -167,6 +176,22 @@ async function main() {
       const sound = await page.getAttribute('#sound-btn', 'aria-pressed');
       check(sound === 'false', `auto-enter: entered without a click, silent (aria-pressed="${sound}")`);
       check(errors.length === 0, `auto-enter: zero console errors${errors.length ? ` (${errors.slice(0, 3).join(' | ')})` : ''}`);
+      await page.close();
+    }
+
+    // 1c. returning visitor in the same tab: the Enter button is skipped and the site opens by itself
+    {
+      const errors = [];
+      const page = await newPage(browser, DESKTOP, {}, errors);
+      await page.goto(url, { waitUntil: 'networkidle' });
+      await page.waitForSelector('#loader-enter:not([hidden])', { timeout: 30000 });
+      await page.click('#enter-btn');
+      await page.waitForSelector('body.entered');
+      await page.reload({ waitUntil: 'networkidle' });
+      await page.waitForSelector('body.entered', { timeout: 20000 });
+      const shown = await page.evaluate(() => !document.getElementById('loader-enter').hidden);
+      check(!shown, 'returning visitor: Enter button skipped, site entered by itself');
+      check(errors.length === 0, `returning visitor: zero console errors${errors.length ? ` (${errors.slice(0, 3).join(' | ')})` : ''}`);
       await page.close();
     }
 

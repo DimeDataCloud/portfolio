@@ -10,7 +10,11 @@
 //   __DESCRIPTION__        meta description, og and twitter description
 //   __EMAIL__              contact email
 //   __VALUE_PROP__         one-sentence value proposition under the identity line
+//
+// Build output: dist/sitemap.xml gets a <lastmod> with the build date (closeBundle).
 
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { contact, experience, profile } from '../src/data/profile.js';
 import { projects } from '../src/data/projects.js';
 
@@ -112,9 +116,32 @@ function jsonLd() {
   return `<script type="application/ld+json">\n${json}\n</script>`;
 }
 
+// Build date as YYYY-MM-DD (UTC), the sitemap <lastmod> value.
+export const buildDate = (now = new Date()) => now.toISOString().slice(0, 10);
+
+// Gives every <url> in a sitemap a <lastmod> set to `date`, replacing any
+// existing one. Pure, so the build step and the unit tests share it.
+export function withLastmod(xml, date) {
+  return xml.replace(
+    /<url>\s*<loc>([^<]+)<\/loc>(?:\s*<lastmod>[^<]*<\/lastmod>)?/g,
+    (_, loc) => `<url>\n    <loc>${loc}</loc>\n    <lastmod>${date}</lastmod>`,
+  );
+}
+
 export default function staticContent() {
+  let outDir = null;
   return {
     name: 'static-content',
+    configResolved(config) {
+      outDir = resolve(config.root, config.build.outDir);
+    },
+    // sitemap.xml is copied from public/ by the time the bundle is written;
+    // stamp the build date into the copy in dist/, never into the source file
+    closeBundle() {
+      const file = resolve(outDir, 'sitemap.xml');
+      if (!existsSync(file)) return;
+      writeFileSync(file, withLastmod(readFileSync(file, 'utf8'), buildDate()));
+    },
     transformIndexHtml(html) {
       const description = esc(describe());
       return html

@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,7 @@
     "preview": "vite preview",
     "check": "node tools/check-content.mjs",
     "check:bundle": "node tools/check-bundle.mjs",
+    "test": "node --test \"tools/test/*.test.mjs\"",
     "verify": "npm run check && npm run build",
     "shots": "node tools/shots.mjs",
     "smoke": "node tools/smoke.mjs",
@@ -20,12 +21,14 @@
     "og": "node tools/og.mjs",
     "fps": "node tools/fps-check.mjs",
     "audio-check": "node tools/audio-check.mjs",
-    "deploy": "node tools/deploy.mjs"
+    "deploy": "node tools/deploy.mjs",
+    "a11y": "node tools/a11y.mjs"
   },
   "dependencies": {
     "three": "^0.170.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "playwright": "^1.64.1",
     "vite": "^6.4.4",
     "wrangler": "^4.151.0"

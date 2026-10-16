@@ -90,6 +90,9 @@ async function main() {
         const idBox = await page.locator('#id-line').boundingBox();
         check(idBox && idBox.height < 30, `${name}: identity line is one line (height ${idBox && Math.round(idBox.height)}px)`);
       }
+      const valueBox = await page.locator('#value-line').boundingBox();
+      check(valueBox && valueBox.width > 0 && valueBox.x >= 0 && valueBox.x + valueBox.width <= viewport.width,
+        `${name}: value proposition is visible inside the viewport`);
 
       await page.evaluate(() => { location.hash = '#agent-eval'; });
       await page.waitForSelector('#detail.open', { timeout: 10000 });

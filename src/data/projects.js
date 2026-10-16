@@ -14,7 +14,7 @@ export const projects = [
     title: 'AI Voice Receptionist',
     year: '2025',
     status: 'archived',
-    statusText: 'Archived',
+    statusText: 'Archived, case study',
     desc: 'A virtual agent that answers the phone, qualifies the caller, books the appointment and writes the result to the CRM.',
     problem: 'Inbound calls went to voicemail after hours and the leads went cold.',
     built:
@@ -36,7 +36,7 @@ export const projects = [
     title: 'Self-Hosted CRM',
     year: '2025',
     status: 'archived',
-    statusText: 'Archived',
+    statusText: 'Archived, case study',
     desc: 'Kanban pipelines, conversion funnels and a Call Room that prepares the rep before every dial.',
     problem: 'Call prep was improvised, so quality swung by rep and by lead.',
     built:
@@ -58,7 +58,7 @@ export const projects = [
     title: 'Lead-Generation Engine',
     year: '2025',
     status: 'archived',
-    statusText: 'Archived',
+    statusText: 'Archived, case study',
     desc: 'Two-axis lead scoring, fit and intent, built entirely from free public signals.',
     problem: "Lead qualification came down to one yes/no question about the prospect's website.",
     built:
@@ -81,7 +81,7 @@ export const projects = [
     title: 'H.A.L.O Agent OS',
     year: '2025',
     status: 'paused',
-    statusText: 'Paused',
+    statusText: 'Paused, case study',
     desc: 'An operating system for a one-person business, staffed by 27 agents in a four-layer hierarchy and connected over Model Context Protocol.',
     problem:
       'One person cannot run sales, ops, security and content at once, and unattended agents are only useful if they ask before they send, spend, publish, delete or sign.',

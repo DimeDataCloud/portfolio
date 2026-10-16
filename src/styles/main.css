@@ -311,7 +311,8 @@ body.entered:not(.no-webgl) .project-list { display: none; }
 /* ============ case-study + profile overlays ============ */
 .detail, .about {
   position: fixed; inset: 0; z-index: 40;
-  display: grid; place-items: center;
+  /* flex, not grid: the panel's max-height: 100% needs a definite height */
+  display: flex; align-items: center; justify-content: center;
   padding: var(--edge);
   background: rgba(10, 10, 10, 0.6);
   backdrop-filter: blur(18px);

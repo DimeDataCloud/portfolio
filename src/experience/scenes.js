@@ -66,15 +66,6 @@ const geo = {
   envFlap: new THREE.ConeGeometry(0.02, 0.016, 4),
   // brainai
   wire: new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(0.125, 0)),
-  // web systems
-  browser: new THREE.BoxGeometry(0.46, 0.34, 0.02),
-  urlbar: new THREE.BoxGeometry(0.28, 0.02, 0.006),
-  hero: new THREE.BoxGeometry(0.36, 0.09, 0.012),
-  nav: new THREE.BoxGeometry(0.40, 0.026, 0.012),
-  col: new THREE.BoxGeometry(0.17, 0.11, 0.012),
-  btn: new THREE.BoxGeometry(0.07, 0.024, 0.016),
-  phonePanel: new THREE.BoxGeometry(0.10, 0.19, 0.012),
-  miniBlock: new THREE.BoxGeometry(0.07, 0.02, 0.008),
   // app builder
   pillar: new THREE.BoxGeometry(0.014, 0.34, 0.014),
   rail: new THREE.BoxGeometry(0.32, 0.012, 0.012),
@@ -723,132 +714,6 @@ function brainai(mats) {
 }
 
 /* =====================================================================
- * 7. Web Systems - a site assembling itself.
- * A browser panel with real depth; blocks fly in from z-depth, a cursor
- * clicks a button, the layout re-flows, clicks again, flows back. A faint
- * rotated phone panel mirrors each layout - the responsive twin.
- * ===================================================================== */
-function webSystems(mats) {
-  const g = new THREE.Group();
-  const T = 7;
-
-  const panel = new THREE.Group();
-  panel.rotation.y = 0.15;
-  g.add(panel);
-
-  const frame = mesh(geo.browser, mats.faint());
-  frame.position.y = 0.42;
-  panel.add(frame);
-  [0, 1, 2].forEach((i) => {
-    const d = mesh(geo.sphXS, mats.line());
-    d.scale.setScalar(0.4);
-    d.position.set(-0.19 + i * 0.028, 0.565, 0.013);
-    panel.add(d);
-  });
-  const urlbar = mesh(geo.urlbar, mats.faint());
-  urlbar.position.set(0.03, 0.565, 0.012);
-  panel.add(urlbar);
-
-  // page blocks with layout A / layout B targets
-  const defs = [
-    { g: geo.nav, A: { p: [0, 0.525, 0.016], s: [1, 1, 1] }, B: { p: [0, 0.525, 0.016], s: [1, 1, 1] }, a: 0.55 },
-    { g: geo.hero, A: { p: [0, 0.448, 0.016], s: [1, 1, 1] }, B: { p: [-0.095, 0.40, 0.016], s: [0.5, 1.9, 1] }, a: 0.55 },
-    { g: geo.col, A: { p: [-0.095, 0.325, 0.016], s: [1, 1, 1] }, B: { p: [0.095, 0.46, 0.016], s: [1, 0.55, 1] }, a: 0.45 },
-    { g: geo.col, A: { p: [0.095, 0.325, 0.016], s: [1, 1, 1] }, B: { p: [0.095, 0.36, 0.016], s: [1, 0.55, 1] }, a: 0.45 },
-  ];
-  const blocks = defs.map((d) => {
-    const m = mats.custom({ alpha: d.a });
-    const b = mesh(d.g, m);
-    panel.add(b);
-    return { b, m, ...d };
-  });
-  const btnMat = mats.bright();
-  const btn = mesh(geo.btn, btnMat);
-  panel.add(btn);
-  const btnA = [0.10, 0.435, 0.026], btnB = [-0.095, 0.33, 0.026];
-
-  const curMat = mats.bright();
-  const cursor = mesh(geo.sphXS, curMat);
-  cursor.scale.setScalar(0.55);
-  panel.add(cursor);
-  const curRest = [0.20, 0.30, 0.05];
-
-  // responsive twin: faint phone panel behind, mirroring the layouts
-  const twin = new THREE.Group();
-  twin.position.set(0.17, 0.40, -0.15);
-  twin.rotation.y = -0.55;
-  g.add(twin);
-  twin.add(mesh(geo.phonePanel, mats.faint()));
-  const twinBlocks = [1, 2, 3].map((bi, i) => {
-    const m = mats.custom({ alpha: 0.4 });
-    const b = mesh(geo.miniBlock, m);
-    twin.add(b);
-    return { b, m, bi };
-  });
-  const twinA = [[0, 0.055, 0.008], [0, 0.01, 0.008], [0, -0.035, 0.008]];
-  const twinB = [[0, 0.05, 0.008], [0, -0.005, 0.008], [0, -0.045, 0.008]];
-
-  return {
-    group: g,
-    update(t) {
-      const u = (t / T) % 1;
-
-      // morph 0→1→0 across the cycle (phase-continuous)
-      const m = inOut(seg(u, 0.45, 0.62)) - inOut(seg(u, 0.78, 0.95));
-      // build in from z-depth, deconstruct at the end
-      blocks.forEach(({ b, m: bm, A, B: LB, a }, i) => {
-        const bi = outCubic(seg(u, 0.02 + i * 0.05, 0.14 + i * 0.05));
-        const out = 1 - inCubic(seg(u, 0.90 + i * 0.015, 0.985));
-        b.position.set(
-          lerp(A.p[0], LB.p[0], m),
-          lerp(A.p[1], LB.p[1], m),
-          -0.13 + (A.p[2] + 0.13) * bi
-        );
-        b.scale.set(lerp(A.s[0], LB.s[0], m) * (0.9 + 0.1 * bi), lerp(A.s[1], LB.s[1], m), 1);
-        bm.uniforms.uAlpha.value = a * bi * out;
-      });
-
-      // button follows the hero region between layouts
-      const click1 = spike(seg(u, 0.40, 0.46));
-      const click2 = spike(seg(u, 0.72, 0.78));
-      btn.position.set(lerp(btnA[0], btnB[0], m), lerp(btnA[1], btnB[1], m), btnA[2]);
-      const bVis = outCubic(seg(u, 0.16, 0.26)) * (1 - inCubic(seg(u, 0.90, 0.985)));
-      btnMat.uniforms.uAlpha.value = (0.65 + click1 * 0.35 + click2 * 0.35) * bVis;
-
-      // cursor: glide → click → glide → click → drift home
-      const g1 = inOut(seg(u, 0.28, 0.40));
-      const g2 = inOut(seg(u, 0.62, 0.72));
-      const g3 = inOut(seg(u, 0.80, 0.90));
-      let cx = lerp(curRest[0], btnA[0], g1);
-      let cy = lerp(curRest[1], btnA[1], g1) + bump(g1) * 0.05;
-      if (u >= 0.45) { cx = lerp(btnA[0], btnB[0], g2); cy = lerp(btnA[1], btnB[1], g2) + bump(g2) * 0.04; }
-      if (u >= 0.78) { cx = lerp(btnB[0], curRest[0], g3); cy = lerp(btnB[1], curRest[1], g3); }
-      cursor.position.set(cx, cy, 0.035 - (click1 + click2) * 0.012);
-      curMat.uniforms.uAlpha.value = 0.9 * bVis;
-
-      // twin mirrors the same phases
-      twinBlocks.forEach(({ b, m: tm }, i) => {
-        const bi = outCubic(seg(u, 0.04 + i * 0.05, 0.16 + i * 0.05));
-        const out = 1 - inCubic(seg(u, 0.90, 0.985));
-        b.position.set(
-          lerp(twinA[i][0], twinB[i][0], m),
-          lerp(twinA[i][1], twinB[i][1], m),
-          -0.05 + (twinA[i][2] + 0.05) * bi
-        );
-        tm.uniforms.uAlpha.value = 0.4 * bi * out;
-      });
-
-      // secondary: gentle panel sway
-      panel.rotation.y = 0.15 + 0.05 * Math.sin(t * 0.4);
-    },
-    beat(t) {
-      const u = (t / T) % 1;
-      return Math.max(spike(seg(u, 0.40, 0.46)), spike(seg(u, 0.72, 0.78)));
-    },
-  };
-}
-
-/* =====================================================================
  * 8. App Builder - idea in, app out.
  * A prompt orb descends into a gantry and dissolves; a printhead carriage
  * sweeps while blocks materialize with weight, building an app tower
@@ -1032,7 +897,6 @@ const builders = {
   'crm-live': crm,
   'leadgen-live': leadgen,
   'brainai': brainai,
-  'web-systems': webSystems,
   'app-builder': appBuilder,
   'portfolio-site': portfolioSite,
 };

@@ -1,130 +1,187 @@
-<h1 align="center">Portfolio</h1>
+<div align="center">
 
-<p align="center">Interactive Three.js portfolio: each project is a procedural hologram on a spiral carousel, with custom post-processing and generative sound.</p>
+# Christian Dixon
 
-<p align="center">Live at <a href="https://portfolio.dimedata.cloud">portfolio.dimedata.cloud</a></p>
+**An interactive 3D portfolio where every project is a procedural hologram**
 
-![The carousel](docs/carousel.jpg)
+[portfolio.dimedata.cloud](https://portfolio.dimedata.cloud)
 
-## What it is
+[![CI](https://github.com/DimeDataCloud/portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/DimeDataCloud/portfolio/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![three.js 0.170](https://img.shields.io/badge/three.js-0.170-black?logo=three.js)](https://threejs.org)
+[![Vite 6](https://img.shields.io/badge/vite-6-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
 
-A single-page portfolio for Dime Data and Christian Dixon. Visitors step through projects on a 3D carousel. Each project has its own animated mini-scene, and selecting one opens a detail panel with the description, stack and links.
+![Animated demo of the portfolio](docs/screens/demo.gif)
 
+</div>
 
-## Features
+| | |
+|---|---|
+| ![Carousel](docs/screens/carousel.png) | ![Case study](docs/screens/case-study.png) |
+| ![Profile](docs/screens/about.png) | ![Mobile carousel](docs/screens/mobile.png) |
+| ![Mobile case study](docs/screens/mobile-case-study.png) | ![Holograms](docs/screens/holograms.png) |
 
-- Spiral carousel of project holograms, driven by mouse wheel, drag, keyboard and touch.
-- One procedural scene per project, built from Three.js primitives. No models or textures are loaded.
-- Custom holographic material (scanlines, fresnel, flicker) and a post-processing shader.
-- Synthesised sound in Web Audio. There are no audio files, and sound can be toggled on or off.
-- Detail panel per project with status, stack and links.
-- Real semantic HTML underneath the canvas for search engines and screen readers.
+## What this shows
+
+- **No asset files.** Every scene is built from Three.js primitives and custom GLSL. Sound is synthesised with Web Audio. The repository has no 3D models, textures or audio files.
+- **A performance budget that CI enforces.** Gzipped JavaScript, Three.js included, must stay under 160 KB. A build check fails the pipeline when it does not. The current build measures 150 KB.
+- **Content as data.** Two data files drive the WebGL interface, the no-JavaScript HTML, the meta tags and the JSON-LD. A Vite plugin writes the same content into the built `index.html`.
+- **Guardrails in the pipeline.** A content check fails the build on broken or private links, missing scene builders, em dashes, phone numbers and secret-shaped strings.
+
+## The person behind it
+
+**Applied AI & Machine Learning Engineer**, Nashville, TN.
+
+> I build, measure and operate applied machine learning and generative AI systems end to end: the discovery that finds which process is worth automating, the engineering that takes it from prototype to production, and the statistical evaluation that proves whether it worked.
+
+Email chris@dimedata.cloud · [LinkedIn](https://www.linkedin.com/in/christian-s-dixon) · [GitHub](https://github.com/DimeDataCloud)
+
+| Headline number | What it measures |
+|---|---|
+| 27 | agents running unattended in a four-layer hierarchy |
+| < 2 s | voice response budget, speech in to speech out |
+| 75.0% | solve rate vs 50.0% for the closest open-source comparator (n=20) |
+| 4 | model providers behind one interface, with automatic failover |
+| 3,000+ | automated tests behind CI/CD |
+| 30+ days | with no outages or incidents across every deployment |
+
+## Case studies
+
+| Project | What it is | Key metric | Status | Link |
+|---|---|---|---|---|
+| AI Voice Receptionist | Virtual agent that answers the phone, qualifies the caller and books the appointment | 83 after-hours calls and 11 appointments in the first 30 days | Archived | private, available on request |
+| Self-Hosted CRM | Pipelines, funnels and a Call Room that prepares the rep before every dial | Under 10% of replies escalated to a person | Archived | [repo](https://github.com/DimeDataCloud/crm-showcase) |
+| Lead-Generation Engine | Two-axis lead scoring from free public signals | 27.2% open and 4.3% book across 233 sends | Archived | [repo](https://github.com/DimeDataCloud/lead-engine-showcase) |
+| H.A.L.O Agent OS | Operating system for a one-person business, 27 agents in four layers | 578 tokens of fixed overhead per turn | Paused | [repo](https://github.com/DimeDataCloud/halo-agent-showcase) |
+| Agent Evaluation Harness | Statistical harness on benchmarks written outside the company | 75.0% solve rate vs 50.0% | Operational | private, available on request |
+| BrainAI Knowledge Graph | 300+ wikilinked notes in Neo4j, read by Claude over a read-only MCP server | 27 agents read it over MCP | Operational | [repo](https://github.com/DimeDataCloud/brain-graph) |
+| Omni SDR | Sales development layer that checks every claim before a human-approved send | None published yet | Pre-launch | [live](https://omnisdr.com), [repo](https://github.com/DimeDataCloud/omni-sdr-showcase) |
+| App Builder | Plain-language app idea to a 12-section build specification | 12 blueprint sections | In the lab | [repo](https://github.com/DimeDataCloud/app-builder) |
+| This Portfolio | Procedural 3D portfolio on Three.js, with a custom post pass | About 150 KB gzipped, Three.js included | Live | [live](https://portfolio.dimedata.cloud), [repo](https://github.com/DimeDataCloud/portfolio) |
+
+Private projects appear on the site with their case study text and no links.
 
 ## How it works
 
 ```mermaid
 flowchart LR
-    D[src/data/projects.js] --> C[Carousel]
-    S[Stage<br/>renderer · camera · post shader] --> C
-    C --> H[Holo, one per project<br/>projector + beam + scene]
-    H --> SC[scenes.js<br/>one animated mini-scene per project]
-    H --> M[holoMaterial<br/>scanlines · fresnel · flicker]
-    I[Input<br/>wheel · drag · keys · touch] --> C
-    A[audio/sound.js<br/>Web Audio, no samples] -.reacts to.-> C
+    subgraph Build
+        PD[src/data/profile.js]
+        JD[src/data/projects.js]
+        IH[index.html template]
+        VP[tools/vite-static-content.js<br/>Vite plugin]
+        PD --> VP
+        JD --> VP
+        IH --> VP
+        VP --> DIST[dist/index.html<br/>project list, profile text,<br/>JSON-LD, meta tags]
+    end
+    subgraph Runtime
+        BOOT[main.js<br/>fonts, loader, entry gate]
+        BOOT -->|motion allowed, WebGL available| STG[Stage<br/>renderer, camera, post pass]
+        BOOT -->|reduced motion or no WebGL| FB[no-webgl layout]
+        IN[Input.js<br/>wheel, drag, keys, touch] --> CAR
+        STG --> CAR[Carousel<br/>ring layout, hover]
+        JD --> CAR
+        CAR --> HOLO[Holo, two per project<br/>dais, beam, label]
+        HOLO --> SC[scenes.js<br/>one builder per slug]
+        HOLO --> MAT[holoMaterial.js<br/>GLSL shaders]
+        CAR --> UI[interface.js<br/>menu, case study, profile]
+        JD --> UI
+        PD --> UI
+        UI --> SND[sound.js<br/>Web Audio]
+    end
+    DIST --> BOOT
 ```
 
-- **`src/data/projects.js` is the only content file.** It holds the project list, the social links and the contact details. Adding an entry there puts it on the carousel, in the labels and in the detail panel.
-- **Link policy.** A project shows a live URL if one exists, a public repo link if the repo is public, and otherwise "private repo, available on request". Do not add a link to a private repo.
-- **Scenes are keyed by slug.** Each entry in `src/experience/scenes.js` (`builders`) is matched to a project by its `slug`.
+- **Content flows one way.** `src/data/` is the only copy. The build plugin writes it into the HTML for crawlers and no-JavaScript readers. The runtime reads the same files for the holograms, the menu and the overlays.
+- **The 3D view is optional.** Reduced-motion visitors and browsers without WebGL get the same content as a list, and the WebGL view is never created for them.
+- **Each hologram is built in code.** A shared shader factory provides the scanlines, fresnel edges, status arc and dust motes. Each project supplies one mini scene that runs inside the beam.
 
-## Project structure
+Full detail is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+### Project structure
 
 ```
-index.html                 Page shell and the server-rendered project list
-src/main.js                Boot sequence (fonts, then scene)
-src/data/projects.js       All content: projects, socials, meta
-src/experience/Stage.js    Renderer, camera, post-processing
-src/experience/Carousel.js Ring layout and selection
-src/experience/Holo.js     One hologram: projector, beam, label
-src/experience/scenes.js   Procedural mini-scene per project
-src/experience/holoMaterial.js  Hologram shader material
-src/experience/Input.js    Wheel, drag, keys, touch
-src/audio/sound.js         Web Audio sound design
-src/ui/interface.js        Detail panel, about overlay, menu
-src/styles/main.css        Styles and font loading
-wrangler.toml              Cloudflare route and static asset directory
-deploy.mjs                 Deploy script (wrangler deploy)
+index.html                       Page shell, loader, overlays, build placeholders
+public/og.png                    1200 x 630 social card (rendered by tools/og.mjs)
+src/main.js                      Boot: fonts, loader, entry gate, WebGL or fallback
+src/data/profile.js              Profile, headline metrics, experience, skills, contact
+src/data/projects.js             The nine projects: the single source for project copy
+src/experience/Stage.js          Renderer, camera, parallax, post pass
+src/experience/Carousel.js       Spiral layout, hover picking, focus
+src/experience/Holo.js           One hologram: dais, beam, caustics, motes, label
+src/experience/holoMaterial.js   Hologram shader factory (GLSL)
+src/experience/scenes.js         Nine procedural mini scenes, keyed by slug
+src/experience/Input.js          Wheel, drag, touch, keyboard, pointer
+src/shaders/postShader.js        Grain and vignette composite
+src/audio/sound.js               Web Audio ambient pad and interaction sounds
+src/loader/mark.js               Canvas loader animation
+src/ui/interface.js              Menu, case study, profile overlay, focus management
+src/ui/icons.js                  Brand icon paths (simple-icons)
+src/styles/main.css             Design tokens, layout, reduced-motion and no-WebGL styles
+tools/vite-static-content.js     Vite plugin: build-time HTML, JSON-LD, meta tags
+tools/check-content.mjs          Guardrails: links, copy rules, secrets, scene builders
+tools/check-bundle.mjs           Gzipped JavaScript budget (160 KB)
+tools/deploy.mjs                 Cloudflare Workers deploy, credentials from the environment
+tools/shots.mjs                  Playwright screenshots of key states
+tools/holo-shots.mjs             Playwright captures of each hologram and a rough frame rate
+tools/fps-check.mjs              Relative frame-rate comparison of two URLs
+tools/audio-check.mjs            Playwright check that the sound engine starts and responds
+tools/sound-verify.html          Manual page for checking the sound engine
+tools/og.mjs                     Renders public/og.png
+docs/                            Architecture, design, content guide, screenshots
+wrangler.toml                    Cloudflare route and static asset directory
+vite.config.js                   Vite config with the static-content plugin
+.github/workflows/ci.yml         Guardrails, build and bundle budget on every push and PR
 ```
-
-## Requirements
-
-- Node.js with npm.
-- A WebGL-capable browser for development and review.
 
 ## Quick start
 
-```bash
-npm install
-npm run dev          # Vite dev server
-```
-
-Other scripts:
+Requires Node 22 (see `.nvmrc`) and a WebGL-capable browser.
 
 ```bash
-npm run build        # Production build into dist/
-npm run preview      # Serve dist/ on a local port (vite preview)
+npm ci                    # install
+npm run dev               # Vite dev server
+npm run verify            # content guardrails, then production build
+npm run check:bundle      # gzipped JS budget, run after a build
+npm run preview           # serve dist/ locally
 ```
 
-## Configuration
+Playwright tools need a browser once: `npx playwright install chromium`.
 
-Deployment reads its credentials from the environment. Nothing is written to disk.
-
-| Name | Required | Purpose |
-|---|---|---|
-| `CLOUDFLARE_API_TOKEN` | Yes, for deploy | Workers and DNS edit token |
-| `CLOUDFLARE_ACCOUNT_ID` | Yes, for deploy | Account that owns the `dimedata.cloud` zone |
-| `KEYS_FILE` | No | Path to a local markdown file that contains `API Token` and `Account ID` rows. Keep it outside the repo. |
-
-Copy `.env.example` to `.env` for local use. `.env` files are git-ignored.
+On Windows arm64, npm can skip the native rollup and esbuild binaries and the build fails. Add them with `npm install --no-save --force @rollup/rollup-win32-arm64-msvc@<rollup> @esbuild/win32-arm64@<esbuild>`, using the versions in `package-lock.json`.
 
 ## Deploy
 
-The site is deployed to Cloudflare Workers as static assets. The custom domain is set by the route in `wrangler.toml`.
+The site deploys to Cloudflare Workers as static assets from `dist/`. The route `portfolio.dimedata.cloud/*` on the `dimedata.cloud` zone is set in `wrangler.toml`.
+
+Credentials come from the environment only. Nothing is written to disk.
+
+| Variable | Purpose |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | Token with Workers and DNS edit access |
+| `CLOUDFLARE_ACCOUNT_ID` | Account that owns the zone |
 
 ```bash
-cp .env.example .env    # fill in CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID
-npm run build && node --env-file=.env deploy.mjs
+cp .env.example .env                       # fill in the two values; .env is git-ignored
+npm run build
+node --env-file=.env tools/deploy.mjs      # or: npm run deploy, with the variables exported
 ```
 
-To deploy under a different domain, change the route in `wrangler.toml` and make sure the zone exists on the account.
+To deploy under another domain, change the route in `wrangler.toml` and make sure the zone exists on the account.
 
-## Scripts
+## Quality gates
 
-These are review and verification tools. They use Playwright, so install a browser first.
+- **`npm run verify`** runs the content guardrails (`tools/check-content.mjs`) and then the production build.
+- **CI** (`.github/workflows/ci.yml`) runs on every push and pull request on Ubuntu with Node 22. It installs with `npm ci --ignore-scripts`, then runs the content guardrails, the build and the bundle budget.
+- **Bundle budget.** Gzipped JavaScript across `dist/assets` must stay under 160 KB. The current build measures 150.15 KB, with Three.js included.
+- **Content rules** enforced by the guardrails: every project has the required fields and a unique slug; links are `https`; a project with no public link has a `privateNote`; every slug has a scene builder; the contact email is the public one; no em dashes, phone numbers or secret-shaped strings in site source.
+- **Review** uses the Playwright scripts above on desktop and phone sizes. They run locally and are not part of CI. The repository has no unit test suite.
 
-| Script | What it does |
-|---|---|
-| `shots.mjs` | Screenshots of the key page states at desktop and mobile sizes |
-| `holo-shots.mjs` | Screenshot of each hologram, plus a hover state and a rough frame-rate average |
-| `fps-check.mjs` | Relative frame-rate comparison of two URLs: `node fps-check.mjs <urlA> <urlB>` |
-| `audio-check.mjs` | Checks that the sound engine starts and responds |
-| `sound-verify.html` | Manual page for checking the sound engine |
-| `og.mjs` | Renders `public/og.png`, the 1200 x 630 social card |
+## Fonts, icons and licence
 
-`shots.mjs`, `holo-shots.mjs` and `audio-check.mjs` take an optional URL argument and default to `http://localhost:4400/`. Start a server first with `npx vite preview --port 4400`.
+- Typefaces are Clash Display and Satoshi from [Fontshare](https://www.fontshare.com), loaded from the Fontshare CDN under the Fontshare licence.
+- Brand icons are path data from [simple-icons](https://github.com/simple-icons/simple-icons), used under its licence.
+- Code is released under the [MIT License](LICENSE). Copyright Dime Data, built by [Dime Data](https://dimedata.cloud).
 
-## Testing
-
-There is no automated test suite. Verification is done with the scripts above and by checking the carousel in a browser after a change.
-
-## Status
-
-The project list is current as of the last content update. Each project's status line is set in `src/data/projects.js`, and the About timeline is in `index.html`. Review both when a project changes state.
-
-## Credits
-
-Typefaces: Clash Display and Satoshi from [Fontshare](https://www.fontshare.com), loaded from their CDN under the Fontshare licence.
-
-## License
-
-Code is released under the [MIT License](LICENSE). Built by [Dime Data](https://dimedata.cloud).
+For contributions, see [CONTRIBUTING.md](CONTRIBUTING.md). For the design principles and the content guide, see [docs/DESIGN.md](docs/DESIGN.md) and [docs/CONTENT.md](docs/CONTENT.md).

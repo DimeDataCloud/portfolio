@@ -33,7 +33,7 @@ Because the plugin reads the same data files the runtime reads, a content change
 3. If `prefers-reduced-motion: reduce` matches, the WebGL path is skipped entirely. The body gets `no-webgl` and the boot ends.
 4. Otherwise `Stage`, `Carousel` and `Input` are imported dynamically, which places the Three.js code in its own chunk.
 5. The loader progress is set at fixed checkpoints (0.08, 0.35, 0.6, 0.92, 1). The loader mark in `src/loader/mark.js` is a canvas node graph driven by the same progress value.
-6. The entry gate offers "enter with sound" and "enter without sound". Either choice starts the experience. Sound is off unless the visitor chooses it.
+6. The entry gate shows loading progress, then one "Enter" button. Entering is always silent. If the visitor does not click, the gate enters by itself a few seconds after loading. Sound is off unless the visitor turns it on with the sound toggle.
 
 Any exception inside the try block (module import, renderer creation, scene setup) logs a console error, adds `no-webgl` and completes the loader.
 

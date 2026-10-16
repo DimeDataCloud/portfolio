@@ -24,7 +24,7 @@
 ## What this shows
 
 - **No asset files.** Every scene is built from Three.js primitives and custom GLSL. Sound is synthesised with Web Audio. The repository has no 3D models, textures or audio files.
-- **A performance budget that CI enforces.** Gzipped JavaScript, Three.js included, must stay under 160 KB. A build check fails the pipeline when it does not. The current build measures 150 KB.
+- **A performance budget that CI enforces.** Gzipped JavaScript, Three.js included, must stay under 160 KB. A build check fails the pipeline when it does not. The current build measures 151 KB.
 - **Content as data.** Two data files drive the WebGL interface, the no-JavaScript HTML, the meta tags and the JSON-LD. A Vite plugin writes the same content into the built `index.html`.
 - **Guardrails in the pipeline.** A content check fails the build on broken or private links, missing scene builders, em dashes, phone numbers and secret-shaped strings.
 
@@ -42,8 +42,7 @@ Email chris@dimedata.cloud · [LinkedIn](https://www.linkedin.com/in/christian-s
 | < 2 s | voice response budget, speech in to speech out | private, walkthrough on request |
 | 75.0% | solve rate vs 50.0% for the closest open-source comparator (n=20) | private, walkthrough on request |
 | 4 | model providers behind one interface, with automatic failover | private, walkthrough on request |
-| 3,000+ | automated tests behind CI/CD | [HALO showcase](https://github.com/DimeDataCloud/halo-agent-showcase#by-the-numbers): 3,567 passing tests |
-| 30+ days | with no outages or incidents across every deployment | private, walkthrough on request |
+| 3,567 | passing tests in the public H.A.L.O showcase repo (measured 2026-09-10) | [HALO showcase](https://github.com/DimeDataCloud/halo-agent-showcase#by-the-numbers) |
 
 ## Case studies
 
@@ -57,7 +56,7 @@ Email chris@dimedata.cloud · [LinkedIn](https://www.linkedin.com/in/christian-s
 | BrainAI Knowledge Graph | 300+ wikilinked notes in Neo4j, read by Claude over a read-only MCP server | 27 agents read it over MCP | Operational | [repo](https://github.com/DimeDataCloud/brain-graph) |
 | Omni SDR | Sales development layer that checks every claim before a human-approved send | None published yet | Pre-launch | [live](https://omnisdr.com), [repo](https://github.com/DimeDataCloud/omni-sdr-showcase) |
 | App Builder | Plain-language app idea to a 12-section build specification | 12 blueprint sections | In the lab | [repo](https://github.com/DimeDataCloud/app-builder) |
-| This Portfolio | Procedural 3D portfolio on Three.js, with a custom post pass | About 150 KB gzipped, Three.js included | Live | [live](https://portfolio.dimedata.cloud), [repo](https://github.com/DimeDataCloud/portfolio) |
+| This Portfolio | Procedural 3D portfolio on Three.js, with a custom post pass | About 151 KB gzipped, Three.js included | Live | [live](https://portfolio.dimedata.cloud), [repo](https://github.com/DimeDataCloud/portfolio) |
 
 Private projects appear on the site with their case study text and no links.
 
@@ -104,6 +103,7 @@ Full detail is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 ```
 index.html                       Page shell, loader, overlays, build placeholders
 public/og.png                    1200 x 630 social card (rendered by tools/og.mjs)
+public/_headers                  Cloudflare headers: nosniff, referrer policy, immutable cache for /assets/*
 src/main.js                      Boot: fonts, loader, entry gate, WebGL or fallback
 src/data/profile.js              Profile, headline metrics, experience, skills, contact
 src/data/projects.js             The nine projects: the single source for project copy
@@ -121,6 +121,9 @@ src/ui/icons.js                  Brand icon paths (simple-icons)
 src/styles/main.css             Design tokens, layout, reduced-motion and no-WebGL styles
 tools/vite-static-content.js     Vite plugin: build-time HTML, JSON-LD, meta tags
 tools/check-content.mjs          Guardrails: links, copy rules, secrets, scene builders
+tools/content-rules.mjs          Pure rule predicates used by the guardrails and the unit tests
+tools/test/                      Unit tests (node:test): static HTML, JSON-LD, guardrail rules
+tools/a11y.mjs                   axe-core accessibility pass (static list and case-study dialog)
 tools/check-bundle.mjs           Gzipped JavaScript budget (160 KB)
 tools/deploy.mjs                 Cloudflare Workers deploy, credentials from the environment
 tools/shots.mjs                  Playwright screenshots of key states
@@ -143,6 +146,7 @@ Requires Node 22 (see `.nvmrc`) and a WebGL-capable browser.
 npm ci                    # install
 npm run dev               # Vite dev server
 npm run verify            # content guardrails, then production build
+npm test                  # unit tests (node:test)
 npm run check:bundle      # gzipped JS budget, run after a build
 npm run preview           # serve dist/ locally
 ```
@@ -173,10 +177,12 @@ To deploy under another domain, change the route in `wrangler.toml` and make sur
 ## Quality gates
 
 - **`npm run verify`** runs the content guardrails (`tools/check-content.mjs`) and then the production build.
-- **CI** (`.github/workflows/ci.yml`) runs on every push and pull request on Ubuntu with Node 22. It installs with `npm ci --ignore-scripts`, then runs the content guardrails, the build and the bundle budget.
-- **Bundle budget.** Gzipped JavaScript across `dist/assets` must stay under 160 KB. The current build measures 150.15 KB, with Three.js included.
+- **CI** (`.github/workflows/ci.yml`) runs on every push and pull request on Ubuntu with Node 22. It installs with `npm ci --ignore-scripts`, then runs the content guardrails, the unit tests, the build, the bundle budget, the smoke test and the accessibility pass.
+- **Unit tests.** `npm test` runs the Node test runner (`node:test`, no extra dependencies) over `tools/test/`. It covers the build-time HTML and JSON-LD from `tools/vite-static-content.js`, each content guardrail rule in `tools/content-rules.mjs`, and a run of the guardrail script on this repository.
+- **Accessibility.** `npm run a11y` runs axe-core (`@axe-core/playwright`, pinned) against the built site: the static project list at desktop and phone widths, and the case-study dialog open at both. It fails on serious or critical WCAG 2.0/2.1 A and AA violations. It needs a running preview or a URL argument, and CI runs it against `vite preview`.
+- **Bundle budget.** Gzipped JavaScript across `dist/assets` must stay under 160 KB. The current build measures 151.3 KB, with Three.js included.
 - **Content rules** enforced by the guardrails: every project has the required fields and a unique slug; links are `https`; a project with no public link has a `privateNote`; every slug has a scene builder; the contact email is the public one; no em dashes, phone numbers or secret-shaped strings in site source.
-- **Review** uses the Playwright scripts above on desktop and phone sizes. They run locally and are not part of CI. The repository has no unit test suite.
+- **Review** uses the Playwright scripts above on desktop and phone sizes. They run locally; `smoke`, `a11y` and the unit tests also run in CI.
 
 ## Fonts, icons and licence
 

@@ -8,6 +8,7 @@
 //   <!--JSON_LD-->         Person structured data (inside <head>)
 //   __DESCRIPTION__        meta description, og and twitter description
 //   __EMAIL__              contact email
+//   __VALUE_PROP__         one-sentence value proposition under the identity line
 
 import { contact, experience, profile } from '../src/data/profile.js';
 import { projects } from '../src/data/projects.js';
@@ -111,6 +112,7 @@ export default function staticContent() {
         .replace('<!--STATIC_CONTENT-->', () => `${projectListHtml()}\n    ${profileArticleHtml()}`)
         .replace('<!--JSON_LD-->', () => jsonLd())
         .replaceAll('__DESCRIPTION__', description)
+        .replaceAll('__VALUE_PROP__', esc(profile.valueProp))
         .replaceAll('__EMAIL__', esc(contact.email));
     },
   };

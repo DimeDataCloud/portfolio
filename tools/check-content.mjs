@@ -1,25 +1,24 @@
 // Content and repo guardrails. Zero dependencies. Run: node tools/check-content.mjs
 // Exits 1 and prints every failure, one per line, if any rule is broken.
+// The rule predicates live in tools/content-rules.mjs and are unit tested in tools/test/.
 import { readdirSync, readFileSync, statSync } from 'fs';
 import { execFileSync } from 'child_process';
 import { fileURLToPath } from 'url';
-import { join, relative, extname } from 'path';
+import { join, relative } from 'path';
+import {
+  CONTACT_EMAIL,
+  duplicateSlugs,
+  hasEmDash,
+  hasPhone,
+  missingSceneBuilders,
+  projectProblems,
+  sceneBuilderKeys,
+  secretNames,
+} from './content-rules.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const failures = [];
 const fail = (rule, msg) => failures.push(`FAIL [${rule}] ${msg}`);
-
-const EM_DASH = '\u2014';
-const CONTACT_EMAIL = 'chris@dimedata.cloud';
-const PHONE = /\+?1?[ -.]?\d{3}[ -.]\d{3}[ -.]\d{4}/;
-const SECRETS = [
-  ['sk-', /\bsk-[A-Za-z0-9_-]{20,}/],
-  ['ghp_', /\bghp_[A-Za-z0-9]{20,}/],
-  ['github_pat_', /\bgithub_pat_[A-Za-z0-9_]{20,}/],
-  ['AKIA', /\bAKIA[0-9A-Z]{16}\b/],
-  ['eyJ', /\beyJ[A-Za-z0-9_-]{20,}/],
-  ['re_', /\bre_[A-Za-z0-9_]{20,}/],
-];
 
 const abs = (p) => join(ROOT, p);
 const rel = (p) => relative(ROOT, p).split(String.fromCharCode(92)).join("/");
@@ -63,21 +62,19 @@ const trackedText = tracked.filter(isText);
 //    root *.md files and index.html.
 const EM_DASH_SCOPE = /^(src|tools|docs|\.github)\/|^[^/]+\.md$|^index\.html$/;
 const emDashFiles = trackedText.filter((f) => EM_DASH_SCOPE.test(rel(f)));
-scan('em-dash', emDashFiles, (l) => l.includes(EM_DASH), 'contains an em dash (U+2014); use a comma, colon or period');
+scan('em-dash', emDashFiles, hasEmDash, 'contains an em dash (U+2014); use a comma, colon or period');
 
 // 2. Phone numbers in site source, index and README.
 const phoneFiles = [...walk(abs('src'), () => true), abs('index.html'), abs('README.md')];
-scan('phone', phoneFiles, (l) => PHONE.test(l), 'looks like a phone number; remove it');
+scan('phone', phoneFiles, hasPhone, 'looks like a phone number; remove it');
 
 // 3. Secret shapes anywhere tracked by git.
 for (const f of tracked) {
   let buf;
   try { buf = readFileSync(f); } catch { continue; }
   if (buf.includes(0)) continue; // skip binary files
-  const s = buf.toString('utf8');
-  for (const [name, re] of SECRETS) {
-    const m = s.match(re);
-    if (m) fail('secrets', `${rel(f)} matches a ${name} secret shape (value not printed)`);
+  for (const name of secretNames(buf.toString('utf8'))) {
+    fail('secrets', `${rel(f)} matches a ${name} secret shape (value not printed)`);
   }
 }
 
@@ -85,29 +82,12 @@ for (const f of tracked) {
 const { projects } = await import(new URL('../src/data/projects.js', import.meta.url));
 const { contact } = await import(new URL('../src/data/profile.js', import.meta.url));
 
-const REQUIRED = ['slug', 'title', 'desc', 'problem', 'built', 'result'];
-const seen = new Map();
 projects.forEach((p, i) => {
-  const id = p.slug || `#${i}`;
-  for (const k of REQUIRED) {
-    if (typeof p[k] !== 'string' || !p[k].trim()) fail('projects', `${id} is missing "${k}"`);
-  }
-  if (!Array.isArray(p.stack) || p.stack.length === 0) fail('projects', `${id} is missing "stack"`);
-  if (p.slug) {
-    if (seen.has(p.slug)) fail('projects', `slug "${p.slug}" is not unique`);
-    seen.set(p.slug, true);
-  }
-  for (const k of ['repoUrl', 'liveUrl']) {
-    if (p[k] == null) continue;
-    let ok = false;
-    try { ok = new URL(p[k]).protocol === 'https:'; } catch { ok = false; }
-    if (!ok) fail('projects', `${id} ${k} must be an https URL`);
-  }
-  const isPrivate = p.status === 'private' || (!p.repoUrl && !p.liveUrl);
-  if (isPrivate && !(typeof p.privateNote === 'string' && p.privateNote.trim())) {
-    fail('projects', `${id} is private (no public link) but has no privateNote`);
-  }
+  for (const msg of projectProblems(p, p.slug || `#${i}`)) fail('projects', msg);
 });
+for (const slug of duplicateSlugs(projects)) {
+  fail('projects', `slug "${slug}" is not unique`);
+}
 
 // 6. Contact email.
 if (contact?.email !== CONTACT_EMAIL) {
@@ -115,16 +95,12 @@ if (contact?.email !== CONTACT_EMAIL) {
 }
 
 // 7. Every project slug has a scene builder. Read the file as text; do not import three.
-const scenesSrc = text(abs('src/experience/scenes.js'));
-const block = scenesSrc.match(/(?:export\s+)?const\s+builders\s*=\s*\{([\s\S]*?)\n\};/);
-if (!block) {
+const keys = sceneBuilderKeys(text(abs('src/experience/scenes.js')));
+if (!keys) {
   fail('scenes', 'could not find "const builders = { ... };" in src/experience/scenes.js');
 } else {
-  const keys = new Set([...block[1].matchAll(/^\s*['"]?([a-z0-9-]+)['"]?\s*:/gm)].map((m) => m[1]));
-  for (const p of projects) {
-    if (!keys.has(p.slug)) {
-      fail('scenes', `missing scene builder for slug "${p.slug}" (add the key to builders in src/experience/scenes.js)`);
-    }
+  for (const slug of missingSceneBuilders(projects, keys)) {
+    fail('scenes', `missing scene builder for slug "${slug}" (add the key to builders in src/experience/scenes.js)`);
   }
 }
 

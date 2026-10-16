@@ -28,6 +28,9 @@ jobs:
       - name: Content guardrails
         run: node tools/check-content.mjs
 
+      - name: Unit tests
+        run: npm test
+
       - name: Build
         run: npm run build
 
@@ -49,3 +52,6 @@ jobs:
 
       - name: Smoke test
         run: node tools/smoke.mjs http://localhost:4173/
+
+      - name: Accessibility (axe-core)
+        run: node tools/a11y.mjs http://localhost:4173/

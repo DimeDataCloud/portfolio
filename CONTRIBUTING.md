@@ -15,10 +15,11 @@ npm run dev
 
 ```bash
 npm run verify                  # content guardrails, then the production build
+npm test                       # unit tests (node:test)
 node tools/check-bundle.mjs     # gzipped JS must stay under 160 KB
 ```
 
-CI runs the same three checks on every push and pull request. The pull request template lists them as a checklist. Also look at the change at phone width and at desktop width.
+CI runs the same checks, plus the smoke test and the accessibility pass, on every push and pull request. The pull request template lists them as a checklist. Also look at the change at phone width and at desktop width.
 
 ## Ground rules
 

@@ -6,6 +6,8 @@
 export const profile = {
   name: 'Christian Dixon',
   headline: 'Applied AI & Machine Learning Engineer',
+  // One-sentence value proposition shown on the first screen, under the identity line.
+  valueProp: 'Voice agents, retrieval, and the statistics that prove they work.',
   location: 'Nashville, TN',
   summary:
     'I build, measure and operate applied machine learning and generative AI systems end to end: the discovery that finds which process is worth automating, the engineering that takes it from prototype to production, and the statistical evaluation that proves whether it worked.',
@@ -19,8 +21,7 @@ export const metrics = [
   { value: '< 2 s', label: 'voice response budget, speech in to speech out' },
   { value: '75.0%', label: 'solve rate vs 50.0% for the closest open-source comparator (n=20)' },
   { value: '4', label: 'model providers behind one interface, with automatic failover' },
-  { value: '3,000+', label: 'automated tests behind CI/CD' },
-  { value: '30+ days', label: 'with no outages or incidents across every deployment' },
+  { value: '3,567', label: 'passing tests in the public H.A.L.O showcase repo (measured 2026-09-10)' },
 ];
 
 export const experience = [

@@ -10,7 +10,7 @@
   --bg-soft: #121216;
   --ink: #fafafa;
   --ink-dim: #9a9aa2;
-  --ink-faint: #55555c;
+  --ink-faint: #808088; /* 4.5:1 or better on --bg and --bg-soft (WCAG AA text) */
   --accent: #2f80ff;
   --accent-soft: rgba(47, 128, 255, 0.14);
   --live: #34d17b;
@@ -468,7 +468,10 @@ body:not(.entered) .skip-link { display: none; }
   border-right: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline);
 }
 .metric:nth-child(3n) { border-right: none; }
-.metric:nth-last-child(-n+3) { border-bottom: none; }
+.metric:last-child { border-right: none; }
+/* five metrics: the last one spans the two empty cells of the bottom row */
+.metric:last-child:nth-child(3n+2) { grid-column: span 2; }
+.metric:nth-last-child(-n+2) { border-bottom: none; }
 .metric-value { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.25rem, 1rem + 0.9vw, 1.7rem); line-height: 1.05; color: var(--ink); }
 .metric-label { font-size: var(--text-xs); color: var(--ink-dim); line-height: 1.4; }
 
@@ -556,6 +559,7 @@ body:not(.entered) .skip-link { display: none; }
   .metrics { grid-template-columns: 1fr; }
   .metric { border-right: none !important; border-bottom: 1px solid var(--hairline); }
   .metric:last-child { border-bottom: none; }
+  .metrics > .metric:last-child { grid-column: auto; }
 }
 
 /* identity line: every width, under the logo at top left, ordinary body text.
@@ -567,6 +571,21 @@ body:not(.entered) .skip-link { display: none; }
   font-family: var(--font-body); font-weight: 400;
   font-size: min(0.875rem, 3.6vw); line-height: 1.3; white-space: nowrap;
   color: var(--ink); pointer-events: none;
+}
+
+/* value proposition: a second line under the identity line, plain body text.
+   In the no-webgl view it sits under the page title instead. */
+.value-line {
+  position: fixed; z-index: 20;
+  top: calc(var(--edge) + 58px + 22px); left: var(--edge);
+  max-width: min(38ch, calc(100vw - 2 * var(--edge)));
+  font-size: min(0.875rem, 3.6vw); line-height: 1.3;
+  color: var(--ink-dim); pointer-events: none;
+}
+body.no-webgl .value-line {
+  position: static; max-width: 60ch;
+  margin: -24px 0 var(--gap-l);
+  font-size: var(--text-m); line-height: 1.5;
 }
 
 /* ============ touch targets: 44 x 44 CSS px minimum on coarse pointers ============ */

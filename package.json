@@ -25,7 +25,7 @@
     "a11y": "node tools/a11y.mjs"
   },
   "dependencies": {
-    "three": "^0.170.0"
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

@@ -2,6 +2,7 @@
 // tap-vs-drag disambiguation, and keyboard arrows.
 
 const TAP_DRAG_PX = 9;
+const SETTLE_AFTER_S = 2.5; // idle seconds before the ring eases to the nearest card
 
 export class Input extends EventTarget {
   constructor(canvas, viewport) {
@@ -15,6 +16,7 @@ export class Input extends EventTarget {
     this.driftDir = 1;          // last scroll direction, drives idle drift
     this.pointer = { x: 0, y: 0 };        // NDC -1..1
     this.paused = false;
+    this.idle = 0;              // seconds since the last wheel, touch or key input
 
     this.isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
     this._drag = null;
@@ -36,6 +38,7 @@ export class Input extends EventTarget {
 
   onWheel(e) {
     if (this.paused) return;
+    this.idle = 0;
     // wheel accelerates the spiral; scrolling the other way flips its direction
     this.velocityTarget = clamp(this.velocityTarget + e.deltaY * 0.00030, -0.22, 0.22);
     this.driftDir = Math.sign(e.deltaY) || this.driftDir;
@@ -49,6 +52,7 @@ export class Input extends EventTarget {
 
   onTouchStart(e) {
     if (this.paused) return;
+    this.idle = 0;
     const t = e.touches[0];
     if (!t) return;
     this._drag = { x0: t.clientX, y0: t.clientY, lastX: t.clientX, vx: 0, moved: false };
@@ -88,6 +92,7 @@ export class Input extends EventTarget {
 
   onKey(e) {
     if (this.paused) return;
+    this.idle = 0;
     if (e.key === 'ArrowRight') { this.emit('step', 1); }
     else if (e.key === 'ArrowLeft') { this.emit('step', -1); }
   }
@@ -95,6 +100,15 @@ export class Input extends EventTarget {
   /** Ease velocity, integrate offset, apply idle drift + friction. */
   update(dt) {
     if (this.paused) return;
+    this.idle += dt;
+    // at rest the spiral settles so the nearest project sits dead centre
+    // (idle drift alone would leave the active hologram off-centre)
+    if (this.idle > SETTLE_AFTER_S && !this._drag) {
+      this.velocityTarget = 0;
+      this.velocity *= Math.pow(0.05, dt);
+      this.offset += (Math.round(this.offset) - this.offset) * (1 - Math.pow(0.04, dt));
+      return;
+    }
     const ease = 1 - Math.pow(0.002, dt); // frame-rate independent
     this.velocity += (this.velocityTarget - this.velocity) * ease;
     this.offset += this.velocity * dt * 60;

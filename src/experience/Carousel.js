@@ -11,9 +11,11 @@ export class Carousel {
     this.input = input;
     this.projects = projects;
 
+    // narrow screens: a tighter ring, neighbours peek in from the edges as a
+    // drag cue, and each hologram is scaled up so it fills the viewport
     const mobile = stage.viewport.w < 700;
     this.params = mobile
-      ? { radius: 3.0, angleStep: 0.82, vStep: 0.3 }
+      ? { radius: 2.6, angleStep: 0.8, vStep: 0.3 }
       : { radius: 3.4, angleStep: 0.72, vStep: 0.32 };
 
     this.raycaster = new THREE.Raycaster();
@@ -25,6 +27,8 @@ export class Carousel {
     const ring = [...projects, ...projects];
     ring.forEach((project, i) => {
       const holo = new Holo({ project, index: i, total: ring.length });
+      holo.zoom = mobile ? 1.45 : 1;
+      holo.narrow = mobile;
       this.holos.push(holo);
       stage.scene.add(holo);
     });

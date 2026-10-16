@@ -24,6 +24,7 @@ const ui = new Interface();
 window.__haloSound = sound; // debug/verification handle (also used to wire music later)
 const mark = reducedMotion ? null : new LoaderMark(document.getElementById('loader-mark'));
 
+const NO_PARALLAX = { x: 0, y: 0 };
 let experience = null;
 let progress = 0;
 
@@ -110,7 +111,8 @@ async function boot() {
       last = now;
       input.update(dt);
       carousel.update(dt, now / 1000);
-      stage.updateCamera(input.pointer, dt);
+      // touch screens keep the camera centred: a tap must not shift the spiral
+      stage.updateCamera(input.isTouch ? NO_PARALLAX : input.pointer, dt);
       stage.render(now / 1000);
       raf = requestAnimationFrame(frame);
     }

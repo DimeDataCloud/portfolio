@@ -113,6 +113,8 @@ export class Holo extends THREE.Group {
     this.dataIndex = index % (total / 2);
     this.phase = (this.dataIndex * 7.31) % 5; // desync ring duplicates
 
+    this.zoom = 1;      // set by Carousel: narrow screens scale holograms up
+    this.narrow = false; // narrow screens: neighbours stay brighter as a drag cue
     this.hover = 0;
     this.hoverTarget = 0;
     this.reveal = 0;
@@ -249,8 +251,11 @@ export class Holo extends THREE.Group {
     // far-side duplicates fade out completely so the back half never clutters
     const dist = Math.abs(this.relIndex);
     const farFade = 1 - Math.min(1, Math.max(0, (dist - 2.4) / 1.1));
-    const dim = (Math.max(0.18, 0.8 - dist * 0.22) + this.hover * 0.2) * farFade;
-    const global = this.reveal * dim;
+    const dim = (this.narrow
+      ? Math.max(0.35, 0.95 - dist * 0.25)
+      : Math.max(0.18, 0.8 - dist * 0.22)) + this.hover * 0.2;
+    const dimmed = dim * farFade;
+    const global = this.reveal * dimmed;
 
     // fully faded holograms skip rendering AND animation work - roughly
     // half the ring at any moment
@@ -258,7 +263,7 @@ export class Holo extends THREE.Group {
 
     // pop + slight tilt with scroll motion (kept live even while hidden so
     // re-entry doesn't snap)
-    const s = (0.85 + this.hover * 0.12) * (0.25 + this.reveal * 0.75);
+    const s = (0.85 + this.hover * 0.12) * (0.25 + this.reveal * 0.75) * this.zoom;
     this.scale.setScalar(s);
     this.rotation.z = -scrollVelocity * 1.6;
 

@@ -1,4 +1,4 @@
-// Fullscreen composite pass — animated film grain + radial vignette
+// Fullscreen composite pass: animated film grain + radial vignette
 // with a faint cool tint at the frame edges. Original GLSL.
 
 export const postVertex = /* glsl */ `

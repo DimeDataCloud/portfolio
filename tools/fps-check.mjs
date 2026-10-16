@@ -1,5 +1,5 @@
 // Relative fps probe: same headless renderer, two URLs. Run:
-// node fps-check.mjs <urlA> <urlB>
+// node tools/fps-check.mjs <urlA> <urlB>
 import { chromium } from 'playwright';
 
 const browser = await chromium.launch();

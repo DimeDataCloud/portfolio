@@ -37,7 +37,7 @@ await page.click('#sound-btn');
 await page.waitForTimeout(1200);
 console.log('after toggle ON:      ', JSON.stringify(await probe()));
 
-// simulate tab hide/show — ambient must survive (loop-forever requirement)
+// simulate tab hide/show - ambient must survive (loop-forever requirement)
 await page.evaluate(() => {
   Object.defineProperty(document, 'hidden', { value: true, configurable: true });
   document.dispatchEvent(new Event('visibilitychange'));

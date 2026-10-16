@@ -1,8 +1,22 @@
+# Dependencies and build output
 node_modules/
 dist/
+
+# Local environment and secrets (keep .env.example tracked)
 .env
 .env.*
 !.env.example
-.DS_Store
 *.local
+
+# Tooling caches and deploy state
+.wrangler/
+.vite/
+
+# Screenshot and audit output from tools/
 shots/
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -66,15 +66,6 @@ const geo = {
   envFlap: new THREE.ConeGeometry(0.02, 0.016, 4),
   // brainai
   wire: new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(0.125, 0)),
-  // web systems
-  browser: new THREE.BoxGeometry(0.46, 0.34, 0.02),
-  urlbar: new THREE.BoxGeometry(0.28, 0.02, 0.006),
-  hero: new THREE.BoxGeometry(0.36, 0.09, 0.012),
-  nav: new THREE.BoxGeometry(0.40, 0.026, 0.012),
-  col: new THREE.BoxGeometry(0.17, 0.11, 0.012),
-  btn: new THREE.BoxGeometry(0.07, 0.024, 0.016),
-  phonePanel: new THREE.BoxGeometry(0.10, 0.19, 0.012),
-  miniBlock: new THREE.BoxGeometry(0.07, 0.02, 0.008),
   // app builder
   pillar: new THREE.BoxGeometry(0.014, 0.34, 0.014),
   rail: new THREE.BoxGeometry(0.32, 0.012, 0.012),
@@ -87,6 +78,21 @@ const geo = {
   microBeam: new THREE.CylinderGeometry(0.024, 0.008, 0.08, 8, 1, true),
   axis: new THREE.CylinderGeometry(0.0025, 0.0025, 0.62, 5),
   riseRing: new THREE.TorusGeometry(0.05, 0.003, 3, 20),
+  // agent eval - bars rise from base y (unit height, scaled to value)
+  evalFloor: new THREE.BoxGeometry(0.36, 0.006, 0.02),
+  evalBar: new THREE.BoxGeometry(0.07, 1, 0.07).translate(0, 0.5, 0),
+  evalGlow: new THREE.BoxGeometry(0.086, 1, 0.086).translate(0, 0.5, 0),
+  // confidence whisker: unit-span stem with two end caps, scaled on y
+  evalWhisk: new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(0, -0.5, 0), new THREE.Vector3(0, 0.5, 0),
+    new THREE.Vector3(-0.014, -0.5, 0), new THREE.Vector3(0.014, -0.5, 0),
+    new THREE.Vector3(-0.014, 0.5, 0), new THREE.Vector3(0.014, 0.5, 0),
+  ]),
+  // omni sdr
+  lane: new THREE.BoxGeometry(0.80, 0.006, 0.02),
+  msgTile: new THREE.BoxGeometry(0.07, 0.05, 0.008),
+  gatePost: new THREE.BoxGeometry(0.012, 0.22, 0.012),
+  gateBeam: new THREE.BoxGeometry(0.012, 0.012, 0.18),
 };
 
 // radar sweep wedge - fan of triangles, per-vertex trail fade
@@ -723,132 +729,6 @@ function brainai(mats) {
 }
 
 /* =====================================================================
- * 7. Web Systems - a site assembling itself.
- * A browser panel with real depth; blocks fly in from z-depth, a cursor
- * clicks a button, the layout re-flows, clicks again, flows back. A faint
- * rotated phone panel mirrors each layout - the responsive twin.
- * ===================================================================== */
-function webSystems(mats) {
-  const g = new THREE.Group();
-  const T = 7;
-
-  const panel = new THREE.Group();
-  panel.rotation.y = 0.15;
-  g.add(panel);
-
-  const frame = mesh(geo.browser, mats.faint());
-  frame.position.y = 0.42;
-  panel.add(frame);
-  [0, 1, 2].forEach((i) => {
-    const d = mesh(geo.sphXS, mats.line());
-    d.scale.setScalar(0.4);
-    d.position.set(-0.19 + i * 0.028, 0.565, 0.013);
-    panel.add(d);
-  });
-  const urlbar = mesh(geo.urlbar, mats.faint());
-  urlbar.position.set(0.03, 0.565, 0.012);
-  panel.add(urlbar);
-
-  // page blocks with layout A / layout B targets
-  const defs = [
-    { g: geo.nav, A: { p: [0, 0.525, 0.016], s: [1, 1, 1] }, B: { p: [0, 0.525, 0.016], s: [1, 1, 1] }, a: 0.55 },
-    { g: geo.hero, A: { p: [0, 0.448, 0.016], s: [1, 1, 1] }, B: { p: [-0.095, 0.40, 0.016], s: [0.5, 1.9, 1] }, a: 0.55 },
-    { g: geo.col, A: { p: [-0.095, 0.325, 0.016], s: [1, 1, 1] }, B: { p: [0.095, 0.46, 0.016], s: [1, 0.55, 1] }, a: 0.45 },
-    { g: geo.col, A: { p: [0.095, 0.325, 0.016], s: [1, 1, 1] }, B: { p: [0.095, 0.36, 0.016], s: [1, 0.55, 1] }, a: 0.45 },
-  ];
-  const blocks = defs.map((d) => {
-    const m = mats.custom({ alpha: d.a });
-    const b = mesh(d.g, m);
-    panel.add(b);
-    return { b, m, ...d };
-  });
-  const btnMat = mats.bright();
-  const btn = mesh(geo.btn, btnMat);
-  panel.add(btn);
-  const btnA = [0.10, 0.435, 0.026], btnB = [-0.095, 0.33, 0.026];
-
-  const curMat = mats.bright();
-  const cursor = mesh(geo.sphXS, curMat);
-  cursor.scale.setScalar(0.55);
-  panel.add(cursor);
-  const curRest = [0.20, 0.30, 0.05];
-
-  // responsive twin: faint phone panel behind, mirroring the layouts
-  const twin = new THREE.Group();
-  twin.position.set(0.17, 0.40, -0.15);
-  twin.rotation.y = -0.55;
-  g.add(twin);
-  twin.add(mesh(geo.phonePanel, mats.faint()));
-  const twinBlocks = [1, 2, 3].map((bi, i) => {
-    const m = mats.custom({ alpha: 0.4 });
-    const b = mesh(geo.miniBlock, m);
-    twin.add(b);
-    return { b, m, bi };
-  });
-  const twinA = [[0, 0.055, 0.008], [0, 0.01, 0.008], [0, -0.035, 0.008]];
-  const twinB = [[0, 0.05, 0.008], [0, -0.005, 0.008], [0, -0.045, 0.008]];
-
-  return {
-    group: g,
-    update(t) {
-      const u = (t / T) % 1;
-
-      // morph 0→1→0 across the cycle (phase-continuous)
-      const m = inOut(seg(u, 0.45, 0.62)) - inOut(seg(u, 0.78, 0.95));
-      // build in from z-depth, deconstruct at the end
-      blocks.forEach(({ b, m: bm, A, B: LB, a }, i) => {
-        const bi = outCubic(seg(u, 0.02 + i * 0.05, 0.14 + i * 0.05));
-        const out = 1 - inCubic(seg(u, 0.90 + i * 0.015, 0.985));
-        b.position.set(
-          lerp(A.p[0], LB.p[0], m),
-          lerp(A.p[1], LB.p[1], m),
-          -0.13 + (A.p[2] + 0.13) * bi
-        );
-        b.scale.set(lerp(A.s[0], LB.s[0], m) * (0.9 + 0.1 * bi), lerp(A.s[1], LB.s[1], m), 1);
-        bm.uniforms.uAlpha.value = a * bi * out;
-      });
-
-      // button follows the hero region between layouts
-      const click1 = spike(seg(u, 0.40, 0.46));
-      const click2 = spike(seg(u, 0.72, 0.78));
-      btn.position.set(lerp(btnA[0], btnB[0], m), lerp(btnA[1], btnB[1], m), btnA[2]);
-      const bVis = outCubic(seg(u, 0.16, 0.26)) * (1 - inCubic(seg(u, 0.90, 0.985)));
-      btnMat.uniforms.uAlpha.value = (0.65 + click1 * 0.35 + click2 * 0.35) * bVis;
-
-      // cursor: glide → click → glide → click → drift home
-      const g1 = inOut(seg(u, 0.28, 0.40));
-      const g2 = inOut(seg(u, 0.62, 0.72));
-      const g3 = inOut(seg(u, 0.80, 0.90));
-      let cx = lerp(curRest[0], btnA[0], g1);
-      let cy = lerp(curRest[1], btnA[1], g1) + bump(g1) * 0.05;
-      if (u >= 0.45) { cx = lerp(btnA[0], btnB[0], g2); cy = lerp(btnA[1], btnB[1], g2) + bump(g2) * 0.04; }
-      if (u >= 0.78) { cx = lerp(btnB[0], curRest[0], g3); cy = lerp(btnB[1], curRest[1], g3); }
-      cursor.position.set(cx, cy, 0.035 - (click1 + click2) * 0.012);
-      curMat.uniforms.uAlpha.value = 0.9 * bVis;
-
-      // twin mirrors the same phases
-      twinBlocks.forEach(({ b, m: tm }, i) => {
-        const bi = outCubic(seg(u, 0.04 + i * 0.05, 0.16 + i * 0.05));
-        const out = 1 - inCubic(seg(u, 0.90, 0.985));
-        b.position.set(
-          lerp(twinA[i][0], twinB[i][0], m),
-          lerp(twinA[i][1], twinB[i][1], m),
-          -0.05 + (twinA[i][2] + 0.05) * bi
-        );
-        tm.uniforms.uAlpha.value = 0.4 * bi * out;
-      });
-
-      // secondary: gentle panel sway
-      panel.rotation.y = 0.15 + 0.05 * Math.sin(t * 0.4);
-    },
-    beat(t) {
-      const u = (t / T) % 1;
-      return Math.max(spike(seg(u, 0.40, 0.46)), spike(seg(u, 0.72, 0.78)));
-    },
-  };
-}
-
-/* =====================================================================
  * 8. App Builder - idea in, app out.
  * A prompt orb descends into a gantry and dissolves; a printhead carriage
  * sweeps while blocks materialize with weight, building an app tower
@@ -1014,6 +894,215 @@ function portfolioSite(mats) {
   };
 }
 
+/* =====================================================================
+ * 7. Agent Evaluation - the numbers, pinned before they are read.
+ * Two bar pairs rise in turn: an accent bar beside a dim comparator.
+ * A confidence whisker pops onto each bar as it lands. The second pair's
+ * top 22 points glow, then dissolve into run-to-run variance.
+ * ===================================================================== */
+function agentEval(mats) {
+  const g = new THREE.Group();
+  const T = 8;
+  const K = 0.0061;      // world height per percentage point (75 -> 0.46)
+  const BASE = 0.10;
+
+  const floor = mesh(geo.evalFloor, mats.faint());
+  floor.position.set(0, BASE - 0.003, 0);
+  g.add(floor);
+
+  // value, CI half-width, x, landing time, accent (bright) or dim
+  const spec = [
+    { v: 75, ci: 6, x: -0.14, land: 0.20, accent: true },
+    { v: 50, ci: 6, x: -0.06, land: 0.30, accent: false },
+    { v: 70, ci: 7, x: 0.06, land: 0.56, accent: true },
+    { v: 44, ci: 6, x: 0.14, land: 0.66, accent: false },
+  ];
+  const bars = spec.map((s) => {
+    const m = s.accent ? mats.bright() : mats.faint();
+    const b = mesh(geo.evalBar, m);
+    b.position.set(s.x, BASE, 0);
+    g.add(b);
+    const wm = mats.line();
+    const w = new THREE.LineSegments(geo.evalWhisk, wm);
+    w.position.set(s.x, BASE, 0);
+    g.add(w);
+    return { ...s, b, m, w, wm };
+  });
+
+  // glowing band over the top 22 points of the second accent bar, cut
+  // into four slabs so the dissolve can scatter them
+  const bandMats = [0, 1, 2, 3].map(() => mats.bright());
+  const band = bandMats.map((bm) => {
+    const s = mesh(geo.evalGlow, bm);
+    g.add(s);
+    return s;
+  });
+
+  return {
+    group: g,
+    update(t) {
+      const u = (t / T) % 1;
+      const out = 1 - inCubic(seg(u, 0.92, 0.99)); // loop reset: everything drops away
+
+      bars.forEach(({ v, ci, x, land, accent, b, m, w, wm }) => {
+        const rise = backOut(seg(u, land - 0.16, land));
+        const h = v * K * rise * out;
+        b.scale.y = Math.max(0.0005, h);
+        const flare = spike(seg(u, land, land + 0.12));
+        m.uniforms.uAlpha.value = (accent ? 0.9 : 0.3) + 0.4 * flare;
+
+        const pop = backOut(seg(u, land, land + 0.06)) * out;
+        w.position.y = BASE + Math.max(0, h);
+        w.scale.y = Math.max(0.0005, 2 * ci * K * pop);
+        wm.uniforms.uAlpha.value = 0.75 * pop;
+      });
+
+      // top 22 points of the 70 bar glow, then dissolve (slabs scatter)
+      const glow = outCubic(seg(u, 0.64, 0.72));
+      const dis = inOut(seg(u, 0.76, 0.90));
+      const bandA = 0.95 * glow * (1 - dis);
+      band.forEach((s, i) => {
+        s.position.set(0.06 + (rnd(i) - 0.5) * 0.05 * dis, BASE + 48 * K + i * 5.5 * K + rnd(i + 3) * 0.02 * dis, 0);
+        s.scale.y = 5.5 * K;
+        bandMats[i].uniforms.uAlpha.value = bandA;
+      });
+
+      g.rotation.y = 0.08 * Math.sin(t * 0.33);
+    },
+    beat(t) {
+      const u = (t / T) % 1;
+      let b = 0;
+      for (let i = 0; i < spec.length; i++) b = Math.max(b, spike(seg(u, spec[i].land, spec[i].land + 0.12)));
+      return b;
+    },
+  };
+}
+
+/* =====================================================================
+ * 8. Omni SDR - the inbox, gated.
+ * Message tiles leave the inbox and slide down a lane toward a gate. A
+ * green core passes through, flips flat and drops into the tray; a red
+ * core is stopped by the gate frame, thuds, bounces back and fades. The
+ * gate flares on every pass.
+ * ===================================================================== */
+function omniSdr(mats) {
+  const g = new THREE.Group();
+  const T = 8;
+  const LANE = 0.36;           // lane height
+  const TILE_Y = LANE + 0.03;  // tile centre while riding the lane
+  const GX = 0.04;             // gate plane
+  const TRAY_X = 0.30;
+  const TRAY_Y = 0.16;         // tile centre once it lies in the tray
+
+  const lane = mesh(geo.lane, mats.faint());
+  lane.position.set(0, LANE - 0.003, 0);
+  g.add(lane);
+
+  // gate frame: two posts and a crossbeam standing across the lane
+  const gateMat = mats.line();
+  [-0.09, 0.09].forEach((z) => {
+    const p = mesh(geo.gatePost, gateMat);
+    p.position.set(GX, LANE + 0.06, z);
+    g.add(p);
+  });
+  const beam = mesh(geo.gateBeam, gateMat);
+  beam.position.set(GX, LANE + 0.17, 0);
+  g.add(beam);
+
+  // tray: floor + four walls (same parts as the CRM tray)
+  const tb = mesh(geo.trayBase, mats.faint());
+  tb.position.set(TRAY_X, TRAY_Y - 0.012, 0);
+  g.add(tb);
+  const rim = mats.soft();
+  [-0.076, 0.076].forEach((dx) => {
+    const w = mesh(geo.trayWallX, rim);
+    w.position.set(TRAY_X + dx, TRAY_Y + 0.003, 0);
+    g.add(w);
+  });
+  [-0.051, 0.051].forEach((dz) => {
+    const w = mesh(geo.trayWallZ, rim);
+    w.position.set(TRAY_X, TRAY_Y + 0.003, dz);
+    g.add(w);
+  });
+
+  // inbox: two unread messages waiting at the left end of the lane
+  [0, 1].forEach((i) => {
+    const m = mesh(geo.msgTile, mats.faint());
+    m.position.set(-0.36, TILE_Y + i * 0.055, 0);
+    g.add(m);
+  });
+
+  // one message per storyboard slot; green lands in the tray, red bounces
+  const defs = [
+    { s: 0.04, green: true, z: -0.025 },
+    { s: 0.20, green: false, z: 0 },
+    { s: 0.36, green: true, z: 0.025 },
+    { s: 0.52, green: false, z: 0 },
+  ];
+  const tiles = defs.map((d) => {
+    const bm = mats.soft();
+    const body = mesh(geo.msgTile, bm);
+    const cm = mats.tint(d.green ? '#34d17b' : '#ff5a5a', { alpha: 0.95 });
+    const core = mesh(geo.sphXS, cm);
+    core.scale.setScalar(1.6);
+    core.position.set(0, 0, 0.006);
+    body.add(core);
+    g.add(body);
+    return { ...d, body, bm, cm };
+  });
+
+  // gate flare window for each pass (centred just after the gate contact)
+  const passFlare = (u) => {
+    let f = 0;
+    for (let i = 0; i < defs.length; i++) f = Math.max(f, spike(seg(u, defs[i].s + 0.04, defs[i].s + 0.16)));
+    return f;
+  };
+
+  return {
+    group: g,
+    update(t) {
+      const u = (t / T) % 1;
+
+      tiles.forEach(({ s, green, z, body, bm, cm }) => {
+        const arrive = seg(u, s, s + 0.10); // inbox -> gate
+        let x, y, zz = 0, rx = 0, sx = 1, sy = 1, vis;
+        if (green) {
+          // through the gate, then drop and lie flat in the tray
+          const run = seg(u, s + 0.10, s + 0.24);
+          x = lerp(lerp(-0.36, GX, inOut(arrive)), TRAY_X, inOut(run));
+          y = lerp(TILE_Y, TRAY_Y, inCubic(run));
+          zz = lerp(0, z, inOut(run));
+          rx = -Math.PI / 2 * inOut(run);
+          vis = seg(u, s, s + 0.02) * (1 - seg(u, 0.88, 0.97));
+        } else {
+          // stopped at the frame: thud, then recoil and fade
+          const hit = GX - 0.035;
+          const thud = seg(u, s + 0.10, s + 0.16);
+          const recoil = outCubic(seg(u, s + 0.16, s + 0.30));
+          x = lerp(-0.36, hit, inOut(arrive)) - recoil * 0.16;
+          y = TILE_Y;
+          const sq = thud > 0 ? impact(thud, 0.3) : 1;
+          sy = sq;
+          sx = 1 + (1 - sq) * 0.6;
+          vis = seg(u, s, s + 0.02) * (1 - seg(u, s + 0.16, s + 0.30));
+        }
+        body.position.set(x, y, zz);
+        body.rotation.set(rx, 0, 0);
+        body.scale.set(sx, sy, 1);
+        bm.uniforms.uAlpha.value = 0.6 * vis;
+        cm.uniforms.uAlpha.value = 0.95 * vis;
+      });
+
+      // gate frame lights on every pass
+      gateMat.uniforms.uAlpha.value = 0.5 + 0.45 * passFlare(u);
+      g.rotation.y = 0.06 * Math.sin(t * 0.4);
+    },
+    beat(t) {
+      return passFlare((t / T) % 1);
+    },
+  };
+}
+
 /* ---------- fallback - slow-turning wireframe sphere ---------- */
 function generic(mats) {
   const g = new THREE.Group();
@@ -1032,7 +1121,8 @@ const builders = {
   'crm-live': crm,
   'leadgen-live': leadgen,
   'brainai': brainai,
-  'web-systems': webSystems,
+  'agent-eval': agentEval,
+  'omni-sdr': omniSdr,
   'app-builder': appBuilder,
   'portfolio-site': portfolioSite,
 };
@@ -1049,6 +1139,8 @@ export function buildScene(project, registerMaterial) {
     faint: () => registerMaterial(holoMat(color, { alpha: 0.22 })),
     line: () => registerMaterial(holoMat(color, { alpha: 0.5 })),
     custom: (opts) => registerMaterial(holoMat(color, opts)),
+    // fixed-colour holo (status cores that must not take the project accent)
+    tint: (hex, opts) => registerMaterial(holoMat(new THREE.Color(hex), opts)),
   };
   return (builders[project.slug] || generic)(mats);
 }

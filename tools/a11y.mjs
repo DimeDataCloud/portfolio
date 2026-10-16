@@ -2,7 +2,9 @@
 //   node tools/a11y.mjs [url]
 // With no url it starts `vite preview` on a free port and stops it afterwards.
 // Covers: the static project list (reduced-motion, no WebGL) at desktop and phone
-// widths, and the case-study dialog open in the motion view at both widths.
+// widths, the first screen after entering (post-gate, with the value line and
+// the action row) at both widths, and the case-study dialog open in the motion
+// view at both widths.
 // Fails on any serious or critical WCAG 2.0/2.1 A and AA violation. Minor and
 // moderate findings are printed for review but do not fail the run.
 
@@ -84,13 +86,26 @@ async function main() {
       await context.close();
     }
 
-    // 2. Case-study dialog open in the motion view.
+    // 2. First screen after entering the gate (motion view): value line and actions.
+    for (const [name, viewport] of [['entered 1440', DESKTOP], ['entered 390', MOBILE]]) {
+      const context = await browser.newContext({ viewport });
+      const page = await context.newPage();
+      await page.goto(url, { waitUntil: 'networkidle' });
+      await page.waitForSelector('#loader-enter:not([hidden])', { timeout: 30000 });
+      await page.click('#enter-btn');
+      await page.waitForSelector('body.entered');
+      await page.waitForTimeout(900); // let the first-screen entrance finish
+      blocking.push(...(await audit(page, name)));
+      await context.close();
+    }
+
+    // 3. Case-study dialog open in the motion view.
     for (const [name, viewport] of [['dialog 1440', DESKTOP], ['dialog 390', MOBILE]]) {
       const context = await browser.newContext({ viewport });
       const page = await context.newPage();
       await page.goto(url, { waitUntil: 'networkidle' });
       await page.waitForSelector('#loader-enter:not([hidden])', { timeout: 30000 });
-      await page.click('#enter-quiet');
+      await page.click('#enter-btn');
       await page.waitForSelector('body.entered');
       await page.evaluate(() => { location.hash = '#agent-eval'; });
       await page.waitForSelector('#detail.open', { timeout: 10000 });

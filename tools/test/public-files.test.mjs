@@ -25,13 +25,15 @@ test('_headers sets the framing, permissions and transport headers', () => {
   assert.match(headers, /^\s+Strict-Transport-Security: max-age=31536000$/m);
 });
 
-test('_headers sets a Content-Security-Policy that blocks framing and plugins', () => {
+// No script-src on purpose: Cloudflare injects an inline snippet and an
+// analytics beacon at the edge, and a strict script-src turns both into
+// console errors on the live site.
+test('_headers sets a scoped Content-Security-Policy', () => {
   const csp = read('_headers').match(/^\s+Content-Security-Policy: (.+)$/m);
   assert.ok(csp, 'Content-Security-Policy missing');
   const directives = Object.fromEntries(csp[1].split(';').map((d) => d.trim().split(/\s+/)).map(([k, ...v]) => [k, v.join(' ')]));
-  assert.equal(directives['default-src'], "'self'");
-  assert.equal(directives['script-src'], "'self'");
+  assert.equal(directives['base-uri'], "'self'");
   assert.equal(directives['object-src'], "'none'");
   assert.equal(directives['frame-ancestors'], "'none'");
-  assert.ok(!/script-src[^;]*unsafe-inline/.test(csp[1]), 'scripts must not allow unsafe-inline');
+  assert.equal(directives['script-src'], undefined);
 });

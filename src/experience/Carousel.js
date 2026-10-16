@@ -100,9 +100,9 @@ export class Carousel {
     const order = this.holos
       .filter((h) => h.visible)
       .sort((a, b) => Math.abs(a.relIndex) - Math.abs(b.relIndex));
-    const hw = LABEL_W / 2;
-    const hh = LABEL_H / 2;
     for (const holo of order) {
+      const hw = (LABEL_W * holo.labelGrow) / 2;
+      const hh = (LABEL_H * holo.labelGrow) / 2;
       let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
       for (const [dx, dy] of [[-hw, -hh], [hw, -hh], [-hw, hh], [hw, hh]]) {
         v.set(dx, holo.labelY + dy, 0);

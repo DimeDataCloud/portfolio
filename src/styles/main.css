@@ -291,9 +291,37 @@ main {
   transition: opacity 0.8s ease, translate 0.9s var(--out-expo);
 }
 body.entered .project-list { opacity: 1; translate: 0 0; }
-/* carousel-only mode: the 3D spiral is the sole project view when WebGL runs;
-   the DOM list stays for the no-webgl / reduced-motion fallback and SEO HTML */
-body.entered:not(.no-webgl) .project-list { display: none; }
+/* carousel mode: the 3D spiral is the visual project view, but the DOM list
+   stays in the tab order. Entries are invisible until one takes keyboard
+   focus, then that entry shows as a caption under the spiral. */
+body.entered:not(.no-webgl) .project-list {
+  position: fixed; left: 0; right: 0; bottom: 6vh;
+  display: grid; justify-items: center; gap: 0;
+  pointer-events: none;
+}
+/* all entries share one grid cell, so only the focused one shows, centred */
+body.entered:not(.no-webgl) .project-list a {
+  grid-area: 1 / 1;
+  opacity: 0; pointer-events: none;
+  font-size: var(--text-m); line-height: 1.2; white-space: nowrap;
+  padding: 6px 4px;
+}
+body.entered:not(.no-webgl) .project-list a:focus-visible { opacity: 1; }
+body.entered:not(.no-webgl) .project-list a:focus-visible .pl-year { color: var(--accent); }
+.project-list a:focus-visible { outline-offset: 6px; }
+.project-list:focus { outline: none; }
+
+/* skip link: first in tab order, visible only when focused */
+.skip-link {
+  position: fixed; top: 12px; left: 12px; z-index: 200;
+  padding: 10px 18px; border-radius: var(--r-pill);
+  background: var(--ink); color: var(--bg);
+  font-weight: 500; font-size: var(--text-s);
+  transform: translateY(-200%);
+  transition: transform 0.25s var(--out-expo);
+}
+.skip-link:focus { transform: none; outline: 2px solid var(--accent); outline-offset: 3px; }
+body:not(.entered) .skip-link { display: none; }
 
 .project-list a {
   display: flex; align-items: baseline; gap: 14px;

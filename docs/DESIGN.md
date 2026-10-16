@@ -57,7 +57,7 @@ Each project carries an `accent` in its data record. The current nine use blue, 
 - Focus ring: 2 px solid accent with a 3 px offset, on every focusable element.
 - Overlays are modal dialogs. Tab is trapped in the open layer. Escape closes it. Focus returns to the trigger.
 - Keyboard controls: arrow keys move the ring. Enter opens the hovered project. Every case study is reachable from the menu.
-- Sound is opt-in. The entry gate offers "enter without sound", and the sound toggle is labelled with `aria-pressed`.
+- Sound is opt-in. The entry gate has a single silent "Enter" button, and the sound toggle is labelled with `aria-pressed`.
 - On dark surfaces, primary text is `#fafafa` and secondary text is `#9a9aa2`. The menu sheet inverts this to dark text on `#f4f4f5`.
 - The no-WebGL layout is a plain list of projects with titles, years and summaries.
 

@@ -1,5 +1,8 @@
 // Bootstrap: loader with real progress -> entry gate -> experience.
-// Handles reduced-motion, no-WebGL fallback, tab-visibility pause.
+// The gate has one Enter button and starts silent; sound is an opt-in toggle
+// after entry. If the visitor does not click, the gate enters by itself a
+// short while after loading finishes. Handles reduced-motion, no-WebGL
+// fallback, tab-visibility pause.
 
 import './styles/main.css';
 import { LoaderMark } from './loader/mark.js';
@@ -10,12 +13,17 @@ const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const loaderEl = document.getElementById('loader');
 const progressEl = document.getElementById('loader-progress');
+const meterEl = document.getElementById('loader-meter');
+const fillEl = document.getElementById('loader-fill');
 const enterWrap = document.getElementById('loader-enter');
-const enterSound = document.getElementById('enter-sound');
-const enterQuiet = document.getElementById('enter-quiet');
+const enterBtn = document.getElementById('enter-btn');
+
+// the gate enters by itself this long after loading finishes, if not clicked
+const AUTO_ENTER_MS = 2500;
+let autoEnterTimer = null;
 
 // per-letter spring hover on the primary CTA
-enterSound.innerHTML = enterSound.textContent
+enterBtn.innerHTML = enterBtn.textContent
   .split('')
   .map((c, i) => `<span class="ltr" style="transition-delay:${i * 14}ms">${c === ' ' ? '&nbsp;' : c}</span>`)
   .join('');
@@ -37,7 +45,10 @@ let progress = 0;
 
 function setProgress(p) {
   progress = Math.max(progress, Math.min(1, p));
-  progressEl.textContent = String(Math.round(progress * 100)).padStart(2, '0');
+  const pct = Math.round(progress * 100);
+  progressEl.textContent = String(pct).padStart(2, '0');
+  fillEl.style.transform = `scaleX(${progress})`;
+  meterEl.setAttribute('aria-valuenow', String(pct));
   mark?.setProgress(progress);
   if (progress >= 1) showEnter();
 }
@@ -47,16 +58,13 @@ function showEnter() {
   if (enterShown) return;
   enterShown = true;
   enterWrap.hidden = false;
+  autoEnterTimer = setTimeout(() => enter(), AUTO_ENTER_MS);
 }
 
-function enter(withSound) {
-  if (withSound) {
-    sound.enable();
-    ui.reflectSound(true);
-  } else {
-    sound.ensure?.();
-    ui.reflectSound(false);
-  }
+// always silent: the sound toggle after entry is the only way to turn sound on
+function enter() {
+  clearTimeout(autoEnterTimer);
+  ui.reflectSound(false);
   loaderEl.classList.add('done');
   loaderEl.setAttribute('aria-hidden', 'true');
   resetFocusStart();
@@ -98,8 +106,7 @@ function resetFocusStart() {
   top.blur();
 }
 
-enterSound.addEventListener('click', () => enter(true));
-enterQuiet.addEventListener('click', () => enter(false));
+enterBtn.addEventListener('click', () => enter());
 
 /* ---------------- boot ---------------- */
 async function boot() {

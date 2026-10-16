@@ -31,7 +31,7 @@ await capture('01-loader-desktop', D, (p) => p.waitForTimeout(1600));
 // 2. main view after entering
 async function enter(p) {
   await p.waitForSelector('#loader-enter:not([hidden])', { timeout: 8000 });
-  await p.click('#enter-quiet');
+  await p.click('#enter-btn');
   await p.waitForTimeout(2200);
 }
 await capture('02-main-desktop', D, enter);

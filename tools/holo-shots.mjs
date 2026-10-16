@@ -18,7 +18,7 @@ page.on('pageerror', (e) => errors.push(e.message));
 
 await page.goto(URL, { waitUntil: 'networkidle' });
 await page.waitForSelector('#loader-enter:not([hidden])', { timeout: 15000 });
-await page.click('#enter-quiet');
+await page.click('#enter-btn');
 await page.waitForTimeout(2600);
 
 for (let i = 0; i < 9; i++) {
@@ -57,7 +57,7 @@ mp.on('console', (m) => m.type() === 'error' && errors.push('[mobile] ' + m.text
 mp.on('pageerror', (e) => errors.push('[mobile] ' + e.message));
 await mp.goto(URL, { waitUntil: 'networkidle' });
 await mp.waitForSelector('#loader-enter:not([hidden])', { timeout: 15000 });
-await mp.click('#enter-quiet');
+await mp.click('#enter-btn');
 await mp.waitForTimeout(2600);
 await mp.screenshot({ path: `${OUT}/mobile.png` });
 console.log('shot: mobile');

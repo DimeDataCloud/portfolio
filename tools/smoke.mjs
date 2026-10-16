@@ -3,11 +3,14 @@
 // With no url it starts `vite preview` on a free port, runs the checks, and
 // stops the server. CI starts its own preview and passes the url.
 //
-// Checks: load and enter the site, the first Tab after entry lands on the skip
-// link, deep-link a case study by hash, open About, the phone identity line is
-// one line, zero console errors and no horizontal overflow at 1440 and 390 px,
-// and a reduced-motion run that must show no entry gate, no Motion control and
-// the first Tab on the skip link.
+// Checks: load and click Enter, the site starts silent, the first Tab after
+// entry lands on the skip link, the first-screen actions (email, GitHub,
+// LinkedIn, Projects and About) are visible inside the viewport and do not
+// overlap the text above them, deep-link a case study by hash, open About, the
+// phone identity line is one line, zero console errors and no horizontal
+// overflow at 1440 and 390 px. Also: a run that never clicks must enter by
+// itself, and a reduced-motion run that must show no entry gate, no Motion
+// control and the first Tab on the skip link.
 
 import { chromium } from 'playwright';
 import { spawn } from 'child_process';
@@ -63,6 +66,20 @@ async function newPage(browser, viewport, extra = {}, errors) {
 
 const overflow = (page) => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
 
+// bounding box of the first match, or null
+const boxOf = async (page, selector) => {
+  const loc = page.locator(selector).first();
+  if ((await loc.count()) === 0) return null;
+  return loc.boundingBox();
+};
+
+const within = (box, viewport) =>
+  !!box && box.width > 0 && box.height > 0 && box.x >= 0 && box.y >= 0 &&
+  box.x + box.width <= viewport.width + 0.5 && box.y + box.height <= viewport.height + 0.5;
+
+const overlaps = (a, b) =>
+  !!a && !!b && a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+
 async function main() {
   let server = null;
   let url = process.argv[2] || process.env.SMOKE_URL;
@@ -80,19 +97,45 @@ async function main() {
       const page = await newPage(browser, viewport, {}, errors);
       await page.goto(url, { waitUntil: 'networkidle' });
       await page.waitForSelector('#loader-enter:not([hidden])', { timeout: 30000 });
-      await page.click('#enter-quiet');
+      await page.click('#enter-btn');
       await page.waitForSelector('body.entered');
       check(true, `${name}: entry gate passed`);
+      const sound = await page.getAttribute('#sound-btn', 'aria-pressed');
+      check(sound === 'false', `${name}: site starts silent (sound toggle aria-pressed="${sound}")`);
       await page.keyboard.press('Tab');
       const firstStop = await page.evaluate(() => document.activeElement?.className);
       check(firstStop === 'skip-link', `${name}: first Tab after entry lands on skip link (got "${firstStop}")`);
+      const idBox = await boxOf(page, '#id-line');
       if (name === '390') {
-        const idBox = await page.locator('#id-line').boundingBox();
         check(idBox && idBox.height < 30, `${name}: identity line is one line (height ${idBox && Math.round(idBox.height)}px)`);
       }
-      const valueBox = await page.locator('#value-line').boundingBox();
-      check(valueBox && valueBox.width > 0 && valueBox.x >= 0 && valueBox.x + valueBox.width <= viewport.width,
-        `${name}: value proposition is visible inside the viewport`);
+      const valueBox = await boxOf(page, '#value-line');
+      check(within(valueBox, viewport), `${name}: value proposition is visible inside the viewport`);
+
+      // first-screen actions: each visible, inside the viewport, and not overlapping the text above
+      const actions = [
+        ['#intro-mail', 'mailto:chris@dimedata.cloud'],
+        ['.intro-action[href*="github.com"]', 'https://github.com/DimeDataCloud'],
+        ['.intro-action[href*="linkedin.com"]', 'https://www.linkedin.com/in/christian-s-dixon'],
+        ['#intro-menu', null],
+      ];
+      for (const [sel, href] of actions) {
+        const box = await boxOf(page, sel);
+        check(within(box, viewport), `${name}: action ${sel} is visible inside the viewport`);
+        if (href) {
+          const got = await page.getAttribute(sel, 'href');
+          check(got === href, `${name}: action ${sel} links to ${href} (got "${got}")`);
+        }
+        check(!overlaps(box, valueBox) && !overlaps(box, idBox), `${name}: action ${sel} does not overlap the text above`);
+      }
+      check(!overlaps(idBox, valueBox), `${name}: identity line and value proposition do not overlap`);
+      const actionsBox = await boxOf(page, '.intro-actions');
+      check(actionsBox && actionsBox.y >= (valueBox?.y ?? 0) + (valueBox?.height ?? 0) - 0.5, `${name}: actions sit below the value proposition`);
+      await page.click('#intro-menu');
+      await page.waitForSelector('#menu-panel.open', { timeout: 5000 });
+      check(true, `${name}: Projects and About action opens the menu`);
+      await page.keyboard.press('Escape');
+      await page.waitForSelector('#menu-panel:not(.open)');
 
       await page.evaluate(() => { location.hash = '#agent-eval'; });
       await page.waitForSelector('#detail.open', { timeout: 10000 });
@@ -112,6 +155,18 @@ async function main() {
 
       check((await overflow(page)) <= 0, `${name}: no horizontal overflow on home`);
       check(errors.length === 0, `${name}: zero console errors${errors.length ? ` (${errors.slice(0, 3).join(' | ')})` : ''}`);
+      await page.close();
+    }
+
+    // 1b. no click: the gate enters by itself after loading, still silent
+    {
+      const errors = [];
+      const page = await newPage(browser, DESKTOP, {}, errors);
+      await page.goto(url, { waitUntil: 'networkidle' });
+      await page.waitForSelector('body.entered', { timeout: 20000 });
+      const sound = await page.getAttribute('#sound-btn', 'aria-pressed');
+      check(sound === 'false', `auto-enter: entered without a click, silent (aria-pressed="${sound}")`);
+      check(errors.length === 0, `auto-enter: zero console errors${errors.length ? ` (${errors.slice(0, 3).join(' | ')})` : ''}`);
       await page.close();
     }
 

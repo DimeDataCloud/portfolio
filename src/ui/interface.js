@@ -32,6 +32,7 @@ export class Interface {
       menuSocials: document.getElementById('menu-socials'),
       menuClose: document.getElementById('menu-close'),
       menuAbout: document.getElementById('menu-about'),
+      introMenu: document.getElementById('intro-menu'),
       detail: document.getElementById('detail'),
       detailPanel: document.getElementById('detail-panel'),
       detailInner: document.getElementById('detail-inner'),
@@ -165,6 +166,8 @@ export class Interface {
       this.setMenu(false);
       setTimeout(() => this.setAbout(true), 250);
     });
+    // first-screen action: the menu lists every case study and About
+    this.el.introMenu.addEventListener('click', () => this.setMenu(true));
   }
 
   setMenu(open) {

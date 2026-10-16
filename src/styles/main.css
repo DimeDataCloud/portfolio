@@ -101,9 +101,23 @@ h1, h2, h3, p { margin: 0; }
   animation: fadeUp 0.9s var(--out-expo) 0.4s forwards;
 }
 
+.loader-meter {
+  position: absolute; bottom: var(--edge); left: 50%; translate: -50% 0;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  width: min(220px, calc(100vw - 2 * var(--edge)));
+}
+.loader-bar {
+  display: block; width: 100%; height: 2px; border-radius: 2px;
+  background: var(--hairline); overflow: hidden;
+}
+.loader-fill {
+  display: block; width: 100%; height: 100%;
+  background: var(--ink-dim);
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform 0.4s var(--out-expo);
+}
 .loader-progress {
-  position: absolute; bottom: var(--edge); right: var(--edge);
-  font-size: var(--text-l); color: var(--ink-faint);
+  font-size: var(--text-xs); color: var(--ink-faint);
   font-variant-numeric: tabular-nums;
 }
 
@@ -122,13 +136,6 @@ h1, h2, h3, p { margin: 0; }
 .enter-btn:hover .ltr { transform: translateY(-0.12em); }
 .enter-btn:active { transform: scale(0.97); }
 
-.enter-alt {
-  font-size: var(--text-s); color: var(--ink-dim);
-  border-bottom: 1px solid transparent;
-  opacity: 0; animation: fadeUp 0.7s var(--out-expo) 0.15s forwards;
-  transition: color 0.25s;
-}
-.enter-alt:hover { color: var(--ink); }
 
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(14px); }
@@ -573,25 +580,38 @@ body:not(.entered) .skip-link { display: none; }
   color: var(--ink); pointer-events: none;
 }
 
-/* value proposition: a second line under the identity line, plain body text.
-   In the no-webgl view it sits under the page title instead. */
-.value-line {
+/* first-screen block: the value proposition and the primary actions, stacked
+   under the identity line. In the no-webgl view it sits under the page title. */
+.intro {
   position: fixed; z-index: 20;
-  top: calc(var(--edge) + 58px + 22px); left: var(--edge);
-  max-width: min(38ch, calc(100vw - 2 * var(--edge)));
-  font-size: min(0.875rem, 3.6vw); line-height: 1.3;
-  color: var(--ink-dim); pointer-events: none;
+  top: calc(var(--edge) + 58px + 30px); left: var(--edge);
+  max-width: min(36ch, calc(100vw - 2 * var(--edge)));
+  display: grid; gap: 18px;
 }
-body.no-webgl .value-line {
+.value-line {
+  font-size: clamp(1.2rem, 1rem + 1.1vw, 1.7rem);
+  font-weight: 500; line-height: 1.22; letter-spacing: -0.01em;
+  color: var(--ink); pointer-events: none;
+}
+.intro-actions { display: flex; flex-wrap: wrap; gap: 8px; pointer-events: auto; }
+.intro-action {
+  display: inline-flex; align-items: center; min-height: 44px;
+  padding: 0 16px; border-radius: var(--r-pill);
+  border: 1px solid var(--hairline); background: var(--bg);
+  font-size: var(--text-s); line-height: 1.2; color: var(--ink);
+  transition: background-color 0.25s, border-color 0.25s;
+}
+.intro-action:hover { background: var(--accent-soft); border-color: var(--accent); }
+body.no-webgl .intro {
   position: static; max-width: 60ch;
   margin: -24px 0 var(--gap-l);
-  font-size: var(--text-m); line-height: 1.5;
 }
+body.no-webgl .value-line { font-size: var(--text-m); }
 
 /* ============ touch targets: 44 x 44 CSS px minimum on coarse pointers ============ */
 @media (pointer: coarse) {
   .logo, .mode-btn, .menu-btn, .detail-close, .about-close, .menu-close,
-  .menu-about-link, .menu-mail, .menu-socials a, .contact-link, .enter-alt {
+  .menu-about-link, .menu-mail, .menu-socials a, .contact-link, .enter-btn {
     min-width: 44px; min-height: 44px;
     display: inline-flex; align-items: center; justify-content: center;
   }
@@ -607,7 +627,7 @@ body.no-webgl .value-line {
     transition-duration: 0.15s !important;
     scroll-behavior: auto !important;
   }
-  .loader-line, .enter-btn, .enter-alt { opacity: 1; animation: none; }
+  .loader-line, .enter-btn { opacity: 1; animation: none; }
   .webgl { display: none; }
   /* no motion to toggle: the Motion control is hidden and the speaker button
      at bottom right is the one sound control, as on phones */

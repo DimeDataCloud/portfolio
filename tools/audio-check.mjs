@@ -1,5 +1,6 @@
-// Empirical audio verification: enter with sound, inspect AudioContext state,
-// then exercise the sound toggle twice and confirm UI + engine stay in sync.
+// Empirical audio verification: enter (silent), turn sound on with the sound
+// toggle, inspect AudioContext state, then exercise the toggle twice and confirm
+// UI + engine stay in sync.
 import { chromium } from 'playwright';
 
 const URL = process.argv[2] || 'http://localhost:4400/';
@@ -11,7 +12,9 @@ page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
 
 await page.goto(URL, { waitUntil: 'networkidle' });
 await page.waitForSelector('#loader-enter:not([hidden])', { timeout: 10000 });
-await page.click('#enter-sound');
+await page.click('#enter-btn');
+await page.waitForSelector('body.entered');
+await page.click('#sound-btn');
 await page.waitForTimeout(1500);
 
 const probe = () => page.evaluate(() => {
@@ -25,7 +28,7 @@ const probe = () => page.evaluate(() => {
   };
 });
 
-console.log('after enter-with-sound:', JSON.stringify(await probe()));
+console.log('after entering and turning sound on:', JSON.stringify(await probe()));
 
 // toggle off
 await page.click('#sound-btn');

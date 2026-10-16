@@ -8,7 +8,7 @@ async function probe(url) {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(url, { waitUntil: 'networkidle' });
   await page.waitForSelector('#loader-enter:not([hidden])', { timeout: 15000 });
-  await page.click('#enter-quiet');
+  await page.click('#enter-btn');
   await page.waitForTimeout(3000);
   const fps = await page.evaluate(
     () =>

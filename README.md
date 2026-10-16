@@ -36,7 +36,7 @@
 
 Email chris@dimedata.cloud · [LinkedIn](https://www.linkedin.com/in/christian-s-dixon) · [GitHub](https://github.com/DimeDataCloud)
 
-| Headline number | What it measures |
+| Headline number | What it measures (self-reported from my own production logs and evaluation runs) |
 |---|---|
 | 27 | agents running unattended in a four-layer hierarchy |
 | < 2 s | voice response budget, speech in to speech out |

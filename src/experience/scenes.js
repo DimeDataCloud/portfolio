@@ -978,6 +978,131 @@ function agentEval(mats) {
   };
 }
 
+/* =====================================================================
+ * 8. Omni SDR - the inbox, gated.
+ * Message tiles leave the inbox and slide down a lane toward a gate. A
+ * green core passes through, flips flat and drops into the tray; a red
+ * core is stopped by the gate frame, thuds, bounces back and fades. The
+ * gate flares on every pass.
+ * ===================================================================== */
+function omniSdr(mats) {
+  const g = new THREE.Group();
+  const T = 8;
+  const LANE = 0.36;           // lane height
+  const TILE_Y = LANE + 0.03;  // tile centre while riding the lane
+  const GX = 0.04;             // gate plane
+  const TRAY_X = 0.30;
+  const TRAY_Y = 0.16;         // tile centre once it lies in the tray
+
+  const lane = mesh(geo.lane, mats.faint());
+  lane.position.set(0, LANE - 0.003, 0);
+  g.add(lane);
+
+  // gate frame: two posts and a crossbeam standing across the lane
+  const gateMat = mats.line();
+  [-0.09, 0.09].forEach((z) => {
+    const p = mesh(geo.gatePost, gateMat);
+    p.position.set(GX, LANE + 0.06, z);
+    g.add(p);
+  });
+  const beam = mesh(geo.gateBeam, gateMat);
+  beam.position.set(GX, LANE + 0.17, 0);
+  g.add(beam);
+
+  // tray: floor + four walls (same parts as the CRM tray)
+  const tb = mesh(geo.trayBase, mats.faint());
+  tb.position.set(TRAY_X, TRAY_Y - 0.012, 0);
+  g.add(tb);
+  const rim = mats.soft();
+  [-0.076, 0.076].forEach((dx) => {
+    const w = mesh(geo.trayWallX, rim);
+    w.position.set(TRAY_X + dx, TRAY_Y + 0.003, 0);
+    g.add(w);
+  });
+  [-0.051, 0.051].forEach((dz) => {
+    const w = mesh(geo.trayWallZ, rim);
+    w.position.set(TRAY_X, TRAY_Y + 0.003, dz);
+    g.add(w);
+  });
+
+  // inbox: two unread messages waiting at the left end of the lane
+  [0, 1].forEach((i) => {
+    const m = mesh(geo.msgTile, mats.faint());
+    m.position.set(-0.36, TILE_Y + i * 0.055, 0);
+    g.add(m);
+  });
+
+  // one message per storyboard slot; green lands in the tray, red bounces
+  const defs = [
+    { s: 0.04, green: true, z: -0.025 },
+    { s: 0.20, green: false, z: 0 },
+    { s: 0.36, green: true, z: 0.025 },
+    { s: 0.52, green: false, z: 0 },
+  ];
+  const tiles = defs.map((d) => {
+    const bm = mats.soft();
+    const body = mesh(geo.msgTile, bm);
+    const cm = mats.tint(d.green ? '#34d17b' : '#ff5a5a', { alpha: 0.95 });
+    const core = mesh(geo.sphXS, cm);
+    core.scale.setScalar(1.6);
+    core.position.set(0, 0, 0.006);
+    body.add(core);
+    g.add(body);
+    return { ...d, body, bm, cm };
+  });
+
+  // gate flare window for each pass (centred just after the gate contact)
+  const passFlare = (u) => {
+    let f = 0;
+    for (let i = 0; i < defs.length; i++) f = Math.max(f, spike(seg(u, defs[i].s + 0.04, defs[i].s + 0.16)));
+    return f;
+  };
+
+  return {
+    group: g,
+    update(t) {
+      const u = (t / T) % 1;
+
+      tiles.forEach(({ s, green, z, body, bm, cm }) => {
+        const arrive = seg(u, s, s + 0.10); // inbox -> gate
+        let x, y, zz = 0, rx = 0, sx = 1, sy = 1, vis;
+        if (green) {
+          // through the gate, then drop and lie flat in the tray
+          const run = seg(u, s + 0.10, s + 0.24);
+          x = lerp(lerp(-0.36, GX, inOut(arrive)), TRAY_X, inOut(run));
+          y = lerp(TILE_Y, TRAY_Y, inCubic(run));
+          zz = lerp(0, z, inOut(run));
+          rx = -Math.PI / 2 * inOut(run);
+          vis = seg(u, s, s + 0.02) * (1 - seg(u, 0.88, 0.97));
+        } else {
+          // stopped at the frame: thud, then recoil and fade
+          const hit = GX - 0.035;
+          const thud = seg(u, s + 0.10, s + 0.16);
+          const recoil = outCubic(seg(u, s + 0.16, s + 0.30));
+          x = lerp(-0.36, hit, inOut(arrive)) - recoil * 0.16;
+          y = TILE_Y;
+          const sq = thud > 0 ? impact(thud, 0.3) : 1;
+          sy = sq;
+          sx = 1 + (1 - sq) * 0.6;
+          vis = seg(u, s, s + 0.02) * (1 - seg(u, s + 0.16, s + 0.30));
+        }
+        body.position.set(x, y, zz);
+        body.rotation.set(rx, 0, 0);
+        body.scale.set(sx, sy, 1);
+        bm.uniforms.uAlpha.value = 0.6 * vis;
+        cm.uniforms.uAlpha.value = 0.95 * vis;
+      });
+
+      // gate frame lights on every pass
+      gateMat.uniforms.uAlpha.value = 0.5 + 0.45 * passFlare(u);
+      g.rotation.y = 0.06 * Math.sin(t * 0.4);
+    },
+    beat(t) {
+      return passFlare((t / T) % 1);
+    },
+  };
+}
+
 /* ---------- fallback - slow-turning wireframe sphere ---------- */
 function generic(mats) {
   const g = new THREE.Group();
@@ -997,6 +1122,7 @@ const builders = {
   'leadgen-live': leadgen,
   'brainai': brainai,
   'agent-eval': agentEval,
+  'omni-sdr': omniSdr,
   'app-builder': appBuilder,
   'portfolio-site': portfolioSite,
 };
@@ -1013,6 +1139,8 @@ export function buildScene(project, registerMaterial) {
     faint: () => registerMaterial(holoMat(color, { alpha: 0.22 })),
     line: () => registerMaterial(holoMat(color, { alpha: 0.5 })),
     custom: (opts) => registerMaterial(holoMat(color, opts)),
+    // fixed-colour holo (status cores that must not take the project accent)
+    tint: (hex, opts) => registerMaterial(holoMat(new THREE.Color(hex), opts)),
   };
   return (builders[project.slug] || generic)(mats);
 }

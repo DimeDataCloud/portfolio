@@ -103,8 +103,8 @@ export const projects = [
     desc: 'This site: an interactive 3D portfolio with a WebGL project carousel, procedural textures, original GLSL grain pass, spring-animated interface, and Web Audio sound design. Built from scratch with Vite and Three.js.',
     stack: ['Three.js', 'Vite', 'GLSL', 'Web Audio API', 'Cloudflare Workers'],
     liveUrl: null,
-    repoUrl: null,
-    privateNote: 'private repo, available on request',
+    repoUrl: 'https://github.com/DimeDataCloud/portfolio',
+    privateNote: null,
     accent: '#2f80ff',
   },
 ];

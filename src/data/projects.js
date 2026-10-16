@@ -111,7 +111,7 @@ export const projects = [
     built:
       'An evaluation harness run on benchmark suites written outside the company, with endpoints fixed before each run, multiple-comparison correction, McNemar tests and bootstrap confidence intervals. Across roughly 47 hypothesis tests the estimator was pinned in advance.',
     result:
-      'A solve rate of 75.0% against 50.0% for the closest open-source comparator (n=20), and a reliability profile to k=6 that fell 70.0% against 44.0%, isolating 22 points of accuracy as run-to-run variance. Six of my own findings were withdrawn after tracing them to a comparison that was never pinned down.',
+      'A solve rate of 75.0% against 50.0% for the closest open-source comparator. n=20 is pilot-sized, so read the gap as directional; the sturdier result is a reliability profile to k=6 that fell 70.0% against 44.0%, isolating 22 points of accuracy as run-to-run variance. Six of my own findings were withdrawn after tracing them to a comparison that was never pinned down.',
     metrics: [
       { value: '75.0%', label: 'solve rate vs 50.0%' },
       { value: '70.0%', label: 'reliability at k=6 vs 44.0%' },

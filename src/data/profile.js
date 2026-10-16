@@ -10,12 +10,12 @@ export const profile = {
   summary:
     'I build, measure and operate applied machine learning and generative AI systems end to end: the discovery that finds which process is worth automating, the engineering that takes it from prototype to production, and the statistical evaluation that proves whether it worked.',
   running:
-    'Running today: real-time virtual agents on voice and messaging inside a sub-2-second response budget, LLM routing across four providers with fallback, retrieval with enforced citations, and 27 agents running autonomously.',
+    'Systems I have built and operated: real-time virtual agents on voice and messaging inside a sub-2-second response budget, LLM routing across four providers with fallback, retrieval with enforced citations, and a 27-agent hierarchy. Numbers on this site are self-reported from my own production logs and evaluation runs; private projects are available to walk through on request.',
 };
 
 // Headline numbers, shown as a strip on the About panel.
 export const metrics = [
-  { value: '27', label: 'agents running unattended in a four-layer hierarchy' },
+  { value: '27', label: 'agents in a four-layer hierarchy, run unattended' },
   { value: '< 2 s', label: 'voice response budget, speech in to speech out' },
   { value: '75.0%', label: 'solve rate vs 50.0% for the closest open-source comparator (n=20)' },
   { value: '4', label: 'model providers behind one interface, with automatic failover' },

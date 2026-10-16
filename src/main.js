@@ -22,8 +22,16 @@ enterSound.innerHTML = enterSound.textContent
 
 const ui = new Interface();
 window.__haloSound = sound; // debug/verification handle (also used to wire music later)
+
+// until the gate is passed, the page behind it is inert: no tab stops under it
+const behindGate = [...document.querySelectorAll('header, main, #sound-btn')];
+behindGate.forEach((el) => { el.inert = true; });
+function releaseGate() {
+  behindGate.forEach((el) => { el.inert = false; });
+}
 const mark = reducedMotion ? null : new LoaderMark(document.getElementById('loader-mark'));
 
+const NO_PARALLAX = { x: 0, y: 0 };
 let experience = null;
 let progress = 0;
 
@@ -41,7 +49,7 @@ function showEnter() {
   enterWrap.hidden = false;
 }
 
-function enter(withSound) {
+function enter(withSound, byKeyboard = false) {
   if (withSound) {
     sound.enable();
     ui.reflectSound(true);
@@ -51,15 +59,45 @@ function enter(withSound) {
   }
   loaderEl.classList.add('done');
   loaderEl.setAttribute('aria-hidden', 'true');
+  // the gate button that was clicked is now hidden: drop focus so Tab starts
+  // at the top of the page (skip link first)
+  if (loaderEl.contains(document.activeElement)) document.activeElement.blur();
+  // hide the gate once its fade ends; a keyboard user lands on the skip link
+  // (first stop on the page) instead of wherever the gate button sat
+  setTimeout(() => {
+    loaderEl.hidden = true;
+    if (byKeyboard) document.querySelector('.skip-link')?.focus();
+  }, 800);
   mark?.stop();
+  releaseGate();
   document.body.classList.add('entered');
   experience?.begin();
+  startDeepLinks();
+}
+
+// Reduced motion or no WebGL: there is nothing to wait for, so the gate is
+// skipped entirely and the static project list, About and menu are the site.
+function skipGate() {
+  enterShown = true; // the gate's enter buttons never appear
+  mark?.stop();
+  loaderEl.hidden = true;
+  loaderEl.setAttribute('aria-hidden', 'true');
+  releaseGate();
+  document.body.classList.add('entered');
+  startDeepLinks();
+}
+
+let deepLinksOn = false;
+function startDeepLinks() {
   ui.openFromHash();
+  if (deepLinksOn) return;
+  deepLinksOn = true;
   window.addEventListener('hashchange', () => ui.openFromHash());
 }
 
-enterSound.addEventListener('click', () => enter(true));
-enterQuiet.addEventListener('click', () => enter(false));
+// click events from the keyboard carry detail 0
+enterSound.addEventListener('click', (e) => enter(true, e.detail === 0));
+enterQuiet.addEventListener('click', (e) => enter(false, e.detail === 0));
 
 /* ---------------- boot ---------------- */
 async function boot() {
@@ -70,8 +108,9 @@ async function boot() {
   setProgress(0.35);
 
   if (reducedMotion) {
-    // calm path: no WebGL scene at all
+    // calm path: no WebGL scene and no entry gate
     document.body.classList.add('no-webgl');
+    skipGate();
     setProgress(1);
     return;
   }
@@ -110,7 +149,8 @@ async function boot() {
       last = now;
       input.update(dt);
       carousel.update(dt, now / 1000);
-      stage.updateCamera(input.pointer, dt);
+      // touch screens keep the camera centred: a tap must not shift the spiral
+      stage.updateCamera(input.isTouch ? NO_PARALLAX : input.pointer, dt);
       stage.render(now / 1000);
       raf = requestAnimationFrame(frame);
     }
@@ -155,6 +195,7 @@ async function boot() {
   } catch (err) {
     console.error('WebGL unavailable, falling back to static list', err);
     document.body.classList.add('no-webgl');
+    skipGate();
     setProgress(1);
   }
 }

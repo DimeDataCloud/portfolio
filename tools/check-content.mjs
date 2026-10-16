@@ -45,13 +45,24 @@ function scan(rule, files, test, describe) {
   }
 }
 
-// 1. Em dashes in site source, index, README and docs.
-const emDashFiles = [
-  ...walk(abs('src'), () => true),
-  abs('index.html'),
-  abs('README.md'),
-  ...walk(abs('docs'), (p) => extname(p) === '.md'),
-];
+// Every tracked text file (binary files skipped). Git is the source of truth,
+// so untracked scratch files and dist/ never trip the checks.
+let tracked = [];
+try {
+  tracked = execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8' })
+    .split('\0').filter(Boolean).map(abs);
+} catch {
+  fail('secrets', 'could not run git ls-files; tracked-file scans skipped');
+}
+const isText = (f) => {
+  try { return !readFileSync(f).includes(0); } catch { return false; }
+};
+const trackedText = tracked.filter(isText);
+
+// 1. Em dashes in every tracked text file under src, tools, docs and .github,
+//    root *.md files and index.html.
+const EM_DASH_SCOPE = /^(src|tools|docs|\.github)\/|^[^/]+\.md$|^index\.html$/;
+const emDashFiles = trackedText.filter((f) => EM_DASH_SCOPE.test(rel(f)));
 scan('em-dash', emDashFiles, (l) => l.includes(EM_DASH), 'contains an em dash (U+2014); use a comma, colon or period');
 
 // 2. Phone numbers in site source, index and README.
@@ -59,13 +70,6 @@ const phoneFiles = [...walk(abs('src'), () => true), abs('index.html'), abs('REA
 scan('phone', phoneFiles, (l) => PHONE.test(l), 'looks like a phone number; remove it');
 
 // 3. Secret shapes anywhere tracked by git.
-let tracked = [];
-try {
-  tracked = execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8' })
-    .split('\0').filter(Boolean).map(abs);
-} catch {
-  fail('secrets', 'could not run git ls-files; secret scan skipped');
-}
 for (const f of tracked) {
   let buf;
   try { buf = readFileSync(f); } catch { continue; }

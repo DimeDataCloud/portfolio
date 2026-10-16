@@ -15,6 +15,7 @@
     "check:bundle": "node tools/check-bundle.mjs",
     "verify": "npm run check && npm run build",
     "shots": "node tools/shots.mjs",
+    "smoke": "node tools/smoke.mjs",
     "holo-shots": "node tools/holo-shots.mjs",
     "og": "node tools/og.mjs",
     "fps": "node tools/fps-check.mjs",

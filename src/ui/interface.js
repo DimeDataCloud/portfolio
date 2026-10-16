@@ -170,6 +170,7 @@ export class Interface {
   setMenu(open) {
     this.el.menuPanel.classList.toggle('open', open);
     this.el.menuPanel.setAttribute('aria-hidden', String(!open));
+    this.el.menuPanel.inert = !open; // closed panels take no focus or clicks
     this.el.menuBtn.setAttribute('aria-expanded', String(open));
     document.body.classList.toggle('menu-open', open);
     if (open) sound.pressThock();
@@ -250,6 +251,7 @@ export class Interface {
     this.el.detailInner.scrollTop = 0;
     this.el.detail.classList.add('open');
     this.el.detail.setAttribute('aria-hidden', 'false');
+    this.el.detail.inert = false;
     this.el.webgl.classList.add('dimmed');
     history.replaceState(null, '', `#${p.slug}`);
     this.carousel?.input.pause();
@@ -260,6 +262,7 @@ export class Interface {
     this.openIndex = null;
     this.el.detail.classList.remove('open');
     this.el.detail.setAttribute('aria-hidden', 'true');
+    this.el.detail.inert = true;
     this.el.webgl.classList.toggle('dimmed', this.aboutOpen);
     history.replaceState(null, '', location.pathname);
     this.carousel?.input.resume();
@@ -273,6 +276,7 @@ export class Interface {
     if (open) this.rememberFocus();
     this.el.about.classList.toggle('open', open);
     this.el.about.setAttribute('aria-hidden', String(!open));
+    this.el.about.inert = !open;
     this.el.webgl.classList.toggle('dimmed', open);
     this.carousel && (open ? this.carousel.input.pause() : this.carousel.input.resume());
     if (open) {

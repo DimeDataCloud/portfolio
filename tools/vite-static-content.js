@@ -35,7 +35,8 @@ function projectListHtml() {
         `<span class="pl-desc">${esc(p.desc)}</span></a></li>`,
     )
     .join('');
-  return `<ul class="project-list" id="project-list">${items}</ul>`;
+  // tabindex -1 lets the "Skip to projects" link move focus into the list
+  return `<ul class="project-list" id="project-list" tabindex="-1">${items}</ul>`;
 }
 
 function profileArticleHtml() {

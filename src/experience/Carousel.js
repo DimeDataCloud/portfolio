@@ -3,7 +3,7 @@
 // and focus-sync with the interface.
 
 import * as THREE from 'three';
-import { Holo } from './Holo.js';
+import { Holo, LABEL_W, LABEL_H } from './Holo.js';
 
 export class Carousel {
   constructor({ stage, input, projects }) {
@@ -11,9 +11,11 @@ export class Carousel {
     this.input = input;
     this.projects = projects;
 
+    // narrow screens: a tighter ring, neighbours peek in from the edges as a
+    // drag cue, and each hologram is scaled up so it fills the viewport
     const mobile = stage.viewport.w < 700;
     this.params = mobile
-      ? { radius: 3.0, angleStep: 0.82, vStep: 0.3 }
+      ? { radius: 2.6, angleStep: 0.8, vStep: 0.3 }
       : { radius: 3.4, angleStep: 0.72, vStep: 0.32 };
 
     this.raycaster = new THREE.Raycaster();
@@ -25,6 +27,8 @@ export class Carousel {
     const ring = [...projects, ...projects];
     ring.forEach((project, i) => {
       const holo = new Holo({ project, index: i, total: ring.length });
+      holo.zoom = mobile ? 1.45 : 1;
+      holo.narrow = mobile;
       this.holos.push(holo);
       stage.scene.add(holo);
     });
@@ -80,6 +84,36 @@ export class Carousel {
     for (const holo of this.holos) {
       holo.layout(this.input.offset, this.params);
       holo.update(dt, elapsed, this.input.velocity);
+    }
+    this.layoutLabels();
+  }
+
+  /**
+   * Keep labels legible: a label fades out when its projected box would clip
+   * the viewport edge or overlap a label already placed nearer the front.
+   * Closer labels are placed first, so the focused card always keeps its label.
+   */
+  layoutLabels() {
+    const cam = this.stage.camera;
+    const v = this._labelV ??= new THREE.Vector3();
+    const placed = [];
+    const order = this.holos
+      .filter((h) => h.visible)
+      .sort((a, b) => Math.abs(a.relIndex) - Math.abs(b.relIndex));
+    const hw = LABEL_W / 2;
+    const hh = LABEL_H / 2;
+    for (const holo of order) {
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+      for (const [dx, dy] of [[-hw, -hh], [hw, -hh], [-hw, hh], [hw, hh]]) {
+        v.set(dx, holo.labelY + dy, 0);
+        holo.localToWorld(v).project(cam);
+        x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x);
+        y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y);
+      }
+      const onScreen = x0 > -0.96 && x1 < 0.96;
+      const clear = onScreen && !placed.some((b) => x0 < b.x1 + 0.06 && x1 > b.x0 - 0.06 && y0 < b.y1 && y1 > b.y0);
+      if (clear) placed.push({ x0, x1, y0, y1 });
+      holo.setLabelClear(clear);
     }
   }
 

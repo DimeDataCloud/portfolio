@@ -9,22 +9,46 @@ import * as THREE from 'three';
 import { holoMat } from './holoMaterial.js';
 import { buildScene } from './scenes.js';
 
+// Label canvas is 512 x 160 px and maps to a LABEL_W x LABEL_H world-unit sprite
+// (same 3.2:1 aspect). Both lines shrink to fit, then truncate with an ellipsis,
+// so nothing clips at the canvas edge or runs into the neighbouring label.
+export const LABEL_W = 1.2;
+export const LABEL_H = LABEL_W * 160 / 512;
+
+// shrink a line to maxW (down to minPx), then cut it with an ellipsis if it
+// still does not fit. Returns the text and the font size it settled on.
+function fitLine(ctx, text, weight, family, startPx, minPx, maxW) {
+  let px = startPx;
+  const set = (p) => { ctx.font = `${weight} ${p}px ${family}`; };
+  set(px);
+  while (ctx.measureText(text).width > maxW && px > minPx) { px -= 2; set(px); }
+  if (ctx.measureText(text).width <= maxW) return { text, px };
+  let out = text;
+  while (ctx.measureText(out + "…").width > maxW && out.length > 1) out = out.slice(0, -1);
+  return { text: out === text ? text : out.trimEnd() + "…", px };
+}
+
 function makeLabelTexture(project, index) {
-  const w = 512, h = 128;
-  const canvas = document.createElement('canvas');
+  const w = 512, h = 160;
+  const canvas = document.createElement("canvas");
   canvas.width = w; canvas.height = h;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, w, h);
+  ctx.textAlign = "center";
+  const maxW = w - 24;
 
-  ctx.font = '600 44px "Clash Display", "Segoe UI", sans-serif';
-  ctx.fillStyle = 'rgba(250,250,250,0.96)';
-  ctx.textAlign = 'center';
-  ctx.fillText(project.title, w / 2, 56);
+  const titleFamily = '"Clash Display", "Segoe UI", sans-serif';
+  const title = fitLine(ctx, project.title, 600, titleFamily, 56, 30, maxW);
+  ctx.font = `600 ${title.px}px ${titleFamily}`;
+  ctx.fillStyle = "rgba(250,250,250,0.98)";
+  ctx.fillText(title.text, w / 2, 66);
 
-  ctx.font = '500 22px ui-monospace, Consolas, monospace';
-  ctx.fillStyle = 'rgba(250,250,250,0.5)';
-  const line = `P-${String(index + 1).padStart(2, '0')} · ${project.year} · ${project.statusText.toUpperCase()}`;
-  ctx.fillText(line, w / 2, 100);
+  const metaFamily = "ui-monospace, Consolas, monospace";
+  const meta = `P-${String(index + 1).padStart(2, "0")} · ${project.year} · ${project.statusText.toUpperCase()}`;
+  const fitMeta = fitLine(ctx, meta, 500, metaFamily, 36, 24, maxW);
+  ctx.font = `500 ${fitMeta.px}px ${metaFamily}`;
+  ctx.fillStyle = "rgba(250,250,250,0.85)";
+  ctx.fillText(fitMeta.text, w / 2, 130);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -89,6 +113,8 @@ export class Holo extends THREE.Group {
     this.dataIndex = index % (total / 2);
     this.phase = (this.dataIndex * 7.31) % 5; // desync ring duplicates
 
+    this.zoom = 1;      // set by Carousel: narrow screens scale holograms up
+    this.narrow = false; // narrow screens: neighbours stay brighter as a drag cue
     this.hover = 0;
     this.hoverTarget = 0;
     this.reveal = 0;
@@ -162,8 +188,13 @@ export class Holo extends THREE.Group {
       depthWrite: false,
     });
     const label = new THREE.Sprite(this.labelMat);
-    label.scale.set(1.3, 0.325, 1);
-    label.position.y = -0.32;
+    label.scale.set(LABEL_W, LABEL_H, 1);
+    this.labelY = -0.32;
+    label.position.y = this.labelY;
+    // screen-space clearance, set each frame by Carousel: 1 when the label is
+    // on screen and clear of closer labels, eased toward 0 otherwise
+    this.labelClip = 1;
+    this.labelTarget = 1;
 
     this.underlineMat = new THREE.SpriteMaterial({
       color: accent,
@@ -173,7 +204,7 @@ export class Holo extends THREE.Group {
     });
     this.underline = new THREE.Sprite(this.underlineMat);
     this.underline.center.set(0, 0.5); // anchor left so it draws in left-to-right
-    this.underline.position.set(-0.26, -0.44, 0);
+    this.underline.position.set(-0.26, -0.5, 0);
     this.underline.scale.set(0.001, 0.012, 1);
 
     /* ---- invisible raycast proxy covering the whole hologram ---- */
@@ -192,6 +223,7 @@ export class Holo extends THREE.Group {
   }
 
   setHovered(on) { this.hoverTarget = on ? 1 : 0; }
+  setLabelClear(on) { this.labelTarget = on ? 1 : 0; }
   show() { this.revealTarget = 1; }
   hide() { this.revealTarget = 0; }
 
@@ -219,8 +251,11 @@ export class Holo extends THREE.Group {
     // far-side duplicates fade out completely so the back half never clutters
     const dist = Math.abs(this.relIndex);
     const farFade = 1 - Math.min(1, Math.max(0, (dist - 2.4) / 1.1));
-    const dim = (Math.max(0.18, 0.8 - dist * 0.22) + this.hover * 0.2) * farFade;
-    const global = this.reveal * dim;
+    const dim = (this.narrow
+      ? Math.max(0.35, 0.95 - dist * 0.25)
+      : Math.max(0.18, 0.8 - dist * 0.22)) + this.hover * 0.2;
+    const dimmed = dim * farFade;
+    const global = this.reveal * dimmed;
 
     // fully faded holograms skip rendering AND animation work - roughly
     // half the ring at any moment
@@ -228,7 +263,7 @@ export class Holo extends THREE.Group {
 
     // pop + slight tilt with scroll motion (kept live even while hidden so
     // re-entry doesn't snap)
-    const s = (0.85 + this.hover * 0.12) * (0.25 + this.reveal * 0.75);
+    const s = (0.85 + this.hover * 0.12) * (0.25 + this.reveal * 0.75) * this.zoom;
     this.scale.setScalar(s);
     this.rotation.z = -scrollVelocity * 1.6;
 
@@ -241,7 +276,11 @@ export class Holo extends THREE.Group {
       m.uniforms.uHover.value = this.hover;
     }
     this.daisMat.opacity = Math.min(1, global * 1.5);
-    this.labelMat.opacity = global * 0.95;
+    // labels: front and side cards stay legible (floor 0.55), hover lifts to
+    // full, back cards fade out with farFade
+    const labelBase = 0.55 + 0.45 * Math.max(0, 1 - dist / 2);
+    this.labelClip += (this.labelTarget - this.labelClip) * (1 - Math.pow(0.02, dt));
+    this.labelMat.opacity = this.reveal * farFade * this.labelClip * Math.min(1, labelBase + this.hover * 0.45);
     this.underlineMat.opacity = global * 0.9;
     const drawIn = 1 - Math.pow(1 - Math.min(1, Math.max(0, (this.reveal - 0.25) / 0.75)), 3);
     this.underline.scale.set(Math.max(0.001, 0.52 * drawIn), 0.012, 1);

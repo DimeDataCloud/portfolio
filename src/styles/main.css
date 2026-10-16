@@ -89,6 +89,7 @@ h1, h2, h3, p { margin: 0; }
   transition: opacity 0.7s var(--inout), visibility 0.7s;
 }
 .loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader[hidden] { display: none; }
 
 .loader-mark { width: clamp(120px, 18vw, 200px); height: auto; }
 
@@ -290,9 +291,37 @@ main {
   transition: opacity 0.8s ease, translate 0.9s var(--out-expo);
 }
 body.entered .project-list { opacity: 1; translate: 0 0; }
-/* carousel-only mode: the 3D spiral is the sole project view when WebGL runs;
-   the DOM list stays for the no-webgl / reduced-motion fallback and SEO HTML */
-body.entered:not(.no-webgl) .project-list { display: none; }
+/* carousel mode: the 3D spiral is the visual project view, but the DOM list
+   stays in the tab order. Entries are invisible until one takes keyboard
+   focus, then that entry shows as a caption under the spiral. */
+body.entered:not(.no-webgl) .project-list {
+  position: fixed; left: 0; right: 0; bottom: 6vh;
+  display: grid; justify-items: center; gap: 0;
+  pointer-events: none;
+}
+/* all entries share one grid cell, so only the focused one shows, centred */
+body.entered:not(.no-webgl) .project-list a {
+  grid-area: 1 / 1;
+  opacity: 0; pointer-events: none;
+  font-size: var(--text-m); line-height: 1.2; white-space: nowrap;
+  padding: 6px 4px;
+}
+body.entered:not(.no-webgl) .project-list a:focus-visible { opacity: 1; }
+body.entered:not(.no-webgl) .project-list a:focus-visible .pl-year { color: var(--accent); }
+.project-list a:focus-visible { outline-offset: 6px; }
+.project-list:focus { outline: none; }
+
+/* skip link: first in tab order, visible only when focused */
+.skip-link {
+  position: fixed; top: 12px; left: 12px; z-index: 200;
+  padding: 10px 18px; border-radius: var(--r-pill);
+  background: var(--ink); color: var(--bg);
+  font-weight: 500; font-size: var(--text-s);
+  transform: translateY(-200%);
+  transition: transform 0.25s var(--out-expo);
+}
+.skip-link:focus { transform: none; outline: 2px solid var(--accent); outline-offset: 3px; }
+body:not(.entered) .skip-link { display: none; }
 
 .project-list a {
   display: flex; align-items: baseline; gap: 14px;
@@ -529,6 +558,17 @@ body.entered:not(.no-webgl) .project-list { display: none; }
   .metric:last-child { border-bottom: none; }
 }
 
+/* ============ touch targets: 44 x 44 CSS px minimum on coarse pointers ============ */
+@media (pointer: coarse) {
+  .logo, .mode-btn, .menu-btn, .detail-close, .about-close, .menu-close,
+  .menu-about-link, .menu-mail, .menu-socials a, .contact-link, .enter-alt {
+    min-width: 44px; min-height: 44px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .menu-socials a { width: 44px; height: 44px; }
+  .detail-close, .about-close { width: 44px; height: 44px; }
+}
+
 /* ============ reduced motion ============ */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -560,7 +600,7 @@ body.no-webgl .site-title {
   position: static; width: auto; height: auto; clip-path: none; overflow: visible; white-space: normal;
   font-family: var(--font-display); font-weight: 600;
   font-size: var(--text-l); line-height: 1.1; letter-spacing: -0.02em;
-  margin: 0 0 var(--gap-l); max-width: 22ch;
+  margin: 0 0 var(--gap-l); width: min(720px, 100%);
 }
 body.no-webgl .project-list { align-items: stretch; gap: 22px; width: min(720px, 100%); }
 body.no-webgl .project-list a { flex-wrap: wrap; align-items: baseline; font-size: var(--text-l); }

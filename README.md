@@ -36,14 +36,14 @@
 
 Email chris@dimedata.cloud · [LinkedIn](https://www.linkedin.com/in/christian-s-dixon) · [GitHub](https://github.com/DimeDataCloud)
 
-| Headline number | What it measures (self-reported from my own production logs and evaluation runs) |
-|---|---|
-| 27 | agents running unattended in a four-layer hierarchy |
-| < 2 s | voice response budget, speech in to speech out |
-| 75.0% | solve rate vs 50.0% for the closest open-source comparator (n=20) |
-| 4 | model providers behind one interface, with automatic failover |
-| 3,000+ | automated tests behind CI/CD |
-| 30+ days | with no outages or incidents across every deployment |
+| Headline number | What it measures (self-reported from my own production logs and evaluation runs) | Evidence |
+|---|---|---|
+| 27 | agents running unattended in a four-layer hierarchy | private, walkthrough on request |
+| < 2 s | voice response budget, speech in to speech out | private, walkthrough on request |
+| 75.0% | solve rate vs 50.0% for the closest open-source comparator (n=20) | private, walkthrough on request |
+| 4 | model providers behind one interface, with automatic failover | private, walkthrough on request |
+| 3,000+ | automated tests behind CI/CD | [HALO showcase](https://github.com/DimeDataCloud/halo-agent-showcase#by-the-numbers): 3,567 passing tests |
+| 30+ days | with no outages or incidents across every deployment | private, walkthrough on request |
 
 ## Case studies
 

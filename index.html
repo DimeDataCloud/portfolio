@@ -25,6 +25,8 @@
   <script type="module" src="/src/main.js"></script>
 </head>
 <body>
+  <!-- focus anchor: main.js focuses then blurs this so the next Tab starts above the skip link -->
+  <span id="focus-top" tabindex="-1"></span>
   <a class="skip-link" href="#project-list">Skip to projects</a>
 
   <!-- Loader / entry gate -->
@@ -79,6 +81,8 @@
       <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </button>
   </nav>
+
+  <p class="id-line" id="id-line">Christian Dixon, Applied AI &amp; Machine Learning Engineer</p>
 
   <!-- Main content: real HTML for SEO (generated at build), enhanced by JS -->
   <main id="main">

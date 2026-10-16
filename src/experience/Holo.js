@@ -47,7 +47,7 @@ function makeLabelTexture(project, index) {
   const meta = `P-${String(index + 1).padStart(2, "0")} · ${project.year} · ${project.statusText.toUpperCase()}`;
   const fitMeta = fitLine(ctx, meta, 500, metaFamily, 36, 24, maxW);
   ctx.font = `500 ${fitMeta.px}px ${metaFamily}`;
-  ctx.fillStyle = "rgba(250,250,250,0.85)";
+  ctx.fillStyle = "rgba(250,250,250,0.95)";
   ctx.fillText(fitMeta.text, w / 2, 130);
 
   const tex = new THREE.CanvasTexture(canvas);
@@ -189,6 +189,8 @@ export class Holo extends THREE.Group {
     });
     const label = new THREE.Sprite(this.labelMat);
     label.scale.set(LABEL_W, LABEL_H, 1);
+    this.labelSprite = label;
+    this.labelGrow = 1; // set each frame: side cards get a larger label
     this.labelY = -0.32;
     label.position.y = this.labelY;
     // screen-space clearance, set each frame by Carousel: 1 when the label is
@@ -250,6 +252,11 @@ export class Holo extends THREE.Group {
     // hologram brightness: front bright, ring recedes, hover lifts to full;
     // far-side duplicates fade out completely so the back half never clutters
     const dist = Math.abs(this.relIndex);
+    // side cards get a larger label (1.35x at one step out, 1.5x at two) so
+    // their title and meta stay legible on screen; Carousel uses the same size
+    // for collision checks
+    this.labelGrow = 1 + 0.35 * Math.min(1, dist) + 0.15 * Math.min(1, Math.max(0, dist - 1));
+    this.labelSprite.scale.set(LABEL_W * this.labelGrow, LABEL_H * this.labelGrow, 1);
     const farFade = 1 - Math.min(1, Math.max(0, (dist - 2.4) / 1.1));
     const dim = (this.narrow
       ? Math.max(0.35, 0.95 - dist * 0.25)
@@ -276,9 +283,9 @@ export class Holo extends THREE.Group {
       m.uniforms.uHover.value = this.hover;
     }
     this.daisMat.opacity = Math.min(1, global * 1.5);
-    // labels: front and side cards stay legible (floor 0.55), hover lifts to
+    // labels: front and side cards stay legible (floor 0.7), hover lifts to
     // full, back cards fade out with farFade
-    const labelBase = 0.55 + 0.45 * Math.max(0, 1 - dist / 2);
+    const labelBase = 0.7 + 0.3 * Math.max(0, 1 - dist / 2);
     this.labelClip += (this.labelTarget - this.labelClip) * (1 - Math.pow(0.02, dt));
     this.labelMat.opacity = this.reveal * farFade * this.labelClip * Math.min(1, labelBase + this.hover * 0.45);
     this.underlineMat.opacity = global * 0.9;

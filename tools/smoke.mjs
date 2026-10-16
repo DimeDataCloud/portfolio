@@ -3,9 +3,11 @@
 // With no url it starts `vite preview` on a free port, runs the checks, and
 // stops the server. CI starts its own preview and passes the url.
 //
-// Checks: load and enter the site, deep-link a case study by hash, open
-// About, zero console errors and no horizontal overflow at 1440 and 390 px,
-// and a reduced-motion run that must show no entry gate.
+// Checks: load and enter the site, the first Tab after entry lands on the skip
+// link, deep-link a case study by hash, open About, the phone identity line is
+// one line, zero console errors and no horizontal overflow at 1440 and 390 px,
+// and a reduced-motion run that must show no entry gate, no Motion control and
+// the first Tab on the skip link.
 
 import { chromium } from 'playwright';
 import { spawn } from 'child_process';
@@ -81,6 +83,13 @@ async function main() {
       await page.click('#enter-quiet');
       await page.waitForSelector('body.entered');
       check(true, `${name}: entry gate passed`);
+      await page.keyboard.press('Tab');
+      const firstStop = await page.evaluate(() => document.activeElement?.className);
+      check(firstStop === 'skip-link', `${name}: first Tab after entry lands on skip link (got "${firstStop}")`);
+      if (name === '390') {
+        const idBox = await page.locator('#id-line').boundingBox();
+        check(idBox && idBox.height < 30, `${name}: identity line is one line (height ${idBox && Math.round(idBox.height)}px)`);
+      }
 
       await page.evaluate(() => { location.hash = '#agent-eval'; });
       await page.waitForSelector('#detail.open', { timeout: 10000 });
@@ -114,6 +123,11 @@ async function main() {
         return { hidden: loader.hidden || getComputedStyle(loader).display === 'none', entered: document.body.classList.contains('entered') };
       });
       check(gate.hidden && gate.entered, 'reduced motion: no entry gate, site entered directly');
+      await page.keyboard.press('Tab');
+      const firstStop = await page.evaluate(() => document.activeElement?.className);
+      check(firstStop === 'skip-link', `reduced motion: first Tab lands on skip link (got "${firstStop}")`);
+      check(!(await page.isVisible('#mode-motion')), 'reduced motion: Motion control is hidden');
+      check(await page.isVisible('#sound-btn'), 'reduced motion: sound control is visible');
       check(await page.isVisible('#project-list'), 'reduced motion: static project list is visible');
       check(errors.length === 0, `reduced motion: zero console errors${errors.length ? ` (${errors.slice(0, 3).join(' | ')})` : ''}`);
       await page.close();

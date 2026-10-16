@@ -49,7 +49,7 @@ function showEnter() {
   enterWrap.hidden = false;
 }
 
-function enter(withSound, byKeyboard = false) {
+function enter(withSound) {
   if (withSound) {
     sound.enable();
     ui.reflectSound(true);
@@ -59,15 +59,9 @@ function enter(withSound, byKeyboard = false) {
   }
   loaderEl.classList.add('done');
   loaderEl.setAttribute('aria-hidden', 'true');
-  // the gate button that was clicked is now hidden: drop focus so Tab starts
-  // at the top of the page (skip link first)
-  if (loaderEl.contains(document.activeElement)) document.activeElement.blur();
-  // hide the gate once its fade ends; a keyboard user lands on the skip link
-  // (first stop on the page) instead of wherever the gate button sat
-  setTimeout(() => {
-    loaderEl.hidden = true;
-    if (byKeyboard) document.querySelector('.skip-link')?.focus();
-  }, 800);
+  resetFocusStart();
+  // hide the gate once its fade ends
+  setTimeout(() => { loaderEl.hidden = true; }, 800);
   mark?.stop();
   releaseGate();
   document.body.classList.add('entered');
@@ -95,9 +89,17 @@ function startDeepLinks() {
   window.addEventListener('hashchange', () => ui.openFromHash());
 }
 
-// click events from the keyboard carry detail 0
-enterSound.addEventListener('click', (e) => enter(true, e.detail === 0));
-enterQuiet.addEventListener('click', (e) => enter(false, e.detail === 0));
+// the gate button that was clicked is hidden next: move the sequential focus
+// start point to the top of the page so the next Tab lands on the skip link
+// (the first stop on the page), not on the header or wherever the gate sat
+function resetFocusStart() {
+  const top = document.getElementById('focus-top');
+  top.focus({ preventScroll: true });
+  top.blur();
+}
+
+enterSound.addEventListener('click', () => enter(true));
+enterQuiet.addEventListener('click', () => enter(false));
 
 /* ---------------- boot ---------------- */
 async function boot() {

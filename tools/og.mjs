@@ -1,6 +1,8 @@
 // Renders public/og.png (1200x630) from an inline HTML card.
 import { chromium } from 'playwright';
+import { fileURLToPath } from "url";
 
+const OUT = fileURLToPath(new URL("../public/og.png", import.meta.url));
 const html = `<!doctype html><html><head><style>
 @import url('https://api.fontshare.com/v2/css?f[]=clash-display@600&f[]=satoshi@500&display=swap');
 *{margin:0;box-sizing:border-box}
@@ -22,6 +24,6 @@ const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1200, height: 630 } });
 await page.setContent(html, { waitUntil: 'networkidle' });
 await page.waitForTimeout(400);
-await page.screenshot({ path: 'public/og.png' });
+await page.screenshot({ path: OUT });
 await browser.close();
 console.log('og.png written');

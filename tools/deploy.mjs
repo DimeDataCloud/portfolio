@@ -1,32 +1,24 @@
-// Deploy to Cloudflare Workers (static assets), with the custom domain
-// attached via the routes in wrangler.toml.
+// Deploy to Cloudflare Workers (static assets). The custom domain is attached
+// by the routes in wrangler.toml. Run `npm run build` first.
 //
-// Credentials come from the environment:
+// Credentials come from the environment only, never from a file in this repo:
 //   CLOUDFLARE_API_TOKEN   Workers + DNS edit token
 //   CLOUDFLARE_ACCOUNT_ID  the account that owns the zone
-// Or point KEYS_FILE at a local markdown key file containing
-// "| API Token | ... |" and "| Account ID | ... |" rows, kept outside the repo.
 // Nothing is written to disk or passed on the command line.
-import { readFileSync } from 'fs';
 import { spawnSync } from 'child_process';
+import { fileURLToPath } from 'url';
 
-const env = { ...process.env };
-
-if (env.KEYS_FILE && (!env.CLOUDFLARE_API_TOKEN || !env.CLOUDFLARE_ACCOUNT_ID)) {
-  const md = readFileSync(env.KEYS_FILE, 'utf8');
-  const field = (label) => md.match(new RegExp(`${label} \\| (\\S+)`))?.[1];
-  env.CLOUDFLARE_API_TOKEN ||= field('API Token');
-  env.CLOUDFLARE_ACCOUNT_ID ||= field('Account ID');
-}
-
-if (!env.CLOUDFLARE_API_TOKEN) {
-  console.error('Set CLOUDFLARE_API_TOKEN (or KEYS_FILE). See .env.example.');
+if (!process.env.CLOUDFLARE_API_TOKEN) {
+  console.error('Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in the environment. See .env.example.');
   process.exit(1);
 }
 
-const r = spawnSync('node', ['node_modules/wrangler/bin/wrangler.js', 'deploy'], {
-  env, stdio: 'pipe', shell: false, encoding: 'utf8',
+const root = fileURLToPath(new URL('..', import.meta.url));
+const wrangler = fileURLToPath(new URL('../node_modules/wrangler/bin/wrangler.js', import.meta.url));
+
+const r = spawnSync(process.execPath, [wrangler, 'deploy'], {
+  cwd: root,
+  env: process.env,
+  stdio: 'inherit',
 });
-const out = (r.stdout || '') + (r.stderr || '');
-console.log(out.slice(-1200));
 process.exit(r.status ?? 1);

@@ -1,11 +1,13 @@
 // Hologram v2 verification pass — captures each of the 9 projects
 // front-center (arrow keys step the ring), a hover state, a mobile
-// viewport, and logs a rough fps average. Run: node holo-shots.mjs [url]
+// viewport, and logs a rough fps average. Run: node tools/holo-shots.mjs [url]
 import { chromium } from 'playwright';
 import { mkdirSync } from 'fs';
+import { fileURLToPath } from "url";
 
 const URL = process.argv[2] || 'http://localhost:4400/';
-mkdirSync('shots/holo', { recursive: true });
+const OUT = fileURLToPath(new URL("../shots/holo", import.meta.url));
+mkdirSync(OUT, { recursive: true });
 
 const browser = await chromium.launch();
 const errors = [];
@@ -20,7 +22,7 @@ await page.click('#enter-quiet');
 await page.waitForTimeout(2600);
 
 for (let i = 0; i < 9; i++) {
-  await page.screenshot({ path: `shots/holo/scene-${i}.png` });
+  await page.screenshot({ path: `${OUT}/scene-${i}.png` });
   console.log('shot: scene-' + i);
   await page.keyboard.press('ArrowRight');
   await page.waitForTimeout(1700);
@@ -29,7 +31,7 @@ for (let i = 0; i < 9; i++) {
 // hover state on the front hologram
 await page.mouse.move(720, 560);
 await page.waitForTimeout(1300);
-await page.screenshot({ path: 'shots/holo/hover.png' });
+await page.screenshot({ path: `${OUT}/hover.png` });
 console.log('shot: hover');
 
 // rough fps
@@ -57,7 +59,7 @@ await mp.goto(URL, { waitUntil: 'networkidle' });
 await mp.waitForSelector('#loader-enter:not([hidden])', { timeout: 15000 });
 await mp.click('#enter-quiet');
 await mp.waitForTimeout(2600);
-await mp.screenshot({ path: 'shots/holo/mobile.png' });
+await mp.screenshot({ path: `${OUT}/mobile.png` });
 console.log('shot: mobile');
 await mp.close();
 

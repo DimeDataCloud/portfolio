@@ -1,10 +1,12 @@
 // Screenshot harness for the polish loop — captures every key state
-// at desktop + mobile sizes. Run: node shots.mjs [url]
-import { chromium } from 'playwright';
-import { mkdirSync } from 'fs';
+// at desktop + mobile sizes. Run: node tools/shots.mjs [url]
+import { chromium } from "playwright";
+import { mkdirSync } from "fs";
+import { fileURLToPath } from "url";
 
 const URL = process.argv[2] || 'http://localhost:4400/';
-mkdirSync('shots', { recursive: true });
+const OUT = fileURLToPath(new URL("../shots", import.meta.url));
+mkdirSync(OUT, { recursive: true });
 
 const browser = await chromium.launch();
 const errors = [];
@@ -15,7 +17,7 @@ async function capture(name, vp, fn) {
   page.on('pageerror', (e) => errors.push(`[${name}] ${e.message}`));
   await page.goto(URL, { waitUntil: 'networkidle' });
   await fn?.(page);
-  await page.screenshot({ path: `shots/${name}.png` });
+  await page.screenshot({ path: `${OUT}/${name}.png` });
   await page.close();
   console.log('shot:', name);
 }
@@ -86,7 +88,7 @@ await capture('09-about-desktop', D, async (p) => {
   page.on('pageerror', (e) => errors.push(`[reduced] ${e.message}`));
   await page.goto(URL, { waitUntil: 'networkidle' });
   await page.waitForTimeout(1200);
-  await page.screenshot({ path: 'shots/10-reduced-motion.png' });
+  await page.screenshot({ path: `${OUT}/10-reduced-motion.png` });
   await page.close();
   console.log('shot: 10-reduced-motion');
 }

@@ -602,6 +602,7 @@ body:not(.entered) .skip-link { display: none; }
 html:has(body.no-webgl) { overflow: auto; }
 body.no-webgl { overflow: visible; min-height: 100dvh; }
 body.no-webgl .webgl { display: none; }
+body.no-webgl .id-line { display: none; }
 body.no-webgl main {
   position: relative; inset: auto;
   min-height: 100dvh;

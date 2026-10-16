@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import staticContent from '../vite-static-content.js';
-import { profile } from '../../src/data/profile.js';
+import { contact, profile } from '../../src/data/profile.js';
 
 const EM_DASH = '\u2014';
 const template = readFileSync(fileURLToPath(new URL('../../index.html', import.meta.url)), 'utf8');
@@ -14,7 +14,7 @@ const output = staticContent().transformIndexHtml(template);
 const jsonLdBlocks = [...output.matchAll(/<script type="application\/ld\+json">\n([\s\S]*?)\n<\/script>/g)].map((m) => m[1]);
 
 test('every placeholder is replaced', () => {
-  for (const token of ['<!--STATIC_CONTENT-->', '<!--JSON_LD-->', '__DESCRIPTION__', '__EMAIL__']) {
+  for (const token of ['<!--STATIC_CONTENT-->', '<!--JSON_LD-->', '<!--INTRO_LINKS-->', '__DESCRIPTION__', '__EMAIL__']) {
     assert.ok(!output.includes(token), `${token} is still in the output`);
   }
 });
@@ -71,4 +71,14 @@ test('contact email is escaped into the mailto link and the menu', () => {
 test('value proposition comes from profile data and sits in the first-screen markup', () => {
   assert.ok(profile.valueProp && profile.valueProp.endsWith('.'), 'valueProp must be one sentence');
   assert.ok(output.includes(`<p class="value-line" id="value-line">${profile.valueProp}</p>`), 'value line missing from output');
+});
+
+test('first-screen actions link the email, GitHub and LinkedIn from contact data', () => {
+  const block = output.match(/<nav class="intro-actions"[\s\S]*?<\/nav>/);
+  assert.ok(block, 'intro action row missing');
+  assert.ok(block[0].includes(`href="mailto:${contact.email}"`), 'mailto action missing');
+  for (const l of contact.links) {
+    assert.ok(block[0].includes(`href="${l.url}"`), `${l.name} action missing`);
+  }
+  assert.ok(block[0].includes('id="intro-menu"'), 'Projects and About action missing');
 });

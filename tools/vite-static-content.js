@@ -6,6 +6,7 @@
 // Placeholders in index.html:
 //   <!--STATIC_CONTENT-->  project list + profile article (inside <main>)
 //   <!--JSON_LD-->         Person structured data (inside <head>)
+//   <!--INTRO_LINKS-->     external contact links in the first-screen action row
 //   __DESCRIPTION__        meta description, og and twitter description
 //   __EMAIL__              contact email
 //   __VALUE_PROP__         one-sentence value proposition under the identity line
@@ -87,6 +88,14 @@ function profileArticleHtml() {
   );
 }
 
+// External contact links for the first-screen action row, from contact.links.
+function introLinksHtml() {
+  const links = contact.links.map(
+    (l) => `<a class="intro-action" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.name)}</a>`,
+  );
+  return links.join('\n        ');
+}
+
 function jsonLd() {
   const data = {
     '@context': 'https://schema.org',
@@ -111,6 +120,7 @@ export default function staticContent() {
       return html
         .replace('<!--STATIC_CONTENT-->', () => `${projectListHtml()}\n    ${profileArticleHtml()}`)
         .replace('<!--JSON_LD-->', () => jsonLd())
+        .replace('<!--INTRO_LINKS-->', () => introLinksHtml())
         .replaceAll('__DESCRIPTION__', description)
         .replaceAll('__VALUE_PROP__', esc(profile.valueProp))
         .replaceAll('__EMAIL__', esc(contact.email));

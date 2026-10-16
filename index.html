@@ -29,14 +29,16 @@
   <span id="focus-top" tabindex="-1"></span>
   <a class="skip-link" href="#project-list">Skip to projects</a>
 
-  <!-- Loader / entry gate -->
+  <!-- Loader / entry gate: loading progress, then one Enter button (silent; sound is opt-in after entry) -->
   <div class="loader" id="loader" aria-hidden="false">
     <canvas class="loader-mark" id="loader-mark" width="220" height="220" aria-hidden="true"></canvas>
     <p class="loader-line" id="loader-line">applied ai and machine learning engineer, nashville</p>
-    <div class="loader-progress mono" id="loader-progress" aria-hidden="true">00</div>
+    <div class="loader-meter" id="loader-meter" role="progressbar" aria-label="Loading" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <span class="loader-bar" aria-hidden="true"><span class="loader-fill" id="loader-fill"></span></span>
+      <span class="loader-progress mono" id="loader-progress" aria-hidden="true">00</span>
+    </div>
     <div class="loader-enter" id="loader-enter" hidden>
-      <button class="enter-btn" id="enter-sound" type="button">enter with sound</button>
-      <button class="enter-alt" id="enter-quiet" type="button">enter without sound</button>
+      <button class="enter-btn" id="enter-btn" type="button">Enter</button>
     </div>
   </div>
 
@@ -87,7 +89,14 @@
   <!-- Main content: real HTML for SEO (generated at build), enhanced by JS -->
   <main id="main">
     <h1 class="site-title visually-hidden">Christian Dixon, Applied AI &amp; Machine Learning Engineer</h1>
-    <p class="value-line" id="value-line">__VALUE_PROP__</p>
+    <div class="intro" id="intro">
+      <p class="value-line" id="value-line">__VALUE_PROP__</p>
+      <nav class="intro-actions" aria-label="Contact and projects">
+        <a class="intro-action" id="intro-mail" href="mailto:__EMAIL__">Email __EMAIL__</a>
+        <!--INTRO_LINKS-->
+        <button class="intro-action" id="intro-menu" type="button" aria-controls="menu-panel">Projects and About</button>
+      </nav>
+    </div>
     <!--STATIC_CONTENT-->
   </main>
 
@@ -124,7 +133,7 @@
     </div>
   </section>
 
-  <!-- Sound toggle -->
+  <!-- Sound toggle (opt-in after entry) -->
   <button class="sound-btn" id="sound-btn" type="button" aria-pressed="false" aria-label="Toggle sound">
     <svg class="icon-sound-on" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2 6v4h3l4 3V3L5 6H2z" fill="currentColor"/><path d="M11.5 5.5a3.5 3.5 0 010 5M13 3.5a6 6 0 010 9" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>
     <svg class="icon-sound-off" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" hidden><path d="M2 6v4h3l4 3V3L5 6H2z" fill="currentColor"/><path d="M11 6l4 4M15 6l-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>

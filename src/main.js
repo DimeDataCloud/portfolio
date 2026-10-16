@@ -19,8 +19,22 @@ const enterWrap = document.getElementById('loader-enter');
 const enterBtn = document.getElementById('enter-btn');
 
 // the gate enters by itself this long after loading finishes, if not clicked
-const AUTO_ENTER_MS = 2500;
+const AUTO_ENTER_MS = 1500;
+// a visitor who already entered this tab gets no Enter button: the site opens
+// as soon as loading finishes
+const RETURN_ENTER_MS = 200;
+const SEEN_KEY = 'portfolio-entered';
 let autoEnterTimer = null;
+
+// sessionStorage can be blocked (private windows, strict settings); without it
+// every visit simply shows the gate once, which is the normal first-visit path
+function seenBefore() {
+  try { return sessionStorage.getItem(SEEN_KEY) === '1'; } catch { return false; }
+}
+function markSeen() {
+  try { sessionStorage.setItem(SEEN_KEY, '1'); } catch { /* gate still works without it */ }
+}
+const returning = seenBefore();
 
 // per-letter spring hover on the primary CTA
 enterBtn.innerHTML = enterBtn.textContent
@@ -57,6 +71,10 @@ let enterShown = false;
 function showEnter() {
   if (enterShown) return;
   enterShown = true;
+  if (returning) {
+    autoEnterTimer = setTimeout(() => enter(), RETURN_ENTER_MS);
+    return;
+  }
   enterWrap.hidden = false;
   autoEnterTimer = setTimeout(() => enter(), AUTO_ENTER_MS);
 }
@@ -68,8 +86,9 @@ function enter() {
   loaderEl.classList.add('done');
   loaderEl.setAttribute('aria-hidden', 'true');
   resetFocusStart();
-  // hide the gate once its fade ends
-  setTimeout(() => { loaderEl.hidden = true; }, 800);
+  markSeen();
+  // hide the gate once its fade ends (CSS fade is 0.45s)
+  setTimeout(() => { loaderEl.hidden = true; }, 500);
   mark?.stop();
   releaseGate();
   document.body.classList.add('entered');

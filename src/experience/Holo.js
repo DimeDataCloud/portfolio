@@ -288,15 +288,14 @@ export class Holo extends THREE.Group {
       m.uniforms.uHover.value = this.hover;
     }
     this.daisMat.opacity = Math.min(1, global * 1.5);
-    // labels: front and side cards stay legible (floor 0.7), hover lifts to
-    // full, back cards fade out with farFade
-    // off-centre labels never drop below 0.6 while on screen; only the back
-    // cards (farFade) and labels with no clear slot fade further
-    const labelBase = 0.6 + 0.4 * Math.max(0, 1 - dist / 2);
+    // labels: drawn at full opacity whenever the card is revealed. Legibility
+    // is handled by Carousel.layoutLabels, which fades out any label without a
+    // clear on-screen slot, so the distance fade (which dimmed side labels to
+    // about 30% and failed WCAG AA contrast) is not applied to text.
     this.labelClip += (this.labelTarget - this.labelClip) * (1 - Math.pow(0.02, dt));
     this.labelOffset += (this.labelOffsetTarget - this.labelOffset) * (1 - Math.pow(0.02, dt));
     this.labelSprite.position.y = this.labelY + this.labelOffset;
-    this.labelMat.opacity = this.reveal * farFade * this.labelClip * Math.min(1, labelBase + this.hover * 0.45);
+    this.labelMat.opacity = this.reveal * this.labelClip;
     this.underlineMat.opacity = global * 0.9;
     const drawIn = 1 - Math.pow(1 - Math.min(1, Math.max(0, (this.reveal - 0.25) / 0.75)), 3);
     this.underline.scale.set(Math.max(0.001, 0.52 * drawIn), 0.012, 1);

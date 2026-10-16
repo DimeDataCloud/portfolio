@@ -40,13 +40,6 @@ const geo = {
   sphS: new THREE.SphereGeometry(0.032, 10, 8),
   sphM: new THREE.SphereGeometry(0.06, 14, 10),
   ringThin: new THREE.TorusGeometry(0.16, 0.005, 4, 36),
-  // deferralai
-  phone: new THREE.BoxGeometry(0.155, 0.30, 0.034),
-  screen: new THREE.PlaneGeometry(0.125, 0.245),
-  bubble: new THREE.CapsuleGeometry(0.032, 0.05, 4, 10),
-  bubbleTail: new THREE.ConeGeometry(0.012, 0.022, 6),
-  coin: new THREE.CylinderGeometry(0.055, 0.055, 0.016, 18),
-  coinRim: new THREE.TorusGeometry(0.055, 0.007, 4, 20),
   // receptionist
   head: new THREE.SphereGeometry(0.125, 16, 12),
   visor: new THREE.TorusGeometry(0.128, 0.018, 6, 28),
@@ -126,128 +119,6 @@ function arcCurve(a, b, out = 1.3, upBias = 0.02) {
   const mid = a.clone().add(b).multiplyScalar(0.5 * out);
   mid.y += upBias;
   return new THREE.QuadraticBezierCurve3(a.clone(), mid, b.clone());
-}
-
-/* =====================================================================
- * 1. DeferralAI — declined call becomes booked revenue.
- * Phone flashes → message bubbles spiral up and dissolve into sparkles →
- * every third bubble a coin flips through an arc and lands on a stack.
- * ===================================================================== */
-function deferralai(mats) {
-  const g = new THREE.Group();
-  const B = 2.4; // bubble stagger period; coin lands once per B
-
-  // 3D phone, tilted toward camera
-  const phone = new THREE.Group();
-  phone.add(mesh(geo.phone, mats.custom({ alpha: 0.38 })));
-  const screenMat = mats.faint();
-  const screen = mesh(geo.screen, screenMat);
-  screen.position.z = 0.019;
-  phone.add(screen);
-  phone.position.set(-0.10, 0.24, 0);
-  phone.rotation.set(-0.12, 0.38, 0);
-  g.add(phone);
-
-  // message bubbles (capsule + tail) with sparkle bursts
-  const bubbles = [];
-  for (let i = 0; i < 3; i++) {
-    const m = mats.bright();
-    const b = new THREE.Group();
-    const body = mesh(geo.bubble, m);
-    body.rotation.z = Math.PI / 2;
-    body.scale.y = 0.72;
-    const tail = mesh(geo.bubbleTail, m);
-    tail.position.set(-0.032, -0.03, 0);
-    tail.rotation.z = 0.7;
-    b.add(body, tail);
-    g.add(b);
-    const sparks = [0, 1, 2].map((s) => {
-      const spMat = mats.bright();
-      const sp = mesh(geo.oct, spMat);
-      g.add(sp);
-      return { sp, m: spMat, dir: _a.set(Math.cos(i * 2.4 + s * 2.1), 0.6 + 0.3 * rnd(i * 3 + s), Math.sin(i * 2.4 + s * 2.1)).clone().normalize() };
-    });
-    bubbles.push({ b, m, sparks });
-  }
-
-  // coin (cylinder + rim) + stack of two settled coins
-  const mkCoin = (m) => {
-    const c = new THREE.Group();
-    c.add(mesh(geo.coin, m));
-    const rim = mesh(geo.coinRim, m);
-    rim.rotation.x = Math.PI / 2;
-    c.add(rim);
-    return c;
-  };
-  const coinMat = mats.bright();
-  const coin = mkCoin(coinMat);
-  const stack = [0, 1].map((i) => {
-    const m = mats.soft();
-    const c = mkCoin(m);
-    c.position.set(0.20, 0.105 + i * 0.022, 0.04);
-    g.add(c);
-    return { c, m };
-  });
-  g.add(coin);
-
-  const bubblePos = (i, p, target) => {
-    const hp = seg(p, 0.10, 0.85);
-    const ang = i * 2.1 + hp * TAU * 1.4;
-    const r = 0.05 + outCubic(hp) * 0.10;
-    return target.set(-0.10 + Math.cos(ang) * r, 0.24 + inOut(hp) * 0.46, 0.03 + Math.sin(ang) * r);
-  };
-
-  return {
-    group: g,
-    update(t) {
-      // secondary motion: phone bobs on its own rhythm
-      phone.position.y = 0.24 + 0.008 * Math.sin(t * 1.1);
-
-      let flash = 0;
-      bubbles.forEach(({ b, m, sparks }, i) => {
-        const p = (t / B + i / 3) % 1;
-        flash = Math.max(flash, spike(seg(p, 0, 0.10)));
-        bubblePos(i, p, b.position);
-        b.scale.setScalar(Math.max(0.001, backOut(seg(p, 0, 0.12))));
-        b.rotation.y = Math.sin(t * 0.9 + i) * 0.3;
-        m.uniforms.uAlpha.value = 0.95 * (1 - seg(p, 0.70, 0.86));
-        // dissolve into sparkles at the top
-        const sw = seg(p, 0.80, 1);
-        bubblePos(i, 0.82, _b);
-        sparks.forEach(({ sp, m: sm, dir }) => {
-          sp.position.copy(_b).addScaledVector(dir, outCubic(sw) * 0.07);
-          sp.scale.setScalar(Math.max(0.001, (1 - sw) * 0.8));
-          sm.uniforms.uAlpha.value = bump(sw) * 0.9;
-        });
-      });
-      screenMat.uniforms.uAlpha.value = 0.16 + 0.5 * flash;
-
-      // coin: flight in the last third of each bubble period, stack persists
-      const q = (t / B) % 1;
-      const sc = (t / (3 * B)) % 1;
-      const k = Math.floor(sc * 3); // which stack slot lands this cycle
-      const stackFade = 1 - seg(sc, 0.96, 1);
-      stack.forEach(({ c, m }, i) => {
-        m.uniforms.uAlpha.value = (i < k ? 0.85 : 0) * stackFade;
-        c.visible = i < k && stackFade > 0.01;
-      });
-      const f = seg(q, 0.72, 0.94);
-      const lq = seg(q, 0.94, 1);
-      const targetY = 0.105 + k * 0.022;
-      coin.visible = q > 0.70;
-      coin.position.set(
-        lerp(-0.02, 0.20, inOut(f)),
-        lerp(0.72, targetY, inOut(f)) + bump(f) * 0.12,
-        lerp(0.05, 0.04, f)
-      );
-      coin.rotation.x = f * TAU * 2; // two full flips, lands flat
-      coin.scale.set(1 + (1 - impact(lq, 0.45)) * 0.5, impact(lq, 0.45), 1 + (1 - impact(lq, 0.45)) * 0.5);
-      coinMat.uniforms.uAlpha.value = seg(q, 0.70, 0.74) * 0.95 * stackFade;
-    },
-    beat(t) {
-      return spike(seg((t / B) % 1, 0.92, 1.0));
-    },
-  };
 }
 
 /* =====================================================================
@@ -1156,7 +1027,6 @@ function generic(mats) {
 }
 
 const builders = {
-  'deferralai': deferralai,
   'halo-agent-os': haloAgentOs,
   'receptionist-live': receptionist,
   'crm-live': crm,

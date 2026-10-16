@@ -33,3 +33,19 @@ jobs:
 
       - name: Bundle budget
         run: node tools/check-bundle.mjs
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Start preview server
+        run: |
+          npx vite preview --port 4173 --strictPort > preview.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:4173/ > /dev/null && exit 0
+            sleep 1
+          done
+          cat preview.log
+          exit 1
+
+      - name: Smoke test
+        run: node tools/smoke.mjs http://localhost:4173/

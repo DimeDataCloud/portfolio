@@ -1,9 +1,9 @@
-// Miniature hologram scenes — one per project, fully 3D, built entirely
+// Miniature hologram scenes - one per project, fully 3D, built entirely
 // from Three.js primitives with the shared hologram material. Each builder
 // returns { group, update(t), beat?(t) } where t is elapsed seconds (with a
 // per-hologram phase offset so ring duplicates don't animate in lockstep).
 //
-// Every update(t) is a pure function of t — no accumulated state — so
+// Every update(t) is a pure function of t - no accumulated state - so
 // tab-hide rAF pauses and phase desync cost nothing, and every loop is
 // phase-continuous (cycle end state === cycle start state).
 // Content budget: XZ radius ≈ 0.42, local y ∈ [0.05, 0.80].
@@ -25,7 +25,7 @@ const seg = (t, a, b) => c01((t - a) / (b - a));                   // storyboard
 const impact = (q, amt = 0.35) => { q = c01(q); return 1 - amt * Math.exp(-5 * q) * Math.cos(11 * q) * (1 - q); };
 const lerp = (a, b, p) => a + (b - a) * p;
 
-// scratch vectors — zero allocations inside update()
+// scratch vectors - zero allocations inside update()
 const _a = new THREE.Vector3();
 const _b = new THREE.Vector3();
 
@@ -89,7 +89,7 @@ const geo = {
   riseRing: new THREE.TorusGeometry(0.05, 0.003, 3, 20),
 };
 
-// radar sweep wedge — fan of triangles, per-vertex trail fade
+// radar sweep wedge - fan of triangles, per-vertex trail fade
 const wedgeGeo = (() => {
   const slices = 10, r = 0.32, arc = 0.95;
   const pos = [], fade = [];
@@ -122,7 +122,7 @@ function arcCurve(a, b, out = 1.3, upBias = 0.02) {
 }
 
 /* =====================================================================
- * 2. H.A.L.O Agent OS — a living hierarchy in 3D.
+ * 2. H.A.L.O Agent OS - a living hierarchy in 3D.
  * Exec orb → 3 C-suite on an arc → 6 workers on a wider arc. Pulses run
  * down curved links, splitting per layer; acks run back up. One branch
  * stays highlighted per cycle. The whole tree precesses; every orb bobs.
@@ -228,7 +228,7 @@ function haloAgentOs(mats) {
 }
 
 /* =====================================================================
- * 3. ReceptionistLIVE — the bot answers.
+ * 3. ReceptionistLIVE - the bot answers.
  * Incoming call shivers → handset arcs up along a bezier with overshoot →
  * talking: ripple tori + 5-bar waveform → handset returns, nod, blink.
  * ===================================================================== */
@@ -363,7 +363,7 @@ function receptionist(mats) {
 }
 
 /* =====================================================================
- * 4. CRMLIVE — pipeline with physics feel.
+ * 4. CRMLIVE - pipeline with physics feel.
  * A hot lead tile leaps tray to tray: anticipation dip, stretch at apex,
  * squash on landing; the receiving tray flashes and residents nudge.
  * Final tray: flip, glow, star spark. Then a fresh tile slides in.
@@ -495,7 +495,7 @@ function crm(mats) {
 }
 
 /* =====================================================================
- * 5. LeadGenLIVE — radar that produces outreach.
+ * 5. LeadGenLIVE - radar that produces outreach.
  * Lathe dish + range rings; a translucent sweep wedge with a baked trail;
  * pin blips pop up out of the dish as it passes; once per revolution one
  * qualifies and launches a tiny envelope up out of the beam.
@@ -589,7 +589,7 @@ function leadgen(mats) {
 }
 
 /* =====================================================================
- * 6. BrainAI — a graph that learns.
+ * 6. BrainAI - a graph that learns.
  * Octahedron nodes, curved links; a signal pulse walks a multi-hop path
  * lighting each edge; a breathing core inside a counter-rotating wireframe
  * icosahedron; a new node pops in and its link draws itself. Tumbles on
@@ -723,10 +723,10 @@ function brainai(mats) {
 }
 
 /* =====================================================================
- * 7. Web Systems — a site assembling itself.
+ * 7. Web Systems - a site assembling itself.
  * A browser panel with real depth; blocks fly in from z-depth, a cursor
  * clicks a button, the layout re-flows, clicks again, flows back. A faint
- * rotated phone panel mirrors each layout — the responsive twin.
+ * rotated phone panel mirrors each layout - the responsive twin.
  * ===================================================================== */
 function webSystems(mats) {
   const g = new THREE.Group();
@@ -849,7 +849,7 @@ function webSystems(mats) {
 }
 
 /* =====================================================================
- * 8. App Builder — idea in, app out.
+ * 8. App Builder - idea in, app out.
  * A prompt orb descends into a gantry and dissolves; a printhead carriage
  * sweeps while blocks materialize with weight, building an app tower
  * topped by a bright screen; the tower takes a proud 360° turn, then
@@ -948,7 +948,7 @@ function appBuilder(mats) {
 }
 
 /* =====================================================================
- * 9. Portfolio Website — the site inside itself.
+ * 9. Portfolio Website - the site inside itself.
  * Five micro-projectors (dais + beam + glowing dot) on a mini helix with
  * the real focus model in miniature; the ring periodically accelerates,
  * friction-glides, and a new micro settles front-center. A faint axis
@@ -985,7 +985,7 @@ function portfolioSite(mats) {
   return {
     group: g,
     update(t) {
-      // offset: slow idle drift + a periodic accelerate-and-glide step —
+      // offset: slow idle drift + a periodic accelerate-and-glide step -
       // continuous and stateless (floor + eased fractional step)
       const s = (t / P) % 1;
       const off = t * 0.10 + Math.floor(t / P) + inOut(seg(s, 0.58, 0.84));
@@ -1014,7 +1014,7 @@ function portfolioSite(mats) {
   };
 }
 
-/* ---------- fallback — slow-turning wireframe sphere ---------- */
+/* ---------- fallback - slow-turning wireframe sphere ---------- */
 function generic(mats) {
   const g = new THREE.Group();
   const globe = new THREE.LineSegments(

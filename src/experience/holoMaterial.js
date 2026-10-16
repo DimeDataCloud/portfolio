@@ -1,4 +1,4 @@
-// Shared hologram look — additive, accent-tinted, animated scanlines +
+// Shared hologram look - additive, accent-tinted, animated scanlines +
 // flicker, global reveal/dim control. One factory covers solid holo
 // surfaces, the volumetric beam shells (fresnel + local-height fade),
 // the dais status arc, the ground-glow disc, the radar sweep wedge,
@@ -62,7 +62,7 @@ void main() {
 }
 `;
 
-// Segmented status arc around the dais mid housing — ~24 segments cut
+// Segmented status arc around the dais mid housing - ~24 segments cut
 // out of one band purely in the fragment shader; a brightness chase runs
 // around it and accelerates + fills on hover.
 const arcFragment = /* glsl */ `
@@ -83,7 +83,7 @@ void main() {
 }
 `;
 
-// Ground glow under the dais — radial gradient falloff, gentle breathing.
+// Ground glow under the dais - radial gradient falloff, gentle breathing.
 const glowFragment = /* glsl */ `
 uniform vec3 uColor;
 uniform float uTime;
@@ -99,7 +99,7 @@ void main() {
 }
 `;
 
-// Radar sweep wedge — per-vertex fade baked into an attribute so the
+// Radar sweep wedge - per-vertex fade baked into an attribute so the
 // leading edge is bright and the trail dissolves.
 const wedgeVertex = /* glsl */ `
 attribute float aFade;
@@ -120,7 +120,7 @@ void main() {
 }
 `;
 
-// Dust motes inside the beam — positions computed in the vertex shader
+// Dust motes inside the beam - positions computed in the vertex shader
 // from uTime (stateless), drifting upward with a slight sine wander,
 // widening with the cone.
 const motesVertex = /* glsl */ `

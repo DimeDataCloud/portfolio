@@ -32,7 +32,7 @@ function makeLabelTexture(project, index) {
   return tex;
 }
 
-// shared geometry — 18 live instances reuse all of this
+// shared geometry - 18 live instances reuse all of this
 const dg = {
   dais: new THREE.LatheGeometry(
     [
@@ -62,7 +62,7 @@ const dg = {
   proxy: new THREE.CylinderGeometry(0.55, 0.55, 1.7, 12),
 };
 
-// motes point cloud — positions live in the vertex shader, geometry only
+// motes point cloud - positions live in the vertex shader, geometry only
 // carries per-point seeds
 const motesGeo = (() => {
   const n = 30;
@@ -100,7 +100,7 @@ export class Holo extends THREE.Group {
     const accent = new THREE.Color(project.accent);
 
     /* ---- emitter dais ---- */
-    // dark tri-layer body — non-additive so glowing parts have contrast
+    // dark tri-layer body - non-additive so glowing parts have contrast
     this.daisMat = new THREE.MeshBasicMaterial({ color: 0x14141a, transparent: true, opacity: 0 });
     const dais = new THREE.Mesh(dg.dais, this.daisMat);
 
@@ -108,7 +108,7 @@ export class Holo extends THREE.Group {
     const arc = new THREE.Mesh(dg.arcBand, reg(holoMat(accent, { alpha: 0.85, kind: 'arc' })));
     arc.position.y = 0.075;
 
-    // counter-rotating halo rings with a marker bead each — gyroscope feel
+    // counter-rotating halo rings with a marker bead each - gyroscope feel
     this.spinA = new THREE.Group();
     this.spinB = new THREE.Group();
     const ringA = new THREE.Mesh(dg.haloA, reg(holoMat(accent, { alpha: 0.5 })));
@@ -124,12 +124,12 @@ export class Holo extends THREE.Group {
     this.spinA.position.y = 0.205;
     this.spinB.position.y = 0.265;
 
-    // emitter lens — pulses softly, flares on the scene's key beat
+    // emitter lens - pulses softly, flares on the scene's key beat
     this.lensMat = reg(holoMat(accent, { alpha: 0.6 }));
     this.lens = new THREE.Mesh(dg.lens, this.lensMat);
     this.lens.position.y = 0.148;
 
-    // ground glow — the light spill that sells the projector
+    // ground glow - the light spill that sells the projector
     const glow = new THREE.Mesh(dg.glow, reg(holoMat(accent, { alpha: 0.16, kind: 'glow' })));
     glow.rotation.x = -Math.PI / 2;
     glow.position.y = 0.004;
@@ -222,7 +222,7 @@ export class Holo extends THREE.Group {
     const dim = (Math.max(0.18, 0.8 - dist * 0.22) + this.hover * 0.2) * farFade;
     const global = this.reveal * dim;
 
-    // fully faded holograms skip rendering AND animation work — roughly
+    // fully faded holograms skip rendering AND animation work - roughly
     // half the ring at any moment
     this.visible = global > 0.004;
 
@@ -246,11 +246,11 @@ export class Holo extends THREE.Group {
     const drawIn = 1 - Math.pow(1 - Math.min(1, Math.max(0, (this.reveal - 0.25) / 0.75)), 3);
     this.underline.scale.set(Math.max(0.001, 0.52 * drawIn), 0.012, 1);
 
-    // gyroscope halo rings — opposite spins, gentle wobble, all pure in t
+    // gyroscope halo rings - opposite spins, gentle wobble, all pure in t
     this.spinA.rotation.set(Math.sin(t * 0.9) * 0.14, t * 1.1, Math.cos(t * 0.7) * 0.10);
     this.spinB.rotation.set(-Math.sin(t * 0.6 + 1.7) * 0.11, -t * 0.7, -Math.cos(t * 0.5 + 0.6) * 0.13);
 
-    // rising caustic rings — scale from the beam base to its mouth, fading
+    // rising caustic rings - scale from the beam base to its mouth, fading
     for (let i = 0; i < 3; i++) {
       const p = (t * 0.14 + i / 3) % 1;
       const ring = this.caustics[i];

@@ -14,8 +14,8 @@ svg{position:absolute;top:70px;right:90px;opacity:.9}
 </style></head><body>
 <svg width="150" height="150" viewBox="0 0 64 64"><circle cx="22" cy="24" r="5" fill="#2f80ff"/><circle cx="44" cy="20" r="3.5" fill="#fafafa"/><circle cx="40" cy="44" r="4.5" fill="#fafafa"/><circle cx="18" cy="46" r="3" fill="#2f80ff"/><path d="M22 24L44 20M44 20L40 44M40 44L18 46M18 46L22 24M22 24L40 44" stroke="#fafafa" stroke-opacity=".5" stroke-width="1.5"/></svg>
 <h1>Christian Dixon</h1>
-<p>Full-Stack AI Developer — AI agents, SaaS, mobile apps,<br>and the automation pipelines that connect them.</p>
-<div class="chip"><span class="dot"></span>systems online — nashville, tn</div>
+<p>Full-Stack AI Developer - AI agents, SaaS, mobile apps,<br>and the automation pipelines that connect them.</p>
+<div class="chip"><span class="dot"></span>Dime Data</div>
 </body></html>`;
 
 const browser = await chromium.launch();

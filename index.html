@@ -86,10 +86,11 @@
 
   <!-- Project detail overlay: case study -->
   <section class="detail" id="detail" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="detail-title">
-    <div class="detail-inner" id="detail-inner">
+    <div class="detail-panel" id="detail-panel">
       <button class="detail-close" id="detail-close" type="button" aria-label="Close project">
         <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
+    <div class="detail-inner" id="detail-inner">
       <div class="detail-top">
         <span class="detail-index mono" id="detail-index"></span>
         <span class="detail-status" id="detail-status"><span class="status-dot" aria-hidden="true"></span><span id="detail-status-text"></span></span>
@@ -101,15 +102,18 @@
       <ul class="detail-stack mono" id="detail-stack" aria-label="Stack"></ul>
       <div class="detail-links" id="detail-links"></div>
     </div>
+    </div>
   </section>
 
   <!-- Profile overlay: rendered from src/data/profile.js -->
   <section class="about" id="about" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Profile">
-    <div class="about-inner" id="about-inner">
+    <div class="about-panel" id="about-panel">
       <button class="about-close" id="about-close" type="button" aria-label="Close profile">
         <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
-      <div class="about-body" id="about-body"></div>
+      <div class="about-inner" id="about-inner">
+        <div class="about-body" id="about-body"></div>
+      </div>
     </div>
   </section>
 

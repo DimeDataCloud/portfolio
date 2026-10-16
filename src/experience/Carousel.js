@@ -5,6 +5,11 @@
 import * as THREE from 'three';
 import { Holo, LABEL_W, LABEL_H } from './Holo.js';
 
+// label slots, as local-space y drops from the home position under the dais
+const LABEL_DROPS = [0, -0.2, -0.4];
+// local-space outline of a hologram's projector and beam, for label clearance
+const HOLO_BODY = [[-0.46, 0], [0.46, 0], [-0.46, 1.33], [0.46, 1.33]];
+
 export class Carousel {
   constructor({ stage, input, projects }) {
     this.stage = stage;
@@ -89,31 +94,52 @@ export class Carousel {
   }
 
   /**
-   * Keep labels legible: a label fades out when its projected box would clip
-   * the viewport edge or overlap a label already placed nearer the front.
-   * Closer labels are placed first, so the focused card always keeps its label.
+   * Keep labels legible and off their neighbours. Each label is tried at its
+   * home slot, then dropped a step at a time. A slot is taken only if the label
+   * stays on screen, clears every label already placed nearer the front, and
+   * sits clear of every other visible hologram's projector body. A label with
+   * no free slot fades out. Closer labels are placed first, so the focused
+   * card always keeps its label.
    */
   layoutLabels() {
     const cam = this.stage.camera;
     const v = this._labelV ??= new THREE.Vector3();
-    const placed = [];
-    const order = this.holos
-      .filter((h) => h.visible)
-      .sort((a, b) => Math.abs(a.relIndex) - Math.abs(b.relIndex));
-    for (const holo of order) {
-      const hw = (LABEL_W * holo.labelGrow) / 2;
-      const hh = (LABEL_H * holo.labelGrow) / 2;
+    // screen-space box of a set of local-space points on one hologram
+    const boxOf = (holo, pts) => {
       let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
-      for (const [dx, dy] of [[-hw, -hh], [hw, -hh], [-hw, hh], [hw, hh]]) {
-        v.set(dx, holo.labelY + dy, 0);
+      for (const [x, y] of pts) {
+        v.set(x, y, 0);
         holo.localToWorld(v).project(cam);
         x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x);
         y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y);
       }
-      const onScreen = x0 > -0.96 && x1 < 0.96;
-      const clear = onScreen && !placed.some((b) => x0 < b.x1 + 0.06 && x1 > b.x0 - 0.06 && y0 < b.y1 && y1 > b.y0);
-      if (clear) placed.push({ x0, x1, y0, y1 });
-      holo.setLabelClear(clear);
+      return { x0, x1, y0, y1 };
+    };
+    const overlaps = (a, b, gap) => a.x0 < b.x1 + gap && a.x1 > b.x0 - gap && a.y0 < b.y1 && a.y1 > b.y0;
+
+    const visible = this.holos.filter((h) => h.visible);
+    const bodies = new Map(visible.map((h) => [h, boxOf(h, HOLO_BODY)]));
+    const placed = [];
+    const order = [...visible].sort((a, b) => Math.abs(a.relIndex) - Math.abs(b.relIndex));
+    for (const holo of order) {
+      const hw = (LABEL_W * holo.labelGrow) / 2;
+      const hh = (LABEL_H * holo.labelGrow) / 2;
+      let slot = null;
+      for (const drop of LABEL_DROPS) {
+        const cy = holo.labelY + drop;
+        const box = boxOf(holo, [[-hw, cy - hh], [hw, cy - hh], [-hw, cy + hh], [hw, cy + hh]]);
+        const onScreen = box.x0 > -0.96 && box.x1 < 0.96;
+        if (!onScreen) break; // dropping lower only moves a label toward the bottom edge, so stop trying
+        const hitsLabel = placed.some((b) => overlaps(box, b, 0.06));
+        let hitsBody = false;
+        for (const [other, body] of bodies) {
+          if (other !== holo && overlaps(box, body, 0.02)) { hitsBody = true; break; }
+        }
+        if (!hitsLabel && !hitsBody) { slot = { drop, box }; break; }
+      }
+      if (slot) placed.push(slot.box);
+      holo.setLabelOffset(slot ? slot.drop : 0);
+      holo.setLabelClear(!!slot);
     }
   }
 

@@ -197,6 +197,10 @@ export class Holo extends THREE.Group {
     // on screen and clear of closer labels, eased toward 0 otherwise
     this.labelClip = 1;
     this.labelTarget = 1;
+    // local y drop, set by Carousel when the label would collide: it eases to
+    // the target so a neighbour's label slides clear rather than snapping
+    this.labelOffset = 0;
+    this.labelOffsetTarget = 0;
 
     this.underlineMat = new THREE.SpriteMaterial({
       color: accent,
@@ -226,6 +230,7 @@ export class Holo extends THREE.Group {
 
   setHovered(on) { this.hoverTarget = on ? 1 : 0; }
   setLabelClear(on) { this.labelTarget = on ? 1 : 0; }
+  setLabelOffset(dy) { this.labelOffsetTarget = dy; }
   show() { this.revealTarget = 1; }
   hide() { this.revealTarget = 0; }
 
@@ -285,12 +290,17 @@ export class Holo extends THREE.Group {
     this.daisMat.opacity = Math.min(1, global * 1.5);
     // labels: front and side cards stay legible (floor 0.7), hover lifts to
     // full, back cards fade out with farFade
-    const labelBase = 0.7 + 0.3 * Math.max(0, 1 - dist / 2);
+    // off-centre labels never drop below 0.6 while on screen; only the back
+    // cards (farFade) and labels with no clear slot fade further
+    const labelBase = 0.6 + 0.4 * Math.max(0, 1 - dist / 2);
     this.labelClip += (this.labelTarget - this.labelClip) * (1 - Math.pow(0.02, dt));
+    this.labelOffset += (this.labelOffsetTarget - this.labelOffset) * (1 - Math.pow(0.02, dt));
+    this.labelSprite.position.y = this.labelY + this.labelOffset;
     this.labelMat.opacity = this.reveal * farFade * this.labelClip * Math.min(1, labelBase + this.hover * 0.45);
     this.underlineMat.opacity = global * 0.9;
     const drawIn = 1 - Math.pow(1 - Math.min(1, Math.max(0, (this.reveal - 0.25) / 0.75)), 3);
     this.underline.scale.set(Math.max(0.001, 0.52 * drawIn), 0.012, 1);
+    this.underline.position.y = this.labelY + this.labelOffset - 0.18;
 
     // gyroscope halo rings - opposite spins, gentle wobble, all pure in t
     this.spinA.rotation.set(Math.sin(t * 0.9) * 0.14, t * 1.1, Math.cos(t * 0.7) * 0.10);

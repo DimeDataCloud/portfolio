@@ -25,16 +25,44 @@ function describe() {
   return `Christian Dixon. ${clause}.`;
 }
 
+// host name for a link label, e.g. "omnisdr.com"
+const hostOf = (url) => new URL(url).hostname.replace(/^www\./, '');
+
+// One list item per project: the case-study link, then the status and first
+// headline metric, then a link to the live site and/or repo (or the private
+// note). The links sit beside the title, not inside it, because anchors cannot nest.
+function projectItemHtml(p, i) {
+  const first = p.metrics[0];
+  const meta =
+    `<p class="pl-meta">` +
+    `<span class="pl-status"><span class="status-dot ${esc(p.status)}" aria-hidden="true"></span>${esc(p.statusText)}</span>` +
+    (first
+      ? `<span class="pl-metric"><span class="pl-value">${esc(first.value)}</span> ` +
+        `<span class="pl-label">${esc(first.label)}</span></span>`
+      : '') +
+    `</p>`;
+  const links = [];
+  if (p.liveUrl) links.push(`<a class="pl-link" href="${esc(p.liveUrl)}" rel="noopener">Visit ${esc(hostOf(p.liveUrl))}</a>`);
+  if (p.repoUrl) links.push(`<a class="pl-link" href="${esc(p.repoUrl)}" rel="noopener">Source on GitHub</a>`);
+  const tail = links.length
+    ? `<div class="pl-links">${links.join('')}</div>`
+    : p.privateNote
+      ? `<p class="pl-private">${esc(p.privateNote)}</p>`
+      : '';
+  return (
+    `<li class="pl-item">` +
+    `<a href="#${esc(p.slug)}" data-slug="${esc(p.slug)}" data-index="${i}">` +
+    `<span class="pl-title">${esc(p.title)}</span>` +
+    `<span class="pl-year mono">${esc(p.year)}</span>` +
+    `<span class="pl-desc">${esc(p.desc)}</span></a>` +
+    meta +
+    tail +
+    `</li>`
+  );
+}
+
 function projectListHtml() {
-  const items = projects
-    .map(
-      (p, i) =>
-        `<li><a href="#${esc(p.slug)}" data-slug="${esc(p.slug)}" data-index="${i}">` +
-        `<span class="pl-title">${esc(p.title)}</span>` +
-        `<span class="pl-year mono">${esc(p.year)}</span>` +
-        `<span class="pl-desc">${esc(p.desc)}</span></a></li>`,
-    )
-    .join('');
+  const items = projects.map((p, i) => projectItemHtml(p, i)).join('');
   // tabindex -1 lets the "Skip to projects" link move focus into the list
   return `<ul class="project-list" id="project-list" tabindex="-1">${items}</ul>`;
 }

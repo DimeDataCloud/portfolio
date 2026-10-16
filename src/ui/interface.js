@@ -80,10 +80,10 @@ export class Interface {
       .map(
         (r) => `
         <article class="role">
-          <header class="role-head">
+          <div class="role-head">
             <h4 class="role-title">${esc(r.role)}</h4>
             <p class="role-org">${esc(r.org)}<span class="role-place"> · ${esc(r.place)}</span></p>
-          </header>
+          </div>
           <p class="role-blurb">${esc(r.blurb)}</p>
           <ul class="role-points">${r.points.map((pt) => `<li>${esc(pt)}</li>`).join('')}</ul>
         </article>`,
@@ -110,11 +110,11 @@ export class Interface {
       .join('');
 
     this.el.aboutBody.innerHTML = `
-      <header class="profile-head">
+      <div class="profile-head">
         <h2 class="about-title" id="about-title">${esc(profile.name)}</h2>
         <p class="profile-headline">${esc(profile.headline)}</p>
         <p class="profile-loc">${esc(profile.location)}</p>
-      </header>
+      </div>
       <p class="profile-summary">${esc(profile.summary)}</p>
       <p class="profile-running">${esc(profile.running)}</p>
       <ul class="metrics" aria-label="Headline numbers">${metricItems}</ul>

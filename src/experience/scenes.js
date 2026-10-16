@@ -78,6 +78,21 @@ const geo = {
   microBeam: new THREE.CylinderGeometry(0.024, 0.008, 0.08, 8, 1, true),
   axis: new THREE.CylinderGeometry(0.0025, 0.0025, 0.62, 5),
   riseRing: new THREE.TorusGeometry(0.05, 0.003, 3, 20),
+  // agent eval - bars rise from base y (unit height, scaled to value)
+  evalFloor: new THREE.BoxGeometry(0.36, 0.006, 0.02),
+  evalBar: new THREE.BoxGeometry(0.07, 1, 0.07).translate(0, 0.5, 0),
+  evalGlow: new THREE.BoxGeometry(0.086, 1, 0.086).translate(0, 0.5, 0),
+  // confidence whisker: unit-span stem with two end caps, scaled on y
+  evalWhisk: new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(0, -0.5, 0), new THREE.Vector3(0, 0.5, 0),
+    new THREE.Vector3(-0.014, -0.5, 0), new THREE.Vector3(0.014, -0.5, 0),
+    new THREE.Vector3(-0.014, 0.5, 0), new THREE.Vector3(0.014, 0.5, 0),
+  ]),
+  // omni sdr
+  lane: new THREE.BoxGeometry(0.80, 0.006, 0.02),
+  msgTile: new THREE.BoxGeometry(0.07, 0.05, 0.008),
+  gatePost: new THREE.BoxGeometry(0.012, 0.22, 0.012),
+  gateBeam: new THREE.BoxGeometry(0.012, 0.012, 0.18),
 };
 
 // radar sweep wedge - fan of triangles, per-vertex trail fade
@@ -879,6 +894,90 @@ function portfolioSite(mats) {
   };
 }
 
+/* =====================================================================
+ * 7. Agent Evaluation - the numbers, pinned before they are read.
+ * Two bar pairs rise in turn: an accent bar beside a dim comparator.
+ * A confidence whisker pops onto each bar as it lands. The second pair's
+ * top 22 points glow, then dissolve into run-to-run variance.
+ * ===================================================================== */
+function agentEval(mats) {
+  const g = new THREE.Group();
+  const T = 8;
+  const K = 0.0061;      // world height per percentage point (75 -> 0.46)
+  const BASE = 0.10;
+
+  const floor = mesh(geo.evalFloor, mats.faint());
+  floor.position.set(0, BASE - 0.003, 0);
+  g.add(floor);
+
+  // value, CI half-width, x, landing time, accent (bright) or dim
+  const spec = [
+    { v: 75, ci: 6, x: -0.14, land: 0.20, accent: true },
+    { v: 50, ci: 6, x: -0.06, land: 0.30, accent: false },
+    { v: 70, ci: 7, x: 0.06, land: 0.56, accent: true },
+    { v: 44, ci: 6, x: 0.14, land: 0.66, accent: false },
+  ];
+  const bars = spec.map((s) => {
+    const m = s.accent ? mats.bright() : mats.faint();
+    const b = mesh(geo.evalBar, m);
+    b.position.set(s.x, BASE, 0);
+    g.add(b);
+    const wm = mats.line();
+    const w = new THREE.LineSegments(geo.evalWhisk, wm);
+    w.position.set(s.x, BASE, 0);
+    g.add(w);
+    return { ...s, b, m, w, wm };
+  });
+
+  // glowing band over the top 22 points of the second accent bar, cut
+  // into four slabs so the dissolve can scatter them
+  const bandMats = [0, 1, 2, 3].map(() => mats.bright());
+  const band = bandMats.map((bm) => {
+    const s = mesh(geo.evalGlow, bm);
+    g.add(s);
+    return s;
+  });
+
+  return {
+    group: g,
+    update(t) {
+      const u = (t / T) % 1;
+      const out = 1 - inCubic(seg(u, 0.92, 0.99)); // loop reset: everything drops away
+
+      bars.forEach(({ v, ci, x, land, accent, b, m, w, wm }) => {
+        const rise = backOut(seg(u, land - 0.16, land));
+        const h = v * K * rise * out;
+        b.scale.y = Math.max(0.0005, h);
+        const flare = spike(seg(u, land, land + 0.12));
+        m.uniforms.uAlpha.value = (accent ? 0.9 : 0.3) + 0.4 * flare;
+
+        const pop = backOut(seg(u, land, land + 0.06)) * out;
+        w.position.y = BASE + Math.max(0, h);
+        w.scale.y = Math.max(0.0005, 2 * ci * K * pop);
+        wm.uniforms.uAlpha.value = 0.75 * pop;
+      });
+
+      // top 22 points of the 70 bar glow, then dissolve (slabs scatter)
+      const glow = outCubic(seg(u, 0.64, 0.72));
+      const dis = inOut(seg(u, 0.76, 0.90));
+      const bandA = 0.95 * glow * (1 - dis);
+      band.forEach((s, i) => {
+        s.position.set(0.06 + (rnd(i) - 0.5) * 0.05 * dis, BASE + 48 * K + i * 5.5 * K + rnd(i + 3) * 0.02 * dis, 0);
+        s.scale.y = 5.5 * K;
+        bandMats[i].uniforms.uAlpha.value = bandA;
+      });
+
+      g.rotation.y = 0.08 * Math.sin(t * 0.33);
+    },
+    beat(t) {
+      const u = (t / T) % 1;
+      let b = 0;
+      for (let i = 0; i < spec.length; i++) b = Math.max(b, spike(seg(u, spec[i].land, spec[i].land + 0.12)));
+      return b;
+    },
+  };
+}
+
 /* ---------- fallback - slow-turning wireframe sphere ---------- */
 function generic(mats) {
   const g = new THREE.Group();
@@ -897,6 +996,7 @@ const builders = {
   'crm-live': crm,
   'leadgen-live': leadgen,
   'brainai': brainai,
+  'agent-eval': agentEval,
   'app-builder': appBuilder,
   'portfolio-site': portfolioSite,
 };

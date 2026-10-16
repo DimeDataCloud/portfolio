@@ -1,4 +1,4 @@
-// Social icons — path data from simple-icons (MIT / CC0 brand marks).
+// Social icons: path data from simple-icons (MIT / CC0 brand marks).
 // https://github.com/simple-icons/simple-icons
 
 export const icons = {

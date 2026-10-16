@@ -1,4 +1,4 @@
-// Loader mark — an original generative animation: a small node-graph
+// Loader mark: an original generative animation: a small node-graph
 // assembles itself as loading progresses, then pulses gently.
 // Echoes the BrainAI / agent-OS identity. Pure canvas 2D, no assets.
 

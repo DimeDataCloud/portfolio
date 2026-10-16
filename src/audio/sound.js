@@ -1,4 +1,4 @@
-// Web Audio sound design — fully synthesized, no audio assets.
+// Web Audio sound design: fully synthesized, no audio assets.
 // Ambient pad (two detuned chord stacks slowly crossfading under a
 // breathing lowpass, over a soft low "air" bed) that loops forever,
 // hover tick, press thock. A user-supplied music file can replace the
@@ -43,7 +43,7 @@ export class Sound {
 
   enable() {
     this.ensure();
-    this.enabled = true; // set synchronously — toggle() reads this right away
+    this.enabled = true; // set synchronously: toggle() reads this right away
 
     const go = () => {
       const t = this.ctx.currentTime;
@@ -129,7 +129,7 @@ export class Sound {
     chord([110, 164.81, 220, 246.94], 1);    // Am(add9): A2 E3 A3 B3
     chord([87.31, 130.81, 174.61, 220], -1); // Fmaj7:    F2 C3 F3 A3
 
-    // soft "air" bed — noise pushed low and low-passed so it reads as
+    // soft "air" bed: noise pushed low and low-passed so it reads as
     // room tone, not static
     const len = ctx.sampleRate * 4;
     const buf = ctx.createBuffer(1, len, ctx.sampleRate);
@@ -151,7 +151,7 @@ export class Sound {
     airLfo.connect(airDepth).connect(airLp.frequency);
     start(noise);
 
-    // sub anchor — felt on real speakers, harmless on laptops
+    // sub anchor: felt on real speakers, harmless on laptops
     const sub = start(ctx.createOscillator());
     sub.frequency.value = 55;
     const subG = ctx.createGain();

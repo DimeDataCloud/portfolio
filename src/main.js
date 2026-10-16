@@ -55,6 +55,7 @@ function enter(withSound) {
   document.body.classList.add('entered');
   experience?.begin();
   ui.openFromHash();
+  window.addEventListener('hashchange', () => ui.openFromHash());
 }
 
 enterSound.addEventListener('click', () => enter(true));

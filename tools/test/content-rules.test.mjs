@@ -18,6 +18,7 @@ import {
   secretNames,
   smallChipProblems,
   smallCountProblems,
+  smallTestCounts,
 } from '../content-rules.mjs';
 
 const EM = '\u2014';
@@ -190,6 +191,15 @@ test('small counts in prose: test, tool and file counts are flagged; architectur
   assert.deepEqual(smallCountProblems('demo', ['3,567 tests across 264 files']), [], 'large figures stay');
   assert.deepEqual(smallCountProblems('demo', ['A set of 27 agents in four layers, four providers.']), []);
   assert.deepEqual(smallCountProblems('demo', ['About 47 hypothesis tests, a 0.85 gate, under 10% escalated.']), []);
+});
+
+test('test counts under 1,000 are flagged; thousands separators and large counts are not', () => {
+  assert.deepEqual(smallTestCounts('The test suite runs 283 tests.'), ['283 tests']);
+  assert.deepEqual(smallTestCounts('231 enterprise tests for the pipeline'), ['231 enterprise tests']);
+  assert.deepEqual(smallTestCounts('3,567 tests in the public repo'), [], 'thousands separator stays');
+  assert.deepEqual(smallTestCounts('3,000+ automated tests'), [], 'large figure stays');
+  assert.deepEqual(smallTestCounts('1,000 tests'), [], 'at the threshold stays');
+  assert.deepEqual(smallTestCounts('Four providers and a 0.85 gate'), []);
 });
 
 // Related systems and shared patterns.

@@ -27,7 +27,7 @@ export const projects = [
     problem: 'AI sales tools are judged on how much they send, so they send a lot and make things up: a statistic the prospect never saw, a follow-up to a call that never happened.',
     built:
       'Replies are classified and sorted with a business-hours SLA. A claims gate blocks any sentence with a number, price or superlative that is not backed by evidence for that contact. The send is guarded in the database: gate passed, same tenant, not suppressed and the daily cap are checked inside the same transaction that writes the message. A second model can only say stop, never send.',
-    result: 'Pre-launch, with the backend running in production on Google Cloud. The test suite runs 283 tests. The public showcase repo shows the product; the source is private.',
+    result: 'Pre-launch, with the backend running in production on Google Cloud. The public showcase repo shows the product; the source is private.',
     metrics: [],
     stack: ['TypeScript', 'Node.js', 'PostgreSQL', 'Google Cloud', 'Gmail API'],
     liveUrl: 'https://omnisdr.com',
@@ -123,10 +123,8 @@ export const projects = [
     problem: "Approval dialogs ask people to trust the model's description of an action, which is the wrong thing to approve.",
     built:
       'Each proposal is a list of typed actions, and the approval card is generated from those actions rather than from the model\'s prose. An on-device router answers the questions it is confident about. C# on .NET 10 with WinUI 3.',
-    result: 'Every answer the on-device router gave at 80% or more confidence was correct. The repo carries 434 tests.',
-    metrics: [
-      { value: '434', label: 'tests in the open repo' },
-    ],
+    result: 'Every answer the on-device router gave at 80% or more confidence was correct.',
+    metrics: [],
     stack: ['C#', '.NET 10', 'WinUI 3'],
     liveUrl: null,
     repoUrl: 'https://github.com/DimeDataCloud/open-ClaudeOS',
@@ -195,10 +193,9 @@ export const projects = [
     built:
       'A scoring model on two axes, fit and intent, fed by a 70K-domain daily newly-registered feed cross-matched against permit records, DNS, TLS and archive probes. Thresholds were tuned on measured conversion, and the FIT score is capped by the evidence behind it. Tiered output routes straight into the CRM with the evidence that scored it attached.',
     result:
-      'The lead-engine-showcase repo carries 231 enterprise tests for the scoring pipeline.',
+      'The scoring pipeline is covered by enterprise tests in the lead-engine-showcase repo.',
     metrics: [
       { value: '70K', label: 'domains per day scanned' },
-      { value: '231', label: 'enterprise tests in the lead-engine-showcase repo' },
       { value: 'FIT', label: 'score capped by the evidence behind it' },
     ],
     stack: ['Python', 'Node.js', 'Overpass API', 'Gemini 2.5 Flash', 'PostgreSQL', 'Cloudflare Workers', 'Docker'],
@@ -235,6 +232,7 @@ export const projects = [
     status: 'progress',
     statusText: 'Open source',
     theme: ['infra', 'assist'],
+    related: ['lobby', 'halo-agent-os'],
     patterns: ['approval'],
     desc: 'A fleet orchestrator for Claude Code sessions with a permission gate that learns from outcomes.',
     problem: 'Running many Claude Code sessions at once means answering the same permission prompts again and again.',
@@ -255,11 +253,12 @@ export const projects = [
     status: 'progress',
     statusText: 'Open source',
     theme: ['assist'],
+    related: ['open-claudeos', 'trading-bot'],
     patterns: ['approval', 'tamper'],
     desc: 'A desktop AI agent drawn as a pixel-art duck that asks before it acts.',
     problem: 'A desktop agent with broad access is only safe if its permissions are decided in code and its record cannot be quietly edited.',
     built:
-      'Four deterministic permission tiers, with approval only from a UI click and never from the model. The activity log is append-only and hash-chained, so an edited entry breaks the chain. Rust, Tauri 2 and TypeScript.',
+      'Deterministic permission tiers, with approval only from a UI click and never from the model. The activity log is append-only and hash-chained, so an edited entry breaks the chain. Rust, Tauri 2 and TypeScript.',
     result: 'Permissions are decided by code, approvals come from a human click, and the activity log shows any edit made after the fact.',
     metrics: [],
     stack: ['Rust', 'Tauri 2', 'TypeScript'],
@@ -275,7 +274,7 @@ export const projects = [
     status: 'progress',
     statusText: 'Open source',
     theme: ['voice', 'infra'],
-    related: ['receptionist-live'],
+    related: ['receptionist-live', 'lobby'],
     desc: 'Browser-only two-player guitar jamming over WebRTC.',
     problem: 'Remote guitar jamming falls apart when latency and jitter go past what two players can play through.',
     built:

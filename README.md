@@ -38,7 +38,6 @@ Email chris@dimedata.cloud · [LinkedIn](https://www.linkedin.com/in/christian-s
 
 | Headline number | What it measures (self-reported from my own production logs and evaluation runs) | Evidence |
 |---|---|---|
-| 27 | agents running unattended in a four-layer hierarchy | private, walkthrough on request |
 | 3,567 | passing tests in the public H.A.L.O showcase repo (measured 2026-09-10) | [HALO showcase](https://github.com/DimeDataCloud/halo-agent-showcase#by-the-numbers) |
 | 70K | domains scanned per day by the lead engine | [lead engine showcase](https://github.com/DimeDataCloud/lead-engine-showcase) |
 | 300+ | notes in the cited knowledge graph | [BrainAI graph](https://github.com/DimeDataCloud/brain-graph) |
@@ -47,16 +46,16 @@ Email chris@dimedata.cloud · [LinkedIn](https://www.linkedin.com/in/christian-s
 
 | Project | What it is | Key metric | Status | Link |
 |---|---|---|---|---|
-| Omni SDR | Sales development layer that checks every claim before a human-approved send | Database-enforced send guard; 283 tests | Pre-launch | [live](https://omnisdr.com), [repo](https://github.com/DimeDataCloud/omni-sdr-showcase) |
+| Omni SDR | Sales development layer that checks every claim before a human-approved send | Database-enforced send guard | Pre-launch | [live](https://omnisdr.com), [repo](https://github.com/DimeDataCloud/omni-sdr-showcase) |
 | H.A.L.O Agent OS | Operating system for a one-person business, 27 agents in four layers | 578 tokens of fixed overhead per turn | Paused, case study | [repo](https://github.com/DimeDataCloud/halo-agent-showcase) |
 | AI Voice Receptionist | Virtual agent that answers the phone, qualifies the caller and books the appointment | Under 2 s response budget | Case study | private, available on request |
 | Agent Evaluation Harness | Statistical harness on benchmarks written outside the company | About 47 hypothesis tests | Operational | private, available on request |
-| Open ClaudeOS | Claude proposes, deterministic code decides, and the user approves a card (C# on .NET 10, WinUI 3) | 434 tests | Open source, Apache-2.0 | [repo](https://github.com/DimeDataCloud/open-ClaudeOS) |
+| Open ClaudeOS | Claude proposes, deterministic code decides, and the user approves a card (C# on .NET 10, WinUI 3) | Every answer the on-device router gave at 80% or more confidence was correct | Open source, Apache-2.0 | [repo](https://github.com/DimeDataCloud/open-ClaudeOS) |
 | BrainAI Knowledge Graph | 300+ wikilinked notes in Neo4j, read by Claude over a read-only MCP server | Every Cypher statement checked and run read-only | Operational | [repo](https://github.com/DimeDataCloud/brain-graph) |
 | Self-Hosted CRM | Pipelines, funnels and a Call Room that prepares the rep before every dial | Under 10% of replies escalated to a person | Case study | [repo](https://github.com/DimeDataCloud/crm-showcase) |
 | Lead-Generation Engine | Two-axis lead scoring from free public signals | 70K domains scanned per day | Case study | [repo](https://github.com/DimeDataCloud/lead-engine-showcase) |
 | Lobby | Shared canvas where humans and AI agents post artifacts | Bot tokens scoped to one workspace | Open source, MIT | [repo](https://github.com/DimeDataCloud/lobby) |
-| Claude Modder | Fleet orchestrator for Claude Code sessions with a learning permission gate | Safety property tested over 400 random histories | Open source, MIT | [repo](https://github.com/DimeDataCloud/claude-modder) |
+| Claude Modder | Fleet orchestrator for Claude Code sessions with a learning permission gate | Safety property tested over random histories | Open source, MIT | [repo](https://github.com/DimeDataCloud/claude-modder) |
 | Open Waddle | Desktop AI agent drawn as a pixel-art duck that asks before it acts | Four deterministic permission tiers | Open source, MIT | [repo](https://github.com/DimeDataCloud/Open-Waddle) |
 | Jamlink | Browser-only two-player guitar jamming over WebRTC | Enforced 60 ms latency budget | Open source, MIT | [repo](https://github.com/DimeDataCloud/jamlink) |
 | Trading Bot | Paper-only research desk with pre-registered experiments. Not financial advice. | Hash-chained audit log | Paper trading only, MIT | [repo](https://github.com/DimeDataCloud/trading-bot) |
@@ -185,7 +184,7 @@ To deploy under another domain, change the route in `wrangler.toml` and make sur
 - **Unit tests.** `npm test` runs the Node test runner (`node:test`, no extra dependencies) over `tools/test/`. It covers the build-time HTML and JSON-LD from `tools/vite-static-content.js`, each content guardrail rule in `tools/content-rules.mjs`, and a run of the guardrail script on this repository.
 - **Accessibility.** `npm run a11y` runs axe-core (`@axe-core/playwright`, pinned) against the built site: the static project list at desktop and phone widths, and the case-study dialog open at both. It fails on serious or critical WCAG 2.0/2.1 A and AA violations. It needs a running preview or a URL argument, and CI runs it against `vite preview`.
 - **Bundle budget.** Gzipped JavaScript across `dist/assets` must stay under 160 KB. The current build measures 151.3 KB, with Three.js included.
-- **Content rules** enforced by the guardrails: every project has the required fields and a unique slug; links are `https`; a project with no public link has a `privateNote`; every slug has a scene builder; every `related` slug names a project; shared-pattern ids are defined and used; no metric chip is a bare count under 100, and no small count is used as evidence in copy; the contact email is the public one; no em dashes, phone numbers or secret-shaped strings in site source.
+- **Content rules** enforced by the guardrails: every project has the required fields and a unique slug; links are `https`; a project with no public link has a `privateNote`; every slug has a scene builder; every `related` slug names a project; shared-pattern ids are defined and used; no metric chip is a bare count under 100, no small count is used as evidence in copy, and no test count under 1,000 appears in copy; the contact email is the public one; no em dashes, phone numbers or secret-shaped strings in site source.
 - **Review** uses the Playwright scripts above on desktop and phone sizes. They run locally; `smoke`, `a11y` and the unit tests also run in CI.
 
 ## Fonts, icons and licence

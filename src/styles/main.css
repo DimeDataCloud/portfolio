@@ -180,7 +180,7 @@ header > * { pointer-events: auto; }
   display: flex; align-items: center; gap: 14px;
   position: absolute; left: 50%; translate: -50% 0;
 }
-.mode-btn { opacity: 0.4; transition: opacity 0.3s; font-weight: 500; font-size: var(--text-s); }
+.mode-btn { position: relative; opacity: 0.4; transition: opacity 0.3s; font-weight: 500; font-size: var(--text-s); }
 .mode-btn.active, .mode-btn:hover { opacity: 1; }
 .mode-label { position: relative; display: block; overflow: hidden; height: 1.3em; }
 .mode-label span { display: block; transition: transform 0.45s var(--spring); }
@@ -264,7 +264,7 @@ body.menu-open .menu-btn { opacity: 0; pointer-events: none; }
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
   padding: clamp(16px, 2.5vw, 24px);
 }
-.menu-mail { font-size: var(--text-s); font-weight: 500; }
+.menu-mail { position: relative; font-size: var(--text-s); font-weight: 500; }
 .menu-mail:hover { color: var(--accent); }
 .menu-socials { display: flex; gap: 8px; }
 .menu-socials a {
@@ -333,6 +333,7 @@ body.entered:not(.no-webgl) .project-list a:focus-visible .pl-year { color: var(
    and it passes the gate (see main.js), so keyboard users need no Enter first */
 
 .project-list a {
+  position: relative;
   display: flex; align-items: baseline; gap: 14px;
   font-family: var(--font-display); font-weight: 600;
   font-size: clamp(1.3rem, 4.6vh, 3.2rem);
@@ -592,8 +593,6 @@ body.entered:not(.no-webgl) .project-list a:focus-visible .pl-year { color: var(
   .project-list a { font-size: clamp(1.25rem, 3.6vh, 1.9rem); }
   /* touch: each project entry and the contact link are 44 px tall (the visual size is unchanged) */
   .project-list a, .menu-links a { min-height: 44px; display: flex; align-items: center; }
-  /* the static Connections list (SEO copy, visually hidden) gets the same 44 px rows */
-  #connections-static a { min-height: 44px; display: flex; align-items: center; }
   .contact-mail { display: inline-flex; align-items: center; min-height: 44px; }
   .menu-panel { width: calc(100vw - var(--edge) * 2); }
   .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -755,3 +754,7 @@ body.no-webgl .pl-desc {
   margin-top: 2px;
 }
 body.no-webgl .project-list a:hover .pl-title { text-decoration: underline; text-underline-offset: 6px; }
+
+/* Hit areas: the Motion and Sound toggles, the mail link and the project list links are about 20 px tall on desktop.
+   A transparent ::after box widens each to at least 24 px without changing the layout or the look. */
+.mode-btn::after, .menu-mail::after, .project-list a::after { content: ""; position: absolute; inset: -4px -6px; }

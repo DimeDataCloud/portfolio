@@ -93,4 +93,4 @@ These rules are checked or enforced in review.
 - No credentials. The guardrail scans tracked files for common key shapes.
 - No eyebrow labels, scroll cues or live clocks in copy.
 - Numbers must trace to the record or to a measurement you can reproduce. Do not round up.
-- No small counts as evidence. A metric chip that is a bare count under 100 is removed, and copy does not use counts such as "45 tests" or "11 of them". Percentages, thresholds ("0.85", "< 2 s") and time budgets ("60 ms") stay, as do architecture facts in words ("four providers", "27 agents"). The guardrail flags the cases it can match.
+- No small counts as evidence. A metric chip that is a bare count under 100 is removed, and copy does not use a test count under 1,000 (the check flags a bare count of tests) or a count such as "11 of them". Percentages, thresholds ("0.85", "< 2 s") and time budgets ("60 ms") stay, as do architecture facts in words ("four providers", "27 agents"). The guardrail flags the cases it can match.

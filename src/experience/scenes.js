@@ -121,7 +121,7 @@ function arcCurve(a, b, out = 1.3, upBias = 0.02) {
 }
 
 /* =====================================================================
- * 2. H.A.L.O Agent OS - a living hierarchy in 3D.
+ * 2. H.A.L.O Agent OS - the 27-agent hierarchy drawn in 3D.
  * Exec orb → 3 C-suite on an arc → 6 workers on a wider arc. Pulses run
  * down curved links, splitting per layer; acks run back up. One branch
  * stays highlighted per cycle. The whole tree precesses; every orb bobs.

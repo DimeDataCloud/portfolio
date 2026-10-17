@@ -90,7 +90,14 @@ test('the shipped project data has no small chips or small counts in prose', () 
 // so the record may not claim either "archived" or "in production".
 test('case studies carry the neutral "case" status and the "Case study" label', () => {
   const cases = projects.filter((p) => p.status === 'case');
-  assert.deepEqual(cases.map((p) => p.slug).sort(), ['crm-live', 'leadgen-live', 'receptionist-live']);
+  assert.deepEqual(cases.map((p) => p.slug).sort(), ['leadgen-live', 'receptionist-live']);
   for (const p of cases) assert.equal(p.statusText, 'Case study', `${p.slug} statusText`);
   assert.equal(projects.find((p) => p.slug === 'halo-agent-os').statusText, 'Paused, case study');
+});
+
+// The owner confirmed the Self-Hosted CRM is in production. No date or customer is claimed.
+test('crm-live is in production with the live status and no archive claim', () => {
+  const crm = projects.find((p) => p.slug === 'crm-live');
+  assert.equal(crm.status, 'live');
+  assert.equal(crm.statusText, 'In production');
 });

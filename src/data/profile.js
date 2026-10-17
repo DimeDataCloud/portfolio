@@ -12,12 +12,12 @@ export const profile = {
   summary:
     'I build, measure and operate applied machine learning and generative AI systems end to end: the discovery that finds which process is worth automating, the engineering that takes it from prototype to production, and the statistical evaluation that proves whether it worked.',
   running:
-    'Systems I have built and operated: real-time virtual agents on voice and messaging inside a sub-2-second response budget, LLM routing across four providers with fallback, retrieval with enforced citations, and a 27-agent hierarchy. Numbers on this site are self-reported from my own production logs and evaluation runs; private projects are available to walk through on request.',
+    'Systems I have built and operated: real-time virtual agents on voice and messaging inside a sub-2-second response budget, LLM routing across four providers with fallback, retrieval with enforced citations, and a 27-agent hierarchy that ran unattended until the H.A.L.O platform was paused. Numbers on this site are self-reported from my own production logs and evaluation runs; private projects are available to walk through on request.',
 };
 
 // Headline numbers, shown as a strip on the About panel.
 export const metrics = [
-  { value: '27', label: 'agents in a four-layer hierarchy, run unattended' },
+  { value: '27', label: 'agents in a four-layer hierarchy, run unattended before the platform was paused' },
   { value: '3,567', label: 'passing tests in the public H.A.L.O showcase repo (measured 2026-09-10)' },
   { value: '70K', label: 'domains scanned per day by the lead engine' },
   { value: '4', label: 'model providers behind one interface, with automatic failover' },
@@ -44,13 +44,13 @@ export const experience = [
     role: 'AI Solutions Engineer',
     org: 'Dime Data',
     place: 'Remote',
-    blurb: 'Sole engineer. Built and operate every system on this site.',
+    blurb: 'Sole engineer. Built every system on this site; operate those still running.',
     points: [
       'Voice agent that answers the phone, qualifies the caller, books the appointment and writes the result to the CRM. Streaming at every hop, inside a sub-2-second budget, with a ~120 ms time-to-first-token target. Audio under a 0.85 ASR confidence gate is re-asked, not guessed.',
       '30+ days of no outages or incidents across every deployment, shipped through CI/CD behind 3,000+ automated tests.',
       'Call Room and reply classifier that prepare the human before the conversation. Under 10% of replies fall below the confidence threshold and go to a person.',
       'Model router across Groq, Gemini on Vertex AI, Ollama and GPT-4o with automatic failover. Measured, not claimed: 578 tokens of fixed per-turn overhead against 656 to 3,878 for three competing frameworks, and 14.3% of context saved losslessly.',
-      'Retrieval layer over a 300+ note knowledge base: embeddings, vector search, reranking, and every answer forced to cite its source note. 27 agents run on top of it over Model Context Protocol.',
+      'Retrieval layer over a 300+ note knowledge base: embeddings, vector search, reranking, and every answer forced to cite its source note. 27 agents ran on top of it over Model Context Protocol until the H.A.L.O platform was paused.',
       'Evaluation harness run on benchmark suites written outside the company, with endpoints fixed before each run. About 47 hypothesis tests, multiple-comparison correction, estimator fixed in advance.',
       'Two-axis lead scoring (fit and intent) from free public signals, including a 70K-domain daily newly-registered feed that feeds a cold outbound funnel.',
     ],

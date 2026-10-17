@@ -420,6 +420,14 @@ body:not(.entered) .skip-link { display: none; }
   transition: background-color 0.25s, border-color 0.25s;
 }
 .connection-project:hover { background: var(--accent-soft); border-color: var(--accent); }
+.pattern-list { display: grid; gap: 22px; }
+.pattern { display: grid; gap: 8px; }
+.pattern + .pattern { padding-top: 22px; border-top: 1px solid var(--hairline); }
+.pattern-title {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: clamp(1.05rem, 1rem + 0.3vw, 1.2rem); line-height: 1.25; color: var(--ink);
+}
+.case-sec[hidden] { display: none; }
 
 /* case study */
 .detail-top { display: flex; align-items: center; justify-content: space-between; padding-right: 52px; min-height: 42px; }
@@ -722,7 +730,17 @@ body.no-webgl .pl-private {
    stay out of layout and out of the tab order, and each entry shares one cell */
 body:not(.no-webgl) .pl-meta,
 body:not(.no-webgl) .pl-links,
+body:not(.no-webgl) .pl-related,
 body:not(.no-webgl) .pl-private { display: none; }
+/* related systems under each entry, no-webgl list only: plain links, not the big title style */
+body.no-webgl .project-list .pl-related {
+  display: flex; flex-wrap: wrap; gap: 6px 18px; list-style: none; padding: 0; margin: 0;
+}
+body.no-webgl .project-list .pl-related a {
+  font-family: var(--font-body); font-size: var(--text-s); line-height: 1.4; color: var(--ink-dim);
+  text-decoration: underline; text-underline-offset: 4px; opacity: 1; translate: none;
+}
+body.no-webgl .project-list .pl-related a:hover { color: var(--ink); }
 body.entered:not(.no-webgl) .project-list li { display: contents; }
 body.no-webgl .pl-desc {
   display: block; flex-basis: 100%;

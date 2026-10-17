@@ -2,7 +2,9 @@
 // Link policy: live URL when one exists; public repo link otherwise;
 // private projects render "private, available on request" (no dead links).
 // Copy rules: no em dashes, no eyebrow labels, no scroll cues, no live clocks.
-// Number policy: no small counts in copy or metrics. Headline numbers only.
+// Number policy (tools/content-rules.mjs enforces it): no small counts used as
+// evidence in copy or metric chips. Large figures, percentages, thresholds and
+// time budgets stay.
 //
 // Each project has a case study: problem (what was broken), built (what was
 // made), result (what it measured), plus up to three headline metrics.
@@ -19,6 +21,8 @@ export const projects = [
     status: 'progress',
     statusText: 'Pre-launch',
     theme: ['sales', 'llm'],
+    related: ['crm-live', 'leadgen-live', 'halo-agent-os'],
+    patterns: ['approval'],
     desc: 'The SDR between outreach and the closer: every reply sorted, every claim checked, and a human approving what goes out.',
     problem: 'AI sales tools are judged on how much they send, so they send a lot and make things up: a statistic the prospect never saw, a follow-up to a call that never happened.',
     built:
@@ -38,15 +42,16 @@ export const projects = [
     status: 'paused',
     statusText: 'Paused, case study',
     theme: ['assist', 'llm', 'infra'],
+    related: ['brainai', 'agent-eval', 'lobby', 'claude-modder', 'open-waddle'],
+    patterns: ['mcp'],
     desc: 'An operating system for a one-person business, staffed by 27 agents in a four-layer hierarchy and connected over Model Context Protocol.',
     problem:
       'One person cannot run sales, ops, security and content at once, and unattended agents are only useful if they ask before they send, spend, publish, delete or sign.',
     built:
-      "Intake turns six answers into departments, routines and templates. Routines run on the server in the owner's time zone and work is handed between agents on a shared board with persistent memory. Each account runs in its own process, and 3,567 tests across 264 files cover the public showcase repo. A model router sends each task across Groq, Gemini on Vertex AI, Ollama and GPT-4o with automatic failover, and steps down a tier at the daily cap rather than failing.",
+      "Intake turns a short set of answers into departments, routines and templates. Routines run on the server in the owner's time zone and work is handed between agents on a shared board with persistent memory. Each account runs in its own process, and 3,567 tests cover the public showcase repo. A model router sends each task across Groq, Gemini on Vertex AI, Ollama and GPT-4o with automatic failover, and steps down a tier at the daily cap rather than failing.",
     result:
       '578 tokens of fixed per-turn overhead against 656 to 3,878 for three competing frameworks, and 14.3% of context saved losslessly where the nearest rival reached 10.8% only by discarding results.',
     metrics: [
-      { value: '27', label: 'agents, four layers' },
       { value: '578', label: 'tokens fixed overhead per turn' },
       { value: '14.3%', label: 'context saved losslessly' },
     ],
@@ -63,6 +68,7 @@ export const projects = [
     status: 'archived',
     statusText: 'Archived, case study',
     theme: ['voice', 'assist'],
+    related: ['crm-live', 'halo-agent-os'],
     desc: 'A virtual agent that answers the phone, qualifies the caller, books the appointment and writes the result to the CRM.',
     problem: 'Inbound calls went to voicemail after hours and the leads went cold.',
     built:
@@ -86,12 +92,13 @@ export const projects = [
     status: 'live',
     statusText: 'Operational',
     theme: ['eval', 'data'],
+    related: ['halo-agent-os', 'brainai', 'trading-bot'],
     desc: 'A statistical harness that measures whether an agent platform beats the alternatives, on benchmarks written by other people.',
     problem: 'Nobody could say whether the platform beat the alternatives, and our own numbers flattered us.',
     built:
       'An evaluation harness run on benchmark suites written outside the company, with endpoints fixed before each run, multiple-comparison correction, McNemar tests and bootstrap confidence intervals. Across about 47 hypothesis tests the estimator was pinned in advance.',
     result:
-      'A reliability profile at k=6 of 70.0% vs 44.0%, with 22 points of run-to-run variance isolated as the difference. Six of my own findings were withdrawn after tracing them to a comparison that was never pinned down.',
+      'A reliability profile of 70.0% vs 44.0%, with the run-to-run variance isolated as a separate measured quantity. Several of my own findings were withdrawn after tracing them to a comparison that was never pinned down.',
     metrics: [
       { value: '~47', label: 'hypothesis tests' },
       { value: '578 vs 656 to 3,878', label: 'fixed per-turn token overhead' },
@@ -110,14 +117,15 @@ export const projects = [
     status: 'progress',
     statusText: 'Open source',
     theme: ['assist', 'llm'],
+    related: ['open-waddle', 'claude-modder'],
+    patterns: ['approval'],
     desc: 'Claude proposes, deterministic code decides, and the user approves a card before anything runs.',
     problem: "Approval dialogs ask people to trust the model's description of an action, which is the wrong thing to approve.",
     built:
       'Each proposal is a list of typed actions, and the approval card is generated from those actions rather than from the model\'s prose. An on-device router answers the questions it is confident about. C# on .NET 10 with WinUI 3.',
-    result: 'Of the answers the on-device router gave at 80% or more confidence, 35 of 35 were correct. The repo carries 434 tests.',
+    result: 'Every answer the on-device router gave at 80% or more confidence was correct. The repo carries 434 tests.',
     metrics: [
       { value: '434', label: 'tests in the open repo' },
-      { value: '35 of 35', label: 'answers at 80%+ confidence correct, on-device router' },
     ],
     stack: ['C#', '.NET 10', 'WinUI 3'],
     liveUrl: null,
@@ -132,6 +140,8 @@ export const projects = [
     status: 'live',
     statusText: 'Operational',
     theme: ['retrieval', 'data', 'viz'],
+    related: ['halo-agent-os', 'lobby', 'agent-eval'],
+    patterns: ['mcp'],
     desc: 'A markdown knowledge base of 300+ wikilinked notes, indexed into Neo4j and exposed to Claude through a read-only MCP server.',
     problem:
       'Answers drawn from a 300+ note knowledge base could not be traced, so a retrieved fact and a guess looked identical.',
@@ -140,7 +150,6 @@ export const projects = [
     result: 'Agents that cite their source note, over a graph that audits itself on every sync.',
     metrics: [
       { value: '300+', label: 'notes in the graph' },
-      { value: '27', label: 'agents that read it over MCP' },
     ],
     stack: ['Node.js', 'Neo4j', 'Docker', 'MCP', 'D3.js', 'Markdown'],
     liveUrl: null,
@@ -155,10 +164,12 @@ export const projects = [
     status: 'archived',
     statusText: 'Archived, case study',
     theme: ['sales', 'infra', 'data'],
+    related: ['leadgen-live', 'omni-sdr'],
+    patterns: ['mcp'],
     desc: 'Kanban pipelines, conversion funnels and a Call Room that prepares the rep before every dial.',
     problem: 'Call prep was improvised, so quality swung by rep and by lead.',
     built:
-      'A Call Room that drafts the call script, voicemail script and likely objections for that specific lead, plus a classifier that reads inbound replies and hands anything it is unsure about to a person. Postgres row-level security keeps each tenant in its own lane. The MCP server uses OAuth 2.1 with PKCE and rotating refresh tokens, and each MCP tool runs as the caller\'s own token. It exposes 18 tools, 11 of them read-only, and no delete tool.',
+      'A Call Room that drafts the call script, voicemail script and likely objections for that specific lead, plus a classifier that reads inbound replies and hands anything it is unsure about to a person. Postgres row-level security keeps each tenant in its own lane. The MCP server uses OAuth 2.1 with PKCE and rotating refresh tokens, and each MCP tool runs as the caller\'s own token. It exposes a set of tools, most of them read-only, and no delete tool.',
     result:
       'Under 10% of replies fall below the confidence threshold and go to a human, which is the guardrail that stops a generative system answering a customer it should not.',
     metrics: [
@@ -178,6 +189,7 @@ export const projects = [
     status: 'archived',
     statusText: 'Archived, case study',
     theme: ['sales', 'data'],
+    related: ['crm-live'],
     desc: 'Two-axis lead scoring, fit and intent, built entirely from free public signals.',
     problem: "Lead qualification came down to one yes/no question about the prospect's website.",
     built:
@@ -202,6 +214,8 @@ export const projects = [
     status: 'progress',
     statusText: 'Open source',
     theme: ['infra', 'viz'],
+    related: ['claude-modder', 'halo-agent-os'],
+    patterns: ['mcp'],
     desc: 'A shared canvas where humans and AI agents post artifacts side by side.',
     problem: 'Artifacts made by people and by agents need one shared place where authorship is clear.',
     built:
@@ -221,15 +235,13 @@ export const projects = [
     status: 'progress',
     statusText: 'Open source',
     theme: ['infra', 'assist'],
+    patterns: ['approval'],
     desc: 'A fleet orchestrator for Claude Code sessions with a permission gate that learns from outcomes.',
     problem: 'Running many Claude Code sessions at once means answering the same permission prompts again and again.',
     built:
-      'A learning permission gate that refits its thresholds from outcomes. It may never get a known outcome wrong, and that is property tested over 400 random histories rather than assumed.',
-    result: 'The gate is tested against its safety property rather than assumed, with 45 tests in the public repo.',
-    metrics: [
-      { value: '400', label: 'random histories, property tested' },
-      { value: '45', label: 'tests in the public repo' },
-    ],
+      'A learning permission gate that refits its thresholds from outcomes. It may never get a known outcome wrong, and that is property tested over many random histories rather than assumed.',
+    result: 'The gate is tested against its safety property rather than assumed, with its test suite in the public repo.',
+    metrics: [],
     stack: ['Claude Code', 'Fleet orchestration'],
     liveUrl: null,
     repoUrl: 'https://github.com/DimeDataCloud/claude-modder',
@@ -243,6 +255,7 @@ export const projects = [
     status: 'progress',
     statusText: 'Open source',
     theme: ['assist'],
+    patterns: ['approval', 'tamper'],
     desc: 'A desktop AI agent drawn as a pixel-art duck that asks before it acts.',
     problem: 'A desktop agent with broad access is only safe if its permissions are decided in code and its record cannot be quietly edited.',
     built:
@@ -262,6 +275,7 @@ export const projects = [
     status: 'progress',
     statusText: 'Open source',
     theme: ['voice', 'infra'],
+    related: ['receptionist-live'],
     desc: 'Browser-only two-player guitar jamming over WebRTC.',
     problem: 'Remote guitar jamming falls apart when latency and jitter go past what two players can play through.',
     built:
@@ -281,6 +295,8 @@ export const projects = [
     status: 'progress',
     statusText: 'Paper trading only',
     theme: ['data', 'eval'],
+    related: ['agent-eval', 'open-waddle'],
+    patterns: ['tamper'],
     desc: 'A paper-only research desk where every experiment is pre-registered with pass and fail gates.',
     problem: 'A strategy looks good in hindsight unless the test and its pass criteria are fixed before the data is seen.',
     built:
@@ -300,6 +316,7 @@ export const projects = [
     status: 'live',
     statusText: 'Live',
     theme: ['viz', 'infra'],
+    related: [],
     desc: 'An interactive 3D portfolio: every project is a procedural hologram, with a custom post-processing pass and synthesised sound.',
     problem: 'A list of links says nothing about how someone builds.',
     built:
@@ -313,6 +330,44 @@ export const projects = [
     accent: '#2f80ff',
   },
 ];
+
+// Relations: each project declares `related` slugs (tools/content-rules.mjs
+// checks they exist). Here the reverse link is derived, so A lists B and B
+// lists A. Each list follows the order of `projects`.
+const declaredOut = new Map(projects.map((p) => [p.slug, new Set(p.related ?? [])]));
+for (const p of projects) {
+  for (const slug of p.related ?? []) declaredOut.get(slug)?.add(p.slug);
+}
+export const relatedSlugs = Object.fromEntries(
+  projects.map((p) => [
+    p.slug,
+    projects.map((q) => q.slug).filter((slug) => slug !== p.slug && declaredOut.get(p.slug).has(slug)),
+  ]),
+);
+
+// Patterns several projects share. A project lists the ids it uses in `patterns`.
+export const patternDefs = [
+  {
+    id: 'approval',
+    title: 'Human approval before anything irreversible',
+    line: 'The model proposes, deterministic code checks, and a person approves before anything is sent, changed or run.',
+  },
+  {
+    id: 'tamper',
+    title: 'Tamper-evident logs',
+    line: 'Each entry is chained to the one before it, so an edited entry breaks the chain and the edit shows.',
+  },
+  {
+    id: 'mcp',
+    title: 'Model Context Protocol as the seam',
+    line: 'Agents and tools meet at one interface, Model Context Protocol, instead of custom glue for each pair.',
+  },
+];
+
+export const sharedPatterns = patternDefs.map((d) => ({
+  ...d,
+  projects: projects.filter((p) => p.patterns?.includes(d.id)).map((p) => p.slug),
+}));
 
 export const socials = contact.links;
 

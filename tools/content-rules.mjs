@@ -104,3 +104,82 @@ export function connectionProblems(linked, projects) {
   }
   return problems;
 }
+
+// Small figures. A metric chip whose value is a bare integer under 100 is a
+// count or tally, so it is removed. Percentages, thresholds ("< 2 s", "0.85")
+// and time budgets ("60 ms") do not match. Approved exceptions are listed here.
+export const SMALL_CHIP_VALUE = /^[~<>+]?\s*(\d{1,2})$/;
+export const APPROVED_SMALL_CHIPS = ['~47']; // hypothesis-test count, kept by the owner
+// Counts used as evidence in prose: "45 tests", "11 of them", "35 of 35".
+// Architecture facts ("27 agents", "four providers") are deliberately not matched.
+export const SMALL_COUNT_PROSE = /\b\d{1,2}\s+(?:tests?|tools?|files?|answers?|histories|findings|points|domains|notes)\b|\b\d{1,2} of \d+\b/i;
+
+// Problems with the metric chips of one project. `metrics` is its array of { value, label }.
+export function smallChipProblems(id, metrics = []) {
+  const problems = [];
+  for (const m of metrics) {
+    const v = String(m?.value ?? '').trim();
+    const hit = v.match(SMALL_CHIP_VALUE);
+    if (hit && Number(hit[1]) < 100 && !APPROVED_SMALL_CHIPS.includes(v)) {
+      problems.push(`${id} has a metric chip "${v}" that is a small count; remove it or use a large figure`);
+    }
+  }
+  return problems;
+}
+
+// Problems with prose strings (copy) of one record. `texts` is a list of strings.
+export function smallCountProblems(id, texts = []) {
+  const problems = [];
+  for (const t of texts) {
+    const hit = typeof t === 'string' ? t.match(SMALL_COUNT_PROSE) : null;
+    if (hit) problems.push(`${id} has a small count used as evidence in prose: "${hit[0]}"`);
+  }
+  return problems;
+}
+
+// Every `related` slug must name a project, and a project cannot relate to itself.
+export function relatedProblems(projects) {
+  const problems = [];
+  const slugs = new Set(projects.map((p) => p.slug));
+  for (const p of projects) {
+    const id = p.slug ?? '?';
+    if (p.related === undefined) continue;
+    if (!Array.isArray(p.related)) {
+      problems.push(`${id} "related" must be an array of slugs`);
+      continue;
+    }
+    if (new Set(p.related).size !== p.related.length) problems.push(`${id} lists a related slug more than once`);
+    for (const s of p.related) {
+      if (!slugs.has(s)) problems.push(`${id} lists unknown related slug "${s}"`);
+      else if (s === id) problems.push(`${id} lists itself as related`);
+    }
+  }
+  return problems;
+}
+
+// Shared patterns: each definition needs an id, title and line, ids must be unique,
+// every project pattern must be defined, and every defined pattern needs a project.
+export function patternProblems(defs, projects) {
+  const problems = [];
+  const ids = defs.map((d) => d.id);
+  for (const id of new Set(ids.filter((id, i) => ids.indexOf(id) !== i))) {
+    problems.push(`pattern "${id}" is defined more than once`);
+  }
+  for (const d of defs) {
+    for (const k of ['id', 'title', 'line']) {
+      if (typeof d[k] !== 'string' || !d[k].trim()) problems.push(`pattern "${d.id ?? '?'}" is missing "${k}"`);
+    }
+    if (!projects.some((p) => p.patterns?.includes(d.id))) problems.push(`pattern "${d.id}" has no projects`);
+  }
+  for (const p of projects) {
+    if (p.patterns === undefined) continue;
+    if (!Array.isArray(p.patterns)) {
+      problems.push(`${p.slug ?? '?'} "patterns" must be an array of ids`);
+      continue;
+    }
+    for (const id of p.patterns) {
+      if (!ids.includes(id)) problems.push(`${p.slug ?? '?'} uses unknown pattern "${id}"`);
+    }
+  }
+  return problems;
+}

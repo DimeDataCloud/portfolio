@@ -41,7 +41,6 @@ Email chris@dimedata.cloud · [LinkedIn](https://www.linkedin.com/in/christian-s
 | 27 | agents running unattended in a four-layer hierarchy | private, walkthrough on request |
 | 3,567 | passing tests in the public H.A.L.O showcase repo (measured 2026-09-10) | [HALO showcase](https://github.com/DimeDataCloud/halo-agent-showcase#by-the-numbers) |
 | 70K | domains scanned per day by the lead engine | [lead engine showcase](https://github.com/DimeDataCloud/lead-engine-showcase) |
-| 4 | model providers behind one interface, with automatic failover | private, walkthrough on request |
 | 300+ | notes in the cited knowledge graph | [BrainAI graph](https://github.com/DimeDataCloud/brain-graph) |
 
 ## Case studies
@@ -186,7 +185,7 @@ To deploy under another domain, change the route in `wrangler.toml` and make sur
 - **Unit tests.** `npm test` runs the Node test runner (`node:test`, no extra dependencies) over `tools/test/`. It covers the build-time HTML and JSON-LD from `tools/vite-static-content.js`, each content guardrail rule in `tools/content-rules.mjs`, and a run of the guardrail script on this repository.
 - **Accessibility.** `npm run a11y` runs axe-core (`@axe-core/playwright`, pinned) against the built site: the static project list at desktop and phone widths, and the case-study dialog open at both. It fails on serious or critical WCAG 2.0/2.1 A and AA violations. It needs a running preview or a URL argument, and CI runs it against `vite preview`.
 - **Bundle budget.** Gzipped JavaScript across `dist/assets` must stay under 160 KB. The current build measures 151.3 KB, with Three.js included.
-- **Content rules** enforced by the guardrails: every project has the required fields and a unique slug; links are `https`; a project with no public link has a `privateNote`; every slug has a scene builder; the contact email is the public one; no em dashes, phone numbers or secret-shaped strings in site source.
+- **Content rules** enforced by the guardrails: every project has the required fields and a unique slug; links are `https`; a project with no public link has a `privateNote`; every slug has a scene builder; every `related` slug names a project; shared-pattern ids are defined and used; no metric chip is a bare count under 100, and no small count is used as evidence in copy; the contact email is the public one; no em dashes, phone numbers or secret-shaped strings in site source.
 - **Review** uses the Playwright scripts above on desktop and phone sizes. They run locally; `smoke`, `a11y` and the unit tests also run in CI.
 
 ## Fonts, icons and licence

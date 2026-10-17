@@ -10,9 +10,13 @@ import {
   hasEmDash,
   hasPhone,
   missingSceneBuilders,
+  patternProblems,
   projectProblems,
+  relatedProblems,
   sceneBuilderKeys,
   secretNames,
+  smallChipProblems,
+  smallCountProblems,
 } from '../content-rules.mjs';
 
 const EM = '\u2014';
@@ -161,4 +165,47 @@ test('connections: missing text, unknown id and duplicate ids are reported', () 
   assert.ok(problems.includes('connection "voice" is missing "title"'));
   assert.ok(problems.includes('connection "voice" is listed more than once'));
   assert.ok(problems.includes('connection "nope" is not one of the theme ids'));
+});
+
+// Small figures: chips under 100 and counts used as evidence are removed.
+test('small chips: bare integers under 100 are flagged, large figures and thresholds are not', () => {
+  assert.equal(smallChipProblems('demo', [{ value: '45', label: 'tests' }]).length, 1);
+  assert.equal(smallChipProblems('demo', [{ value: '35 of 35', label: 'correct' }]).length, 0);
+  for (const ok of ['434', '283', '231', '300+', '70K', '3,567', '578 vs 656 to 3,878', '14.3%', '< 10%', '< 2 s', '~120 ms', '0.85', '60 ms', '~47', 'RLS', 'FIT']) {
+    assert.deepEqual(smallChipProblems('demo', [{ value: ok, label: 'x' }]), [], `${ok} should be allowed`);
+  }
+});
+
+test('small counts in prose: test, tool and file counts are flagged; architecture facts are not', () => {
+  assert.equal(smallCountProblems('demo', ['The suite runs 45 tests.']).length, 1);
+  assert.equal(smallCountProblems('demo', ['18 tools, 11 of them read-only']).length, 1);
+  assert.equal(smallCountProblems('demo', ['35 of 35 were correct']).length, 1);
+  assert.deepEqual(smallCountProblems('demo', ['3,567 tests across 264 files']), [], 'large figures stay');
+  assert.deepEqual(smallCountProblems('demo', ['A set of 27 agents in four layers, four providers.']), []);
+  assert.deepEqual(smallCountProblems('demo', ['About 47 hypothesis tests, a 0.85 gate, under 10% escalated.']), []);
+});
+
+// Related systems and shared patterns.
+test('related: a list naming an unknown slug, itself or a slug twice is reported', () => {
+  const problems = relatedProblems([{ slug: 'a', related: ['b', 'ghost', 'a', 'b'] }, { slug: 'b' }]);
+  assert.ok(problems.includes('a lists unknown related slug "ghost"'));
+  assert.ok(problems.includes('a lists itself as related'));
+  assert.ok(problems.includes('a lists a related slug more than once'));
+});
+
+test('related: a valid list and an absent field have no problems', () => {
+  assert.deepEqual(relatedProblems([{ slug: 'a', related: ['b'] }, { slug: 'b' }]), []);
+  assert.deepEqual(relatedProblems([{ slug: 'a' }]), []);
+});
+
+test('patterns: unknown uses, missing text and unused definitions are reported', () => {
+  const defs = [
+    { id: 'p1', title: 'T', line: 'L' },
+    { id: 'p2', title: '', line: 'L' },
+  ];
+  const problems = patternProblems(defs, [{ slug: 'a', patterns: ['p1', 'nope'] }]);
+  assert.ok(problems.includes('a uses unknown pattern "nope"'));
+  assert.ok(problems.includes('pattern "p2" is missing "title"'));
+  assert.ok(problems.includes('pattern "p2" has no projects'));
+  assert.deepEqual(patternProblems([{ id: 'p1', title: 'T', line: 'L' }], [{ slug: 'a', patterns: ['p1'] }]), []);
 });

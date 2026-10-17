@@ -18,6 +18,7 @@
     "shots": "node tools/shots.mjs",
     "smoke": "node tools/smoke.mjs",
     "holo-shots": "node tools/holo-shots.mjs",
+    "docs:shots": "node tools/docs-shots.mjs",
     "og": "node tools/og.mjs",
     "fps": "node tools/fps-check.mjs",
     "audio-check": "node tools/audio-check.mjs",

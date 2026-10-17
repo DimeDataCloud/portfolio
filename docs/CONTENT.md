@@ -19,7 +19,7 @@ Append an object to `projects` in `src/data/projects.js`:
 | `title` | Yes | Shown on the hologram label, the menu and the case-study panel. |
 | `year` | Yes | Four-digit string. Shown on the hologram label. |
 | `status` | Yes | One of `live`, `paused`, `progress`, `case` or `archived`. Each colours the status dot in `main.css`; `case` has no class of its own, so it takes the neutral base dot. Use `case` for case-study-only records whose live state is not verified. |
-| `statusText` | Yes | Label shown next to the status dot, for example `Operational`, `Pre-launch`, `In the lab`, `Case study`, `Paused, case study`. Describe the state without changing any claim. |
+| `statusText` | Yes | Label shown next to the status dot, for example `Operational`, `In production`, `Pre-launch`, `In the lab`, `Case study`, `Paused, case study`. Describe the state without changing any claim. |
 | `desc` | Yes | One sentence. Used in the list and the case-study panel. |
 | `problem` | Yes | What was broken. One paragraph. |
 | `built` | Yes | What was made. One paragraph. |

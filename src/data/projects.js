@@ -44,11 +44,11 @@ export const projects = [
     theme: ['assist', 'llm', 'infra'],
     related: ['brainai', 'agent-eval', 'lobby', 'claude-modder', 'open-waddle'],
     patterns: ['mcp'],
-    desc: 'An operating system for a one-person business, staffed by 27 agents in a four-layer hierarchy and connected over Model Context Protocol.',
+    desc: 'An operating system for a one-person business, built with 27 agents in a four-layer hierarchy over Model Context Protocol; the platform is now paused.',
     problem:
       'One person cannot run sales, ops, security and content at once, and unattended agents are only useful if they ask before they send, spend, publish, delete or sign.',
     built:
-      "Intake turns a short set of answers into departments, routines and templates. Routines run on the server in the owner's time zone and work is handed between agents on a shared board with persistent memory. Each account runs in its own process, and 3,567 tests cover the public showcase repo. A model router sends each task across Groq, Gemini on Vertex AI, Ollama and GPT-4o with automatic failover, and steps down a tier at the daily cap rather than failing.",
+      "Intake turned a short set of answers into departments, routines and templates. Routines ran on the server in the owner's time zone and work was handed between agents on a shared board with persistent memory. Each account ran in its own process, and 3,567 tests cover the public showcase repo. A model router sent each task across Groq, Gemini on Vertex AI, Ollama and GPT-4o with automatic failover, and stepped down a tier at the daily cap rather than failing. The platform is paused.",
     result:
       '578 tokens of fixed per-turn overhead against 656 to 3,878 for three competing frameworks, and 14.3% of context saved losslessly where the nearest rival reached 10.8% only by discarding results.',
     metrics: [
@@ -159,8 +159,8 @@ export const projects = [
     slug: 'crm-live',
     title: 'Self-Hosted CRM',
     year: '2025',
-    status: 'case',
-    statusText: 'Case study',
+    status: 'live',
+    statusText: 'In production',
     theme: ['sales', 'infra', 'data'],
     related: ['leadgen-live', 'omni-sdr'],
     patterns: ['mcp'],

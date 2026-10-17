@@ -16,7 +16,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { contact, experience, profile } from '../src/data/profile.js';
-import { linkedConnections, projects } from '../src/data/projects.js';
+import { linkedConnections, projects, relatedSlugs, sharedPatterns } from '../src/data/projects.js';
 
 const esc = (s) =>
   String(s)
@@ -55,6 +55,13 @@ function projectItemHtml(p, i) {
     : p.privateNote
       ? `<p class="pl-private">${esc(p.privateNote)}</p>`
       : '';
+  // related systems as plain links to their list entries (the anchors sit outside the title link)
+  const related = (relatedSlugs[p.slug] ?? []).map((slug) => projects.find((q) => q.slug === slug)).filter(Boolean);
+  const relatedHtml = related.length
+    ? `<ul class="pl-related" aria-label="Related systems">${related
+        .map((q) => `<li><a href="#${esc(q.slug)}">${esc(q.title)}</a></li>`)
+        .join('')}</ul>`
+    : '';
   return (
     `<li class="pl-item">` +
     `<a href="#${esc(p.slug)}" data-slug="${esc(p.slug)}" data-index="${i}">` +
@@ -63,6 +70,7 @@ function projectItemHtml(p, i) {
     `<span class="pl-desc">${esc(p.desc)}</span></a>` +
     meta +
     tail +
+    relatedHtml +
     `</li>`
   );
 }
@@ -104,7 +112,17 @@ function connectionsHtml() {
       return `<article><h3>${esc(c.title)}</h3><p>${esc(c.line)}</p><ul>${names}</ul></article>`;
     })
     .join('');
-  return `<section class="visually-hidden" id="connections-static"><h2>Connections</h2>${items}</section>`;
+  const patterns = sharedPatterns
+    .map((pt) => {
+      const names = pt.projects
+        .map((slug) => projects.find((p) => p.slug === slug))
+        .filter(Boolean)
+        .map((p) => `<li><a href="#${esc(p.slug)}">${esc(p.title)}</a></li>`)
+        .join('');
+      return `<article><h3>${esc(pt.title)}</h3><p>${esc(pt.line)}</p><ul>${names}</ul></article>`;
+    })
+    .join('');
+  return `<section class="visually-hidden" id="connections-static"><h2>Connections</h2>${items}<h2>Shared patterns</h2>${patterns}</section>`;
 }
 
 // External contact links for the first-screen action row, from contact.links.

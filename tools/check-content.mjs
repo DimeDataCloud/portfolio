@@ -12,9 +12,13 @@ import {
   hasEmDash,
   hasPhone,
   missingSceneBuilders,
+  patternProblems,
   projectProblems,
+  relatedProblems,
   sceneBuilderKeys,
   secretNames,
+  smallChipProblems,
+  smallCountProblems,
 } from './content-rules.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -94,6 +98,24 @@ for (const slug of duplicateSlugs(projects)) {
 //    every project sits under a connection.
 const { linkedConnections } = await import(new URL('../src/data/projects.js', import.meta.url));
 for (const msg of connectionProblems(linkedConnections, projects)) fail('connections', msg);
+
+// 6a. Small figures: no count chips under 100 and no small counts used as evidence.
+//     Prose from projects and the résumé (profile summary, running text, experience points).
+const { patternDefs } = await import(new URL('../src/data/projects.js', import.meta.url));
+const { experience, profile } = await import(new URL('../src/data/profile.js', import.meta.url));
+projects.forEach((p, i) => {
+  const id = p.slug || `#${i}`;
+  for (const msg of smallChipProblems(id, p.metrics)) fail('numbers', msg);
+  const texts = [p.statusText, p.desc, p.problem, p.built, p.result, ...(p.metrics ?? []).map((m) => m.label)];
+  for (const msg of smallCountProblems(id, texts)) fail('numbers', msg);
+});
+const profileTexts = [profile.summary, profile.running, ...experience.flatMap((e) => e.points)];
+for (const msg of smallCountProblems('profile', profileTexts)) fail('numbers', msg);
+
+// 6c. Related systems and shared patterns: every slug exists, relations are declared
+//     once, and every pattern is defined and used.
+for (const msg of relatedProblems(projects)) fail('related', msg);
+for (const msg of patternProblems(patternDefs, projects)) fail('patterns', msg);
 
 // 6b. Contact email.
 if (contact?.email !== CONTACT_EMAIL) {

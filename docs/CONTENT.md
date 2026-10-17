@@ -28,6 +28,8 @@ Append an object to `projects` in `src/data/projects.js`:
 | `stack` | Yes | Non-empty array of strings, shown as tags. |
 | `liveUrl` | Yes, may be `null` | `https://` URL, or `null`. |
 | `repoUrl` | Yes, may be `null` | `https://` URL, or `null`. Only public repositories. |
+| `related` | No | Array of project slugs this one works with. The reverse link is derived, so list a pair once. Shown as Related systems in the case study and in the Connections view. |
+| `patterns` | No | Array of ids from `patternDefs` in `src/data/projects.js`, shown under Shared patterns in the Connections view. |
 | `privateNote` | Conditional | Required when there is no public link or when `status` is `private`. Use `"Private, available on request"`. Otherwise `null`. |
 | `accent` | Yes | Hex colour. It tints the hologram, lightened 45 percent toward `#7ec4ff`. |
 
@@ -91,3 +93,4 @@ These rules are checked or enforced in review.
 - No credentials. The guardrail scans tracked files for common key shapes.
 - No eyebrow labels, scroll cues or live clocks in copy.
 - Numbers must trace to the record or to a measurement you can reproduce. Do not round up.
+- No small counts as evidence. A metric chip that is a bare count under 100 is removed, and copy does not use counts such as "45 tests" or "11 of them". Percentages, thresholds ("0.85", "< 2 s") and time budgets ("60 ms") stay, as do architecture facts in words ("four providers", "27 agents"). The guardrail flags the cases it can match.

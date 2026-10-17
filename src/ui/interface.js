@@ -2,7 +2,7 @@
 // focus management (trap + return), mode switch, sound toggle, deep links.
 // Content comes from src/data/profile.js and src/data/projects.js only.
 
-import { linkedConnections, projects, socials } from '../data/projects.js';
+import { linkedConnections, projects, relatedSlugs, sharedPatterns, socials } from '../data/projects.js';
 import { contact, education, experience, metrics, profile, skills } from '../data/profile.js';
 import { iconSvg } from './icons.js';
 import { sound } from '../audio/sound.js';
@@ -50,6 +50,8 @@ export class Interface {
       detailDesc: document.getElementById('detail-desc'),
       detailMetrics: document.getElementById('detail-metrics'),
       detailCase: document.getElementById('detail-case'),
+      detailRelatedSec: document.getElementById('detail-related-sec'),
+      detailRelated: document.getElementById('detail-related'),
       detailStack: document.getElementById('detail-stack'),
       detailLinks: document.getElementById('detail-links'),
       detailClose: document.getElementById('detail-close'),
@@ -152,17 +154,22 @@ export class Interface {
   }
 
   /* ---------- connections (rendered from profile.js + projects.js) ---------- */
+  // Buttons for a list of project slugs. Each one selects its project (data-index).
+  projectButtons(slugs, action) {
+    return slugs
+      .map((slug) => projects.findIndex((p) => p.slug === slug))
+      .filter((i) => i >= 0)
+      .map((i) => {
+        const title = projects[i].title;
+        return `<li><button class="connection-project" type="button" data-index="${i}" aria-label="${esc(title)}, ${action}">${esc(title)}</button></li>`;
+      })
+      .join('');
+  }
+
   renderConnections() {
     const groups = linkedConnections
       .map((c) => {
-        const buttons = c.projects
-          .map((slug) => projects.findIndex((p) => p.slug === slug))
-          .filter((i) => i >= 0)
-          .map((i) => {
-            const title = projects[i].title;
-            return `<li><button class="connection-project" type="button" data-index="${i}" aria-label="${esc(title)}, show in the project carousel">${esc(title)}</button></li>`;
-          })
-          .join('');
+        const buttons = this.projectButtons(c.projects, 'show in the project carousel');
         return `
         <article class="connection">
           <h3 class="connection-title">${esc(c.title)}</h3>
@@ -172,12 +179,29 @@ export class Interface {
       })
       .join('');
 
+    const patterns = sharedPatterns
+      .map(
+        (pt) => `
+          <div class="pattern">
+            <h4 class="pattern-title">${esc(pt.title)}</h4>
+            <p class="connection-line">${esc(pt.line)}</p>
+            <ul class="connection-projects" aria-label="Projects for ${esc(pt.title)}">${this.projectButtons(pt.projects, 'show in the project carousel')}</ul>
+          </div>`,
+      )
+      .join('');
+    const shared = `
+        <article class="connection shared-patterns">
+          <h3 class="connection-title" id="shared-patterns-title">Shared patterns</h3>
+          <p class="connection-line">The same design choice, built in more than one project.</p>
+          <div class="pattern-list" aria-labelledby="shared-patterns-title">${patterns}</div>
+        </article>`;
+
     this.el.connectionsBody.innerHTML = `
       <div class="connections-head">
         <h2 class="connections-title" id="connections-title">Connections</h2>
         <p class="connections-intro">How the work fits together. Each area lists the projects that show it.</p>
       </div>
-      <div class="connection-list">${groups}</div>`;
+      <div class="connection-list">${groups}${shared}</div>`;
 
     this.el.connectionsBody.addEventListener('click', (e) => {
       const b = e.target.closest('button[data-index]');
@@ -295,6 +319,8 @@ export class Interface {
     const p = projects[i];
     if (!p) return;
     this.rememberFocus();
+    // A related-system jump inside an open case study keeps the original return focus
+    if (!this.el.detail.classList.contains('open')) this.rememberFocus();
     this.openIndex = i;
     sound.pressThock();
 
@@ -318,6 +344,11 @@ export class Interface {
     this.el.detailCase.innerHTML = sections
       .map(([heading, text]) => `<section class="case-sec"><h3 class="case-title">${heading}</h3><p>${esc(text)}</p></section>`)
       .join('');
+
+    // Related systems: the same select-project path as the Connections buttons
+    const relatedHtml = this.projectButtons(relatedSlugs[p.slug] ?? [], 'open case study');
+    this.el.detailRelated.innerHTML = relatedHtml;
+    this.el.detailRelatedSec.hidden = !relatedHtml;
 
     this.el.detailStack.innerHTML = p.stack.map((s) => `<li>${esc(s)}</li>`).join('');
 
@@ -370,6 +401,13 @@ export class Interface {
 
   bindOverlays() {
     this.el.detailClose.addEventListener('click', () => this.closeDetail());
+    this.el.detailRelated.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-index]');
+      if (!b) return;
+      const i = Number(b.dataset.index);
+      this.carousel?.focusProject(i);
+      this.openDetail(i);
+    });
     this.el.detail.addEventListener('click', (e) => {
       if (e.target === this.el.detail) this.closeDetail();
     });

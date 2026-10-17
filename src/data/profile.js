@@ -20,7 +20,6 @@ export const metrics = [
   { value: '27', label: 'agents in a four-layer hierarchy run unattended' },
   { value: '3,567', label: 'passing tests in the public H.A.L.O showcase repo (measured 2026-09-10)' },
   { value: '70K', label: 'domains scanned per day by the lead engine' },
-  { value: '4', label: 'model providers behind one interface, with automatic failover' },
   { value: '300+', label: 'notes in the cited knowledge graph' },
 ];
 
@@ -47,7 +46,7 @@ export const experience = [
     blurb: 'Sole engineer. Built and operate every system on this site.',
     points: [
       'Voice agent that answers the phone, qualifies the caller, books the appointment and writes the result to the CRM. Streaming at every hop, inside a sub-2-second budget, with a ~120 ms time-to-first-token target. Audio under a 0.85 ASR confidence gate is re-asked, not guessed.',
-      '30+ days without outages or incidents across every deployment, shipped through CI/CD behind 3,000+ automated tests.',
+      'No outages or incidents across every deployment, shipped through CI/CD behind 3,000+ automated tests.',
       'Call Room and reply classifier that prepare the human before the conversation. Under 10% of replies fall below the confidence threshold and go to a person.',
       'Model router across Groq, Gemini on Vertex AI, Ollama and GPT-4o with automatic failover. Measured, not claimed: 578 tokens of fixed per-turn overhead against 656 to 3,878 for three competing frameworks, and 14.3% of context saved losslessly.',
       'Retrieval layer over a 300+ note knowledge base: embeddings, vector search, reranking, and every answer forced to cite its source note. 27 agents run on top of it over Model Context Protocol.',

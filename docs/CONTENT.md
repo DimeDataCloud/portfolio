@@ -18,8 +18,8 @@ Append an object to `projects` in `src/data/projects.js`:
 | `slug` | Yes | Lowercase, hyphenated, unique. It is the URL hash (`#slug`) and the key in `builders`. |
 | `title` | Yes | Shown on the hologram label, the menu and the case-study panel. |
 | `year` | Yes | Four-digit string. Shown on the hologram label. |
-| `status` | Yes | One of `live`, `archived`, `paused`, `progress`. Each colours the status dot in `main.css`. |
-| `statusText` | Yes | Label shown next to the status dot, for example `Operational`, `Pre-launch`, `In the lab`, `Archived, case study`, `Paused, case study`. Describe the state without changing any claim. |
+| `status` | Yes | One of `live`, `paused`, `progress`, `case` or `archived`. Each colours the status dot in `main.css`; `case` has no class of its own, so it takes the neutral base dot. Use `case` for case-study-only records whose live state is not verified. |
+| `statusText` | Yes | Label shown next to the status dot, for example `Operational`, `Pre-launch`, `In the lab`, `Case study`, `Paused, case study`. Describe the state without changing any claim. |
 | `desc` | Yes | One sentence. Used in the list and the case-study panel. |
 | `problem` | Yes | What was broken. One paragraph. |
 | `built` | Yes | What was made. One paragraph. |

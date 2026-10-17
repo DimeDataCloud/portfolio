@@ -48,13 +48,13 @@ Email chris@dimedata.cloud · [LinkedIn](https://www.linkedin.com/in/christian-s
 | Project | What it is | Key metric | Status | Link |
 |---|---|---|---|---|
 | Omni SDR | Sales development layer that checks every claim before a human-approved send | Database-enforced send guard; 283 tests | Pre-launch | [live](https://omnisdr.com), [repo](https://github.com/DimeDataCloud/omni-sdr-showcase) |
-| H.A.L.O Agent OS | Operating system for a one-person business, 27 agents in four layers | 578 tokens of fixed overhead per turn | Paused | [repo](https://github.com/DimeDataCloud/halo-agent-showcase) |
-| AI Voice Receptionist | Virtual agent that answers the phone, qualifies the caller and books the appointment | Under 2 s response budget | Archived | private, available on request |
+| H.A.L.O Agent OS | Operating system for a one-person business, 27 agents in four layers | 578 tokens of fixed overhead per turn | Paused, case study | [repo](https://github.com/DimeDataCloud/halo-agent-showcase) |
+| AI Voice Receptionist | Virtual agent that answers the phone, qualifies the caller and books the appointment | Under 2 s response budget | Case study | private, available on request |
 | Agent Evaluation Harness | Statistical harness on benchmarks written outside the company | About 47 hypothesis tests | Operational | private, available on request |
 | Open ClaudeOS | Claude proposes, deterministic code decides, and the user approves a card (C# on .NET 10, WinUI 3) | 434 tests | Open source, Apache-2.0 | [repo](https://github.com/DimeDataCloud/open-ClaudeOS) |
 | BrainAI Knowledge Graph | 300+ wikilinked notes in Neo4j, read by Claude over a read-only MCP server | Every Cypher statement checked and run read-only | Operational | [repo](https://github.com/DimeDataCloud/brain-graph) |
-| Self-Hosted CRM | Pipelines, funnels and a Call Room that prepares the rep before every dial | Under 10% of replies escalated to a person | Archived | [repo](https://github.com/DimeDataCloud/crm-showcase) |
-| Lead-Generation Engine | Two-axis lead scoring from free public signals | 70K domains scanned per day | Archived | [repo](https://github.com/DimeDataCloud/lead-engine-showcase) |
+| Self-Hosted CRM | Pipelines, funnels and a Call Room that prepares the rep before every dial | Under 10% of replies escalated to a person | Case study | [repo](https://github.com/DimeDataCloud/crm-showcase) |
+| Lead-Generation Engine | Two-axis lead scoring from free public signals | 70K domains scanned per day | Case study | [repo](https://github.com/DimeDataCloud/lead-engine-showcase) |
 | Lobby | Shared canvas where humans and AI agents post artifacts | Bot tokens scoped to one workspace | Open source, MIT | [repo](https://github.com/DimeDataCloud/lobby) |
 | Claude Modder | Fleet orchestrator for Claude Code sessions with a learning permission gate | Safety property tested over 400 random histories | Open source, MIT | [repo](https://github.com/DimeDataCloud/claude-modder) |
 | Open Waddle | Desktop AI agent drawn as a pixel-art duck that asks before it acts | Four deterministic permission tiers | Open source, MIT | [repo](https://github.com/DimeDataCloud/Open-Waddle) |

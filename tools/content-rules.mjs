@@ -17,6 +17,9 @@ export const SECRETS = [
 export const REQUIRED_PROJECT_FIELDS = ['slug', 'title', 'desc', 'problem', 'built', 'result'];
 // Filter themes a project may carry (its `theme` array).
 export const THEMES = ['voice', 'assist', 'llm', 'retrieval', 'eval', 'data', 'infra', 'viz', 'sales'];
+// Status values a project may carry (its `status`, which picks the status dot).
+// `case` is the neutral case-study state: no claim about whether it is running.
+export const STATUSES = ['live', 'progress', 'paused', 'archived', 'case', 'private'];
 
 export const hasEmDash = (line) => line.includes(EM_DASH);
 export const hasPhone = (line) => PHONE.test(line);
@@ -33,6 +36,9 @@ export function projectProblems(p, id = p?.slug ?? '?') {
     if (typeof p[k] !== 'string' || !p[k].trim()) problems.push(`${id} is missing "${k}"`);
   }
   if (!Array.isArray(p.stack) || p.stack.length === 0) problems.push(`${id} is missing "stack"`);
+  if (p.status !== undefined && !STATUSES.includes(p.status)) {
+    problems.push(`${id} has a status outside ${STATUSES.join(', ')}`);
+  }
   if (!Array.isArray(p.theme) || p.theme.length === 0) {
     problems.push(`${id} is missing "theme"`);
   } else if (p.theme.some((t) => !THEMES.includes(t))) {

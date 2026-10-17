@@ -27,7 +27,10 @@
 <body>
   <!-- focus anchor: main.js focuses then blurs this so the next Tab starts above the skip link -->
   <span id="focus-top" tabindex="-1"></span>
-  <a class="skip-link" href="#project-list">Skip to projects</a>
+  <!-- first stop for keyboard and screen-reader users, before the entry gate: passes the gate and lands on the content -->
+  <a class="skip-link" id="skip-link" href="#project-list">Skip to content</a>
+  <!-- announces the selected project as the carousel or list selection changes -->
+  <p class="visually-hidden" id="list-live" aria-live="polite" aria-atomic="true"></p>
 
   <!-- Loader / entry gate: loading progress, then one Enter button (silent; sound is opt-in after entry) -->
   <div class="loader" id="loader" aria-hidden="false">
@@ -60,11 +63,11 @@
 
     <div class="mode-switch" id="mode-switch" role="group" aria-label="Site mode">
       <button class="mode-btn active" id="mode-motion" type="button" aria-pressed="true" aria-label="Motion">
-        <span class="mode-label"><span aria-hidden="true">Motion</span><span aria-hidden="true">Motion</span></span>
+        <span class="mode-label" aria-hidden="true"><span>Motion</span><span>Motion</span></span>
       </button>
       <span class="mode-dot" aria-hidden="true"></span>
       <button class="mode-btn" id="mode-sound" type="button" aria-pressed="false" aria-label="Sound">
-        <span class="mode-label"><span aria-hidden="true">Sound</span><span aria-hidden="true">Sound</span></span>
+        <span class="mode-label" aria-hidden="true"><span>Sound</span><span>Sound</span></span>
       </button>
     </div>
 

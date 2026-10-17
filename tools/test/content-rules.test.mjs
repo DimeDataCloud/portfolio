@@ -4,6 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  STATUSES,
   THEMES,
   connectionProblems,
   duplicateSlugs,
@@ -82,6 +83,12 @@ test('projects: a theme is required and must use the allowed ids', () => {
   assert.deepEqual(projectProblems({ ...validProject, theme: [] }), ['demo is missing "theme"']);
   assert.deepEqual(projectProblems({ ...validProject, theme: ['assist', 'nope'] }), [`demo has a theme outside ${THEMES.join(', ')}`]);
   assert.deepEqual(projectProblems({ ...validProject, theme: ['voice', 'sales'] }), []);
+});
+
+test('projects: status must be one of the allowed values', () => {
+  assert.deepEqual(projectProblems({ ...validProject, status: 'case' }), []);
+  assert.deepEqual(projectProblems({ ...validProject, status: 'live' }), []);
+  assert.deepEqual(projectProblems({ ...validProject, status: 'shipped' }), [`demo has a status outside ${STATUSES.join(', ')}`]);
 });
 
 test('projects: empty stack is reported', () => {

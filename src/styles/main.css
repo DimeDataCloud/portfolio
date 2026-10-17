@@ -329,7 +329,8 @@ body.entered:not(.no-webgl) .project-list a:focus-visible .pl-year { color: var(
   transition: transform 0.25s var(--out-expo);
 }
 .skip-link:focus { transform: none; outline: 2px solid var(--accent); outline-offset: 3px; }
-body:not(.entered) .skip-link { display: none; }
+/* the skip link stays focusable before the entry gate: it is the first Tab stop
+   and it passes the gate (see main.js), so keyboard users need no Enter first */
 
 .project-list a {
   display: flex; align-items: baseline; gap: 14px;
@@ -589,6 +590,11 @@ body:not(.entered) .skip-link { display: none; }
 @media (max-width: 700px) {
   .mode-switch { display: none; }
   .project-list a { font-size: clamp(1.25rem, 3.6vh, 1.9rem); }
+  /* touch: each project entry and the contact link are 44 px tall (the visual size is unchanged) */
+  .project-list a, .menu-links a { min-height: 44px; display: flex; align-items: center; }
+  /* the static Connections list (SEO copy, visually hidden) gets the same 44 px rows */
+  #connections-static a { min-height: 44px; display: flex; align-items: center; }
+  .contact-mail { display: inline-flex; align-items: center; min-height: 44px; }
   .menu-panel { width: calc(100vw - var(--edge) * 2); }
   .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .metric:nth-child(3n) { border-right: 1px solid var(--hairline); }

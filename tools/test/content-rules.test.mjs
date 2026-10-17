@@ -5,6 +5,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   THEMES,
+  connectionProblems,
   duplicateSlugs,
   hasEmDash,
   hasPhone,
@@ -126,4 +127,38 @@ test('scene builders: missing object is signalled with null', () => {
 test('scene builders: every project needs a key', () => {
   const keys = new Set(['a']);
   assert.deepEqual(missingSceneBuilders([{ slug: 'a' }, { slug: 'b' }], keys), ['b']);
+});
+
+// Connections: one per theme, each with projects, and every project under one.
+const oneConnectionPerTheme = THEMES.map((id) => ({ id, title: `T ${id}`, line: `L ${id}.`, projects: ['demo'] }));
+
+test('connections: a complete set covering every theme has no problems', () => {
+  assert.deepEqual(connectionProblems(oneConnectionPerTheme, [validProject]), []);
+});
+
+test('connections: a theme with no connection is reported', () => {
+  const short = oneConnectionPerTheme.filter((c) => c.id !== 'viz');
+  assert.ok(connectionProblems(short, []).includes('theme "viz" has no connection'));
+});
+
+test('connections: a connection with no projects is reported', () => {
+  const empty = oneConnectionPerTheme.map((c) => (c.id === 'sales' ? { ...c, projects: [] } : c));
+  assert.ok(connectionProblems(empty, [validProject]).includes('connection "sales" has no projects'));
+});
+
+test('connections: a project under no connection is reported', () => {
+  const orphan = { ...validProject, slug: 'orphan', theme: [] };
+  assert.ok(connectionProblems(oneConnectionPerTheme, [orphan]).includes('orphan is under no connection'));
+});
+
+test('connections: missing text, unknown id and duplicate ids are reported', () => {
+  const bad = [
+    { id: 'voice', title: '', line: 'x', projects: ['demo'] },
+    { id: 'voice', title: 'T', line: 'x', projects: ['demo'] },
+    { id: 'nope', title: 'T', line: 'x', projects: ['demo'] },
+  ];
+  const problems = connectionProblems(bad, []);
+  assert.ok(problems.includes('connection "voice" is missing "title"'));
+  assert.ok(problems.includes('connection "voice" is listed more than once'));
+  assert.ok(problems.includes('connection "nope" is not one of the theme ids'));
 });

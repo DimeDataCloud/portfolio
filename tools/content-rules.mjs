@@ -73,3 +73,34 @@ export function sceneBuilderKeys(scenesSrc) {
 export function missingSceneBuilders(projects, keys) {
   return projects.filter((p) => !keys.has(p.slug)).map((p) => p.slug);
 }
+
+// Problems with the Connections view data. `linked` is the derived list from
+// projects.js (each connection with its `projects` slugs). Every connection must
+// name a theme and have at least one project; every project must sit under at
+// least one connection; every theme must have exactly one connection.
+export function connectionProblems(linked, projects) {
+  const problems = [];
+  const ids = linked.map((c) => c.id);
+  for (const id of new Set(ids.filter((id, i) => ids.indexOf(id) !== i))) {
+    problems.push(`connection "${id}" is listed more than once`);
+  }
+  for (const c of linked) {
+    const id = c.id ?? '?';
+    for (const k of ['title', 'line']) {
+      if (typeof c[k] !== 'string' || !c[k].trim()) problems.push(`connection "${id}" is missing "${k}"`);
+    }
+    if (!THEMES.includes(id)) problems.push(`connection "${id}" is not one of the theme ids`);
+    if (!Array.isArray(c.projects) || c.projects.length === 0) {
+      problems.push(`connection "${id}" has no projects`);
+    }
+  }
+  for (const t of THEMES) {
+    if (!ids.includes(t)) problems.push(`theme "${t}" has no connection`);
+  }
+  for (const p of projects) {
+    if (!linked.some((c) => p.theme?.includes(c.id))) {
+      problems.push(`${p.slug ?? '?'} is under no connection`);
+    }
+  }
+  return problems;
+}

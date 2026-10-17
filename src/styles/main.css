@@ -249,8 +249,9 @@ body.menu-open .menu-btn { opacity: 0; pointer-events: none; }
   .menu-links a:hover::before { scale: 1; opacity: 1; }
 }
 
+.menu-secondary { margin-top: var(--gap-m); display: flex; flex-wrap: wrap; gap: 4px 28px; }
 .menu-about-link {
-  margin-top: var(--gap-m);
+  display: inline-flex; align-items: center; min-height: 44px;
   font-weight: 500; font-size: var(--text-m);
   color: var(--panel-ink); opacity: 0.55;
   width: fit-content;
@@ -345,7 +346,7 @@ body:not(.entered) .skip-link { display: none; }
 .project-list a.focused .pl-year { color: var(--accent); }
 
 /* ============ case-study + profile overlays ============ */
-.detail, .about {
+.detail, .about, .connections {
   position: fixed; inset: 0; z-index: 40;
   /* flex, not grid: the panel's max-height: 100% needs a definite height */
   display: flex; align-items: center; justify-content: center;
@@ -356,10 +357,14 @@ body:not(.entered) .skip-link { display: none; }
   opacity: 0; visibility: hidden;
   transition: opacity 0.45s var(--inout), visibility 0.45s;
 }
-.detail.open, .about.open { opacity: 1; visibility: visible; }
+.detail.open, .about.open, .connections.open { opacity: 1; visibility: visible; }
+/* connections: visibility switches on at once when it opens (a transition that starts
+   from hidden makes focus() fail in the same task) and waits for the fade when it closes */
+.connections { transition: opacity 0.45s var(--inout), visibility 0s linear 0.45s; }
+.connections.open { transition: opacity 0.45s var(--inout), visibility 0s; }
 
 /* panel: fixed frame; the close button lives here so it stays put over long content */
-.detail-panel, .about-panel {
+.detail-panel, .about-panel, .connections-panel {
   position: relative;
   width: min(720px, 100%);
   max-height: 100%;
@@ -367,9 +372,9 @@ body:not(.entered) .skip-link { display: none; }
   translate: 0 30px; scale: 0.97;
   transition: translate 0.55s var(--out-expo), scale 0.55s var(--out-expo);
 }
-.detail.open .detail-panel, .about.open .about-panel { translate: 0 0; scale: 1; }
+.detail.open .detail-panel, .about.open .about-panel, .connections.open .connections-panel { translate: 0 0; scale: 1; }
 
-.detail-inner, .about-inner {
+.detail-inner, .about-inner, .connections-inner {
   flex: 1 1 auto; min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -379,16 +384,42 @@ body:not(.entered) .skip-link { display: none; }
   padding: clamp(24px, 4.5vw, 48px);
   display: flex; flex-direction: column; gap: var(--gap-m);
 }
-.detail-inner:focus-visible, .about-inner:focus-visible { outline-offset: -2px; }
+.detail-inner:focus-visible, .about-inner:focus-visible, .connections-inner:focus-visible { outline-offset: -2px; }
 
-.detail-close, .about-close {
+.detail-close, .about-close, .connections-close {
   position: absolute; top: 14px; right: 14px; z-index: 2;
   display: grid; place-items: center;
   width: 42px; height: 42px; border-radius: 50%;
   background: var(--hairline); color: var(--ink);
   transition: transform 0.4s var(--spring), background 0.25s;
 }
-.detail-close:hover, .about-close:hover { transform: rotate(90deg); background: var(--accent-soft); }
+.detail-close:hover, .about-close:hover, .connections-close:hover { transform: rotate(90deg); background: var(--accent-soft); }
+
+/* connections: the same dark sheet as the profile, one block per area of work */
+.connections-body { display: flex; flex-direction: column; gap: var(--gap-m); }
+.connections-head { display: grid; gap: 10px; padding-right: 48px; }
+.connections-title {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: clamp(2rem, 1.4rem + 3vw, 3.4rem); letter-spacing: -0.02em; line-height: 1;
+}
+.connections-intro { font-size: var(--text-s); line-height: 1.6; color: var(--ink-dim); max-width: 62ch; }
+.connection-list { display: grid; }
+.connection { display: grid; gap: 10px; padding: 24px 0; border-top: 1px solid var(--hairline); }
+.connection:first-child { border-top: none; padding-top: 0; }
+.connection-title {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: clamp(1.15rem, 1.05rem + 0.4vw, 1.35rem); letter-spacing: -0.01em; color: var(--ink);
+}
+.connection-line { font-size: var(--text-s); line-height: 1.55; color: var(--ink-dim); max-width: 62ch; }
+.connection-projects { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.connection-project {
+  display: inline-flex; align-items: center; min-height: 44px;
+  padding: 0 16px; border-radius: var(--r-pill);
+  border: 1px solid var(--hairline); background: var(--bg);
+  font-size: var(--text-s); line-height: 1.2; color: var(--ink);
+  transition: background-color 0.25s, border-color 0.25s;
+}
+.connection-project:hover { background: var(--accent-soft); border-color: var(--accent); }
 
 /* case study */
 .detail-top { display: flex; align-items: center; justify-content: space-between; padding-right: 52px; min-height: 42px; }
@@ -560,8 +591,8 @@ body:not(.entered) .skip-link { display: none; }
 }
 
 @media (max-width: 380px) {
-  .detail, .about { padding: 12px; }
-  .detail-inner, .about-inner { padding: 22px 18px; }
+  .detail, .about, .connections { padding: 12px; }
+  .detail-inner, .about-inner, .connections-inner { padding: 22px 18px; }
   .detail-links a, .detail-links span { padding: 11px 18px; }
   .metrics { grid-template-columns: 1fr; }
   .metric { border-right: none !important; border-bottom: 1px solid var(--hairline); }
@@ -616,13 +647,13 @@ body.no-webgl .value-line { font-size: var(--text-m); }
 
 /* ============ touch targets: 44 x 44 CSS px minimum on coarse pointers ============ */
 @media (pointer: coarse) {
-  .logo, .mode-btn, .menu-btn, .detail-close, .about-close, .menu-close,
+  .logo, .mode-btn, .menu-btn, .detail-close, .about-close, .connections-close, .menu-close,
   .menu-about-link, .menu-mail, .menu-socials a, .contact-link, .enter-btn {
     min-width: 44px; min-height: 44px;
     display: inline-flex; align-items: center; justify-content: center;
   }
   .menu-socials a { width: 44px; height: 44px; }
-  .detail-close, .about-close { width: 44px; height: 44px; }
+  .detail-close, .about-close, .connections-close { width: 44px; height: 44px; }
 }
 
 /* ============ reduced motion ============ */
@@ -638,7 +669,7 @@ body.no-webgl .value-line { font-size: var(--text-m); }
   /* no motion to toggle: the Motion control is hidden and the speaker button
      at bottom right is the one sound control, as on phones */
   .mode-switch { display: none; }
-  .detail-panel, .about-panel { translate: none !important; scale: none !important; }
+  .detail-panel, .about-panel, .connections-panel { translate: none !important; scale: none !important; }
 }
 
 /* ============ no-webgl / reduced-motion fallback ============ */

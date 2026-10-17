@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { join, relative } from 'path';
 import {
   CONTACT_EMAIL,
+  connectionProblems,
   duplicateSlugs,
   hasEmDash,
   hasPhone,
@@ -89,7 +90,12 @@ for (const slug of duplicateSlugs(projects)) {
   fail('projects', `slug "${slug}" is not unique`);
 }
 
-// 6. Contact email.
+// 6. Connections: every theme is a connection, every connection has projects,
+//    every project sits under a connection.
+const { linkedConnections } = await import(new URL('../src/data/projects.js', import.meta.url));
+for (const msg of connectionProblems(linkedConnections, projects)) fail('connections', msg);
+
+// 6b. Contact email.
 if (contact?.email !== CONTACT_EMAIL) {
   fail('contact', `contact.email in src/data/profile.js must be ${CONTACT_EMAIL}`);
 }

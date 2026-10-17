@@ -107,7 +107,7 @@ function connectionsHtml() {
       const names = c.projects
         .map((slug) => projects.find((p) => p.slug === slug))
         .filter(Boolean)
-        .map((p) => `<li><a href="#${esc(p.slug)}">${esc(p.title)}</a></li>`)
+        .map((p) => `<li><a href="#${esc(p.slug)}" tabindex="-1">${esc(p.title)}</a></li>`)
         .join('');
       return `<article><h3>${esc(c.title)}</h3><p>${esc(c.line)}</p><ul>${names}</ul></article>`;
     })
@@ -117,7 +117,7 @@ function connectionsHtml() {
       const names = pt.projects
         .map((slug) => projects.find((p) => p.slug === slug))
         .filter(Boolean)
-        .map((p) => `<li><a href="#${esc(p.slug)}">${esc(p.title)}</a></li>`)
+        .map((p) => `<li><a href="#${esc(p.slug)}" tabindex="-1">${esc(p.title)}</a></li>`)
         .join('');
       return `<article><h3>${esc(pt.title)}</h3><p>${esc(pt.line)}</p><ul>${names}</ul></article>`;
     })

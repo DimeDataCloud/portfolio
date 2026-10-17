@@ -19,6 +19,7 @@ import {
   secretNames,
   smallChipProblems,
   smallCountProblems,
+  smallTestCounts,
 } from './content-rules.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -111,6 +112,17 @@ projects.forEach((p, i) => {
 });
 const profileTexts = [profile.summary, profile.running, ...experience.flatMap((e) => e.points)];
 for (const msg of smallCountProblems('profile', profileTexts)) fail('numbers', msg);
+
+// 6a2. Test counts under 1,000 in site source, index, README, docs and the social card script.
+//       tools/ is otherwise not scanned because its tests use these phrases as fixtures.
+const TEST_COUNT_SCOPE = /^(src\/.*|index\.html|README\.md|docs\/.*\.md|tools\/og\.mjs)$/;
+for (const f of tracked.filter((f) => TEST_COUNT_SCOPE.test(rel(f)))) {
+  lines(text(f)).forEach((line, i) => {
+    for (const hit of smallTestCounts(line)) {
+      fail('numbers', `${rel(f)}:${i + 1} has a test count under 1,000 used as evidence: "${hit}"; remove it`);
+    }
+  });
+}
 
 // 6c. Related systems and shared patterns: every slug exists, relations are declared
 //     once, and every pattern is defined and used.

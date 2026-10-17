@@ -143,6 +143,20 @@ export function smallCountProblems(id, texts = []) {
   return problems;
 }
 
+// Test counts used as evidence: "283 tests", "231 enterprise tests". A bare count
+// of tests under 1,000 fails the build. Thousands separators (3,567) do not match
+// because the count must not follow a digit, comma or period.
+export const TEST_COUNT = /(?<![\d,.])(\d{1,3})\s+(?:(?:passing|automated|enterprise|unit|property|integration)\s+)?tests?\b/gi;
+
+// Test counts under 1,000 in one line of text. Returns the matched phrases.
+export function smallTestCounts(line) {
+  const out = [];
+  for (const m of String(line).matchAll(TEST_COUNT)) {
+    if (Number(m[1]) < 1000) out.push(m[0]);
+  }
+  return out;
+}
+
 // Every `related` slug must name a project, and a project cannot relate to itself.
 export function relatedProblems(projects) {
   const problems = [];

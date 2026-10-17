@@ -8,9 +8,9 @@ import { fileURLToPath } from 'url';
 const OUT = fileURLToPath(new URL('../public/og.png', import.meta.url));
 
 const metrics = [
-  { value: '27', label: 'agents running unattended in a four-layer hierarchy' },
   { value: '3,567', label: 'passing tests in the public H.A.L.O showcase repo' },
   { value: '70K', label: 'domains scanned per day by the lead engine' },
+  { value: '300+', label: 'notes in the cited knowledge graph' },
 ];
 
 const html = `<!doctype html><html><head><meta charset="utf-8"><style>

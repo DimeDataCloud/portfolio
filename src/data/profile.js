@@ -17,9 +17,10 @@ export const profile = {
 
 // Headline numbers, shown as a strip on the About panel.
 export const metrics = [
-  { value: '27', label: 'agents in a four-layer hierarchy run unattended' },
+  { value: '27', label: 'agents in a four-layer hierarchy, run unattended' },
   { value: '3,567', label: 'passing tests in the public H.A.L.O showcase repo (measured 2026-09-10)' },
   { value: '70K', label: 'domains scanned per day by the lead engine' },
+  { value: '4', label: 'model providers behind one interface, with automatic failover' },
   { value: '300+', label: 'notes in the cited knowledge graph' },
 ];
 

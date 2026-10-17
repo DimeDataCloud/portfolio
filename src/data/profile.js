@@ -24,6 +24,21 @@ export const metrics = [
   { value: '300+', label: 'notes in the cited knowledge graph' },
 ];
 
+// How the work fits together. `id` is a theme id from THEMES (tools/content-rules.mjs).
+// The projects for each connection are derived from projects.js (`theme` arrays),
+// so this list never names a project directly and cannot drift from it.
+export const connections = [
+  { id: 'voice', title: 'Virtual agents and voice', line: 'Speech in, model, speech out, every hop streaming, with a sub-2-second budget and a confidence gate that re-asks instead of guessing.' },
+  { id: 'assist', title: 'Agent assist and messaging', line: 'Tools that prepare the human before the conversation, and hand anything uncertain to a person.' },
+  { id: 'llm', title: 'LLMs, routing and cost', line: 'Four providers behind one interface with failover, each task sent to the cheapest model that is good enough.' },
+  { id: 'retrieval', title: 'Retrieval and agents', line: 'Embeddings, search and reranking under agents that must cite the note an answer came from, connected over Model Context Protocol.' },
+  { id: 'eval', title: 'Measurement and evaluation', line: 'Endpoints fixed before the run, multiple-comparison correction, and findings withdrawn when the statistics stop supporting them.' },
+  { id: 'data', title: 'Data pipelines and modeling', line: 'Scheduled ingestion into scoring models built from free public signals.' },
+  { id: 'infra', title: 'Infrastructure and security', line: 'Separate networks, a reverse proxy as the only way in, database-enforced rules, least-privilege access.' },
+  { id: 'viz', title: 'Visualization and observability', line: 'Live maps and readable traces that turn a running agent from a black box into steps and costs.' },
+  { id: 'sales', title: 'Sales and CRM systems', line: 'Discovery to close, built into the tools: CRMs, lead scoring and approval-gated outreach.' },
+];
+
 export const experience = [
   {
     role: 'AI Solutions Engineer',

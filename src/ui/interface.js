@@ -2,7 +2,7 @@
 // focus management (trap + return), mode switch, sound toggle, deep links.
 // Content comes from src/data/profile.js and src/data/projects.js only.
 
-import { projects, socials } from '../data/projects.js';
+import { linkedConnections, projects, socials } from '../data/projects.js';
 import { contact, education, experience, metrics, profile, skills } from '../data/profile.js';
 import { iconSvg } from './icons.js';
 import { sound } from '../audio/sound.js';
@@ -22,6 +22,7 @@ export class Interface {
     this.carousel = null; // wired by main.js
     this.openIndex = null; // project detail open
     this.aboutOpen = false;
+    this.connectionsOpen = false;
     this.returnFocus = null;
 
     this.el = {
@@ -32,6 +33,12 @@ export class Interface {
       menuSocials: document.getElementById('menu-socials'),
       menuClose: document.getElementById('menu-close'),
       menuAbout: document.getElementById('menu-about'),
+      menuConnections: document.getElementById('menu-connections'),
+      connections: document.getElementById('connections'),
+      connectionsPanel: document.getElementById('connections-panel'),
+      connectionsInner: document.getElementById('connections-inner'),
+      connectionsBody: document.getElementById('connections-body'),
+      connectionsClose: document.getElementById('connections-close'),
       introMenu: document.getElementById('intro-menu'),
       detail: document.getElementById('detail'),
       detailPanel: document.getElementById('detail-panel'),
@@ -62,8 +69,10 @@ export class Interface {
     // overlay bodies that can overflow must be reachable by keyboard
     this.el.detailInner.tabIndex = 0;
     this.el.aboutInner.tabIndex = 0;
+    this.el.connectionsInner.tabIndex = 0;
 
     this.renderProfile();
+    this.renderConnections();
     this.buildMenu();
     this.bindList();
     this.bindOverlays();
@@ -142,6 +151,69 @@ export class Interface {
       </section>`;
   }
 
+  /* ---------- connections (rendered from profile.js + projects.js) ---------- */
+  renderConnections() {
+    const groups = linkedConnections
+      .map((c) => {
+        const buttons = c.projects
+          .map((slug) => projects.findIndex((p) => p.slug === slug))
+          .filter((i) => i >= 0)
+          .map((i) => {
+            const title = projects[i].title;
+            return `<li><button class="connection-project" type="button" data-index="${i}" aria-label="${esc(title)}, show in the project carousel">${esc(title)}</button></li>`;
+          })
+          .join('');
+        return `
+        <article class="connection">
+          <h3 class="connection-title">${esc(c.title)}</h3>
+          <p class="connection-line">${esc(c.line)}</p>
+          <ul class="connection-projects" aria-label="Projects for ${esc(c.title)}">${buttons}</ul>
+        </article>`;
+      })
+      .join('');
+
+    this.el.connectionsBody.innerHTML = `
+      <div class="connections-head">
+        <h2 class="connections-title" id="connections-title">Connections</h2>
+        <p class="connections-intro">How the work fits together. Each area lists the projects that show it.</p>
+      </div>
+      <div class="connection-list">${groups}</div>`;
+
+    this.el.connectionsBody.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-index]');
+      if (b) this.jumpToProject(Number(b.dataset.index));
+    });
+  }
+
+  // Close the overlay and select the project in the carousel. Focus goes to the
+  // matching DOM list entry, whose focus handler selects it on the carousel too.
+  jumpToProject(i) {
+    this.setConnections(false, { restore: false });
+    const entry = this.anchors?.find((a) => Number(a.dataset.index) === i);
+    if (entry) entry.focus({ preventScroll: true });
+    else this.carousel?.focusProject(i);
+  }
+
+  setConnections(open, { restore = true } = {}) {
+    if (open === this.connectionsOpen) return;
+    this.connectionsOpen = open;
+    if (open) this.rememberFocus();
+    this.el.connections.classList.toggle('open', open);
+    this.el.connections.setAttribute('aria-hidden', String(!open));
+    this.el.connections.inert = !open;
+    this.el.webgl.classList.toggle('dimmed', open);
+    this.carousel && (open ? this.carousel.input.pause() : this.carousel.input.resume());
+    if (open) {
+      this.el.connectionsInner.scrollTop = 0;
+      history.replaceState(null, '', '#connections');
+      this.el.connectionsClose.focus();
+    } else {
+      history.replaceState(null, '', location.pathname);
+      if (restore) this.restoreFocus();
+      else this.returnFocus = null;
+    }
+  }
+
   /* ---------- menu ---------- */
   buildMenu() {
     this.el.menuLinks.innerHTML = projects
@@ -165,6 +237,10 @@ export class Interface {
     this.el.menuAbout.addEventListener('click', () => {
       this.setMenu(false);
       setTimeout(() => this.setAbout(true), 250);
+    });
+    this.el.menuConnections.addEventListener('click', () => {
+      this.setMenu(false);
+      setTimeout(() => this.setConnections(true), 250);
     });
     // first-screen action: the menu lists every case study and About
     this.el.introMenu.addEventListener('click', () => this.setMenu(true));
@@ -266,7 +342,7 @@ export class Interface {
     this.el.detail.classList.remove('open');
     this.el.detail.setAttribute('aria-hidden', 'true');
     this.el.detail.inert = true;
-    this.el.webgl.classList.toggle('dimmed', this.aboutOpen);
+    this.el.webgl.classList.toggle('dimmed', this.aboutOpen || this.connectionsOpen);
     history.replaceState(null, '', location.pathname);
     this.carousel?.input.resume();
     this.restoreFocus();
@@ -300,6 +376,10 @@ export class Interface {
     this.el.aboutClose.addEventListener('click', () => this.setAbout(false));
     this.el.about.addEventListener('click', (e) => {
       if (e.target === this.el.about) this.setAbout(false);
+    });
+    this.el.connectionsClose.addEventListener('click', () => this.setConnections(false));
+    this.el.connections.addEventListener('click', (e) => {
+      if (e.target === this.el.connections) this.setConnections(false);
     });
   }
 
@@ -371,13 +451,22 @@ export class Interface {
       if (e.key === 'Escape') {
         if (this.openIndex !== null) this.closeDetail();
         else if (this.aboutOpen) this.setAbout(false);
+        else if (this.connectionsOpen) this.setConnections(false);
         else if (menuOpen) this.setMenu(false);
         return;
       }
 
       if (e.key === 'Tab') {
         const layer =
-          this.openIndex !== null ? this.el.detailPanel : this.aboutOpen ? this.el.aboutPanel : menuOpen ? this.el.menuPanel : null;
+          this.openIndex !== null
+            ? this.el.detailPanel
+            : this.aboutOpen
+              ? this.el.aboutPanel
+              : this.connectionsOpen
+                ? this.el.connectionsPanel
+                : menuOpen
+                  ? this.el.menuPanel
+                  : null;
         if (layer) this.trapFocus(e, layer);
         return;
       }
@@ -394,6 +483,10 @@ export class Interface {
     if (!slug) return;
     if (slug === 'about') {
       this.setAbout(true);
+      return;
+    }
+    if (slug === 'connections') {
+      this.setConnections(true);
       return;
     }
     const i = projects.findIndex((p) => p.slug === slug);

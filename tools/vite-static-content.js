@@ -4,7 +4,7 @@
 // data files stay the single source of truth.
 //
 // Placeholders in index.html:
-//   <!--STATIC_CONTENT-->  project list + profile article (inside <main>)
+//   <!--STATIC_CONTENT-->  project list, profile article and connections (inside <main>)
 //   <!--JSON_LD-->         Person structured data (inside <head>)
 //   <!--INTRO_LINKS-->     external contact links in the first-screen action row
 //   __DESCRIPTION__        meta description, og and twitter description
@@ -16,7 +16,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { contact, experience, profile } from '../src/data/profile.js';
-import { projects } from '../src/data/projects.js';
+import { linkedConnections, projects } from '../src/data/projects.js';
 
 const esc = (s) =>
   String(s)
@@ -92,6 +92,21 @@ function profileArticleHtml() {
   );
 }
 
+// The Connections view as plain HTML: each area, its line, and the projects under it.
+function connectionsHtml() {
+  const items = linkedConnections
+    .map((c) => {
+      const names = c.projects
+        .map((slug) => projects.find((p) => p.slug === slug))
+        .filter(Boolean)
+        .map((p) => `<li><a href="#${esc(p.slug)}">${esc(p.title)}</a></li>`)
+        .join('');
+      return `<article><h3>${esc(c.title)}</h3><p>${esc(c.line)}</p><ul>${names}</ul></article>`;
+    })
+    .join('');
+  return `<section class="visually-hidden" id="connections-static"><h2>Connections</h2>${items}</section>`;
+}
+
 // External contact links for the first-screen action row, from contact.links.
 function introLinksHtml() {
   const links = contact.links.map(
@@ -110,6 +125,7 @@ function jsonLd() {
     url: 'https://portfolio.dimedata.cloud/',
     address: { '@type': 'PostalAddress', addressLocality: 'Nashville', addressRegion: 'TN' },
     sameAs: contact.links.map((l) => l.url),
+    knowsAbout: linkedConnections.map((c) => c.title),
   };
   // Escape "<" so no value can close the script tag early.
   const json = JSON.stringify(data, null, 2).replace(/</g, '\\u003c');
@@ -145,7 +161,7 @@ export default function staticContent() {
     transformIndexHtml(html) {
       const description = esc(describe());
       return html
-        .replace('<!--STATIC_CONTENT-->', () => `${projectListHtml()}\n    ${profileArticleHtml()}`)
+        .replace('<!--STATIC_CONTENT-->', () => `${projectListHtml()}\n    ${profileArticleHtml()}\n    ${connectionsHtml()}`)
         .replace('<!--JSON_LD-->', () => jsonLd())
         .replace('<!--INTRO_LINKS-->', () => introLinksHtml())
         .replaceAll('__DESCRIPTION__', description)

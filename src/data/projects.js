@@ -9,7 +9,7 @@
 // `theme` tags the project for filtering (next PR). Allowed ids are listed in
 // THEMES in tools/content-rules.mjs.
 
-import { contact, profile } from './profile.js';
+import { connections, contact, profile } from './profile.js';
 
 export const projects = [
   {
@@ -315,6 +315,14 @@ export const projects = [
 ];
 
 export const socials = contact.links;
+
+// Each connection from profile.js with the slugs of the projects whose `theme`
+// includes its id, in projects order. Derived here (not in profile.js) so the
+// links cannot drift from the theme arrays and profile.js never imports projects.
+export const linkedConnections = connections.map((c) => ({
+  ...c,
+  projects: projects.filter((p) => p.theme?.includes(c.id)).map((p) => p.slug),
+}));
 
 export const meta = {
   name: profile.name,

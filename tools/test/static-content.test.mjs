@@ -5,8 +5,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import staticContent from '../vite-static-content.js';
-import { contact, profile } from '../../src/data/profile.js';
-import { projects } from '../../src/data/projects.js';
+import { connections, contact, profile } from '../../src/data/profile.js';
+import { linkedConnections, projects } from '../../src/data/projects.js';
 
 const EM_DASH = '\u2014';
 const template = readFileSync(fileURLToPath(new URL('../../index.html', import.meta.url)), 'utf8');
@@ -82,4 +82,23 @@ test('first-screen actions link the email, GitHub and LinkedIn from contact data
     assert.ok(block[0].includes(`href="${l.url}"`), `${l.name} action missing`);
   }
   assert.ok(block[0].includes('id="intro-menu"'), 'Projects and About action missing');
+});
+
+test('connections: every area appears in the static HTML with its projects linked', () => {
+  const block = output.match(/<section class="visually-hidden" id="connections-static">[\s\S]*?<\/section>/);
+  assert.ok(block, 'connections static section missing');
+  for (const c of connections) {
+    assert.ok(block[0].includes(`<h3>${c.title}</h3>`), `${c.title} heading missing`);
+    assert.ok(block[0].includes(`<p>${c.line}</p>`), `${c.title} line missing`);
+  }
+  for (const c of linkedConnections) {
+    for (const slug of c.projects) {
+      assert.ok(block[0].includes(`href="#${slug}"`), `${slug} link missing under ${c.title}`);
+    }
+  }
+});
+
+test('JSON-LD lists the connection titles under knowsAbout', () => {
+  const data = JSON.parse(jsonLdBlocks[0]);
+  assert.deepEqual(data.knowsAbout, connections.map((c) => c.title));
 });

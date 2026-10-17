@@ -25,7 +25,7 @@ The site is a dark, low-light space with one 3D object type: a projected hologra
 | `--amber` | `#e8a33d` | Paused and pre-launch status |
 | `--hairline` | `rgba(250,250,250,0.12)` | Panel borders and dividers |
 
-Each project carries an `accent` in its data record. The current nine use blue, green or amber, and the scene colour is that accent lerped 45 percent toward a light blue (`#7ec4ff`) so the holograms read as one family. Status colours are reserved for status. They are not used as decoration.
+Each project carries an `accent` in its data record. The current projects use blue, green or amber, and the scene colour is that accent lerped 45 percent toward a light blue (`#7ec4ff`) so the holograms read as one family. Status colours are reserved for status. They are not used as decoration.
 
 ## Type
 

@@ -8,9 +8,9 @@ import { fileURLToPath } from 'url';
 const OUT = fileURLToPath(new URL('../public/og.png', import.meta.url));
 
 const metrics = [
-  { value: '75.0%', label: 'solve rate vs 50.0% for the closest open-source comparator' },
-  { value: '27', label: 'agents running unattended' },
-  { value: '< 2 s', label: 'voice response budget, speech in to speech out' },
+  { value: '27', label: 'agents running unattended in a four-layer hierarchy' },
+  { value: '3,567', label: 'passing tests in the public H.A.L.O showcase repo' },
+  { value: '70K', label: 'domains scanned per day by the lead engine' },
 ];
 
 const html = `<!doctype html><html><head><meta charset="utf-8"><style>

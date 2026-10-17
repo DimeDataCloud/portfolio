@@ -17,11 +17,11 @@ export const profile = {
 
 // Headline numbers, shown as a strip on the About panel.
 export const metrics = [
-  { value: '27', label: 'agents in a four-layer hierarchy, run unattended' },
-  { value: '< 2 s', label: 'voice response budget, speech in to speech out' },
-  { value: '75.0%', label: 'solve rate vs 50.0% for the closest open-source comparator (n=20)' },
-  { value: '4', label: 'model providers behind one interface, with automatic failover' },
+  { value: '27', label: 'agents in a four-layer hierarchy run unattended' },
   { value: '3,567', label: 'passing tests in the public H.A.L.O showcase repo (measured 2026-09-10)' },
+  { value: '70K', label: 'domains scanned per day by the lead engine' },
+  { value: '4', label: 'model providers behind one interface, with automatic failover' },
+  { value: '300+', label: 'notes in the cited knowledge graph' },
 ];
 
 export const experience = [
@@ -31,12 +31,13 @@ export const experience = [
     place: 'Remote',
     blurb: 'Sole engineer. Built and operate every system on this site.',
     points: [
-      'Voice agent that answers the phone, qualifies the caller, books the appointment and writes the result to the CRM. Streaming at every hop, inside a sub-2-second budget. Audio under a 0.85 ASR confidence gate is re-asked, not guessed. First 30 days live: 83 after-hours calls, 11 appointments booked.',
+      'Voice agent that answers the phone, qualifies the caller, books the appointment and writes the result to the CRM. Streaming at every hop, inside a sub-2-second budget, with a ~120 ms time-to-first-token target. Audio under a 0.85 ASR confidence gate is re-asked, not guessed.',
+      '30+ days without outages or incidents across every deployment, shipped through CI/CD behind 3,000+ automated tests.',
       'Call Room and reply classifier that prepare the human before the conversation. Under 10% of replies fall below the confidence threshold and go to a person.',
       'Model router across Groq, Gemini on Vertex AI, Ollama and GPT-4o with automatic failover. Measured, not claimed: 578 tokens of fixed per-turn overhead against 656 to 3,878 for three competing frameworks, and 14.3% of context saved losslessly.',
       'Retrieval layer over a 300+ note knowledge base: embeddings, vector search, reranking, and every answer forced to cite its source note. 27 agents run on top of it over Model Context Protocol.',
-      'Evaluation harness run on benchmark suites written outside the company: 75.0% vs 50.0% solve rate (n=20), and a reliability profile to k=6 of 70.0% vs 44.0%. About 47 hypothesis tests, multiple-comparison correction, estimator fixed in advance, six of my own findings withdrawn.',
-      'Two-axis lead scoring (fit and intent) from free public signals, including a 70K-domain daily newly-registered feed. Cold outbound funnel: 27.2% open, 4.3% book across 233 sends on the initial production run.',
+      'Evaluation harness run on benchmark suites written outside the company, with endpoints fixed before each run. About 47 hypothesis tests, multiple-comparison correction, estimator fixed in advance.',
+      'Two-axis lead scoring (fit and intent) from free public signals, including a 70K-domain daily newly-registered feed that feeds a cold outbound funnel.',
     ],
   },
   {
@@ -45,7 +46,7 @@ export const experience = [
     place: 'Nashville, TN',
     blurb: 'Full-cycle outbound for a cold T-Mobile Fiber pilot market, then the AT&T book.',
     points: [
-      'Number one rep in the pilot market in its first week. Daily funnel: 100 visits, 20 decision-makers, 4 presentations, 1 sale.',
+      'Number one rep in the pilot market in its first week.',
       'Consistent top-five ranking in a 26-person office on the AT&T book. Ran the weekly objection-handling training and built the library that I later automated for each lead.',
     ],
   },
@@ -55,7 +56,7 @@ export const experience = [
     place: 'Remote',
     blurb: 'Replaced manual market research with an AI and Python tool.',
     points: [
-      'Scheduled API collection, transformation, statistical analysis and visualization, scoring token legitimacy across Solana perpetuals and memecoins. Cut about 180 seconds of research per token and supported desks that acquired over $500,000 in trading revenue.',
+      'Scheduled API collection, transformation, statistical analysis and visualization, scoring token legitimacy across Solana perpetuals and memecoins. Saves about 180 seconds of research per token and supported desks that acquired over $500,000 in trading revenue.',
       'Built and ran the employee process-documentation portal for a non-technical audience, growing it to a peak of 200+ active members. The same stack became the CRM.',
     ],
   },

@@ -4,6 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  THEMES,
   duplicateSlugs,
   hasEmDash,
   hasPhone,
@@ -22,6 +23,7 @@ const validProject = {
   built: 'Something built.',
   result: 'A result.',
   stack: ['Node.js'],
+  theme: ['assist'],
   repoUrl: 'https://github.com/example/demo',
   liveUrl: null,
   privateNote: null,
@@ -40,7 +42,7 @@ test('phone: flags US-style numbers and ignores metrics', () => {
   assert.equal(hasPhone('call 615 555 0100'), true);
   assert.equal(hasPhone('3,567 passing tests'), false);
   assert.equal(hasPhone('measured 2026-09-10'), false);
-  assert.equal(hasPhone('83 after-hours calls and 11 appointments'), false);
+  assert.equal(hasPhone('3,567 passing tests and 70K domains per day'), false);
 });
 
 test('secrets: detects each known shape by name without returning the value', () => {
@@ -69,6 +71,12 @@ test('projects: a complete public record has no problems', () => {
 test('projects: a missing required field is reported by name', () => {
   const p = { ...validProject, problem: '   ' };
   assert.deepEqual(projectProblems(p), ['demo is missing "problem"']);
+});
+
+test('projects: a theme is required and must use the allowed ids', () => {
+  assert.deepEqual(projectProblems({ ...validProject, theme: [] }), ['demo is missing "theme"']);
+  assert.deepEqual(projectProblems({ ...validProject, theme: ['assist', 'nope'] }), [`demo has a theme outside ${THEMES.join(', ')}`]);
+  assert.deepEqual(projectProblems({ ...validProject, theme: ['voice', 'sales'] }), []);
 });
 
 test('projects: empty stack is reported', () => {

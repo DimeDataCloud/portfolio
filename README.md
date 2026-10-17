@@ -24,7 +24,7 @@
 ## What this shows
 
 - **No asset files.** Every scene is built from Three.js primitives and custom GLSL. Sound is synthesised with Web Audio. The repository has no 3D models, textures or audio files.
-- **A performance budget that CI enforces.** Gzipped JavaScript, Three.js included, must stay under 160 KB. A build check fails the pipeline when it does not. The current build measures 151 KB.
+- **A performance budget that CI enforces.** Gzipped JavaScript, Three.js included, must stay under 160 KB. A build check fails the pipeline when it does not. The current build measures 152 KB.
 - **Content as data.** Two data files drive the WebGL interface, the no-JavaScript HTML, the meta tags and the JSON-LD. A Vite plugin writes the same content into the built `index.html`.
 - **Guardrails in the pipeline.** A content check fails the build on broken or private links, missing scene builders, em dashes, phone numbers and secret-shaped strings.
 
@@ -39,24 +39,29 @@ Email chris@dimedata.cloud · [LinkedIn](https://www.linkedin.com/in/christian-s
 | Headline number | What it measures (self-reported from my own production logs and evaluation runs) | Evidence |
 |---|---|---|
 | 27 | agents running unattended in a four-layer hierarchy | private, walkthrough on request |
-| < 2 s | voice response budget, speech in to speech out | private, walkthrough on request |
-| 75.0% | solve rate vs 50.0% for the closest open-source comparator (n=20) | private, walkthrough on request |
-| 4 | model providers behind one interface, with automatic failover | private, walkthrough on request |
 | 3,567 | passing tests in the public H.A.L.O showcase repo (measured 2026-09-10) | [HALO showcase](https://github.com/DimeDataCloud/halo-agent-showcase#by-the-numbers) |
+| 70K | domains scanned per day by the lead engine | [lead engine showcase](https://github.com/DimeDataCloud/lead-engine-showcase) |
+| 4 | model providers behind one interface, with automatic failover | private, walkthrough on request |
+| 300+ | notes in the cited knowledge graph | [BrainAI graph](https://github.com/DimeDataCloud/brain-graph) |
 
 ## Case studies
 
 | Project | What it is | Key metric | Status | Link |
 |---|---|---|---|---|
-| AI Voice Receptionist | Virtual agent that answers the phone, qualifies the caller and books the appointment | 83 after-hours calls and 11 appointments in the first 30 days | Archived | private, available on request |
-| Self-Hosted CRM | Pipelines, funnels and a Call Room that prepares the rep before every dial | Under 10% of replies escalated to a person | Archived | [repo](https://github.com/DimeDataCloud/crm-showcase) |
-| Lead-Generation Engine | Two-axis lead scoring from free public signals | 27.2% open and 4.3% book across 233 sends | Archived | [repo](https://github.com/DimeDataCloud/lead-engine-showcase) |
+| Omni SDR | Sales development layer that checks every claim before a human-approved send | Database-enforced send guard; 283 tests | Pre-launch | [live](https://omnisdr.com), [repo](https://github.com/DimeDataCloud/omni-sdr-showcase) |
 | H.A.L.O Agent OS | Operating system for a one-person business, 27 agents in four layers | 578 tokens of fixed overhead per turn | Paused | [repo](https://github.com/DimeDataCloud/halo-agent-showcase) |
-| Agent Evaluation Harness | Statistical harness on benchmarks written outside the company | 75.0% solve rate vs 50.0% | Operational | private, available on request |
-| BrainAI Knowledge Graph | 300+ wikilinked notes in Neo4j, read by Claude over a read-only MCP server | 27 agents read it over MCP | Operational | [repo](https://github.com/DimeDataCloud/brain-graph) |
-| Omni SDR | Sales development layer that checks every claim before a human-approved send | None published yet | Pre-launch | [live](https://omnisdr.com), [repo](https://github.com/DimeDataCloud/omni-sdr-showcase) |
-| App Builder | Plain-language app idea to a 12-section build specification | 12 blueprint sections | In the lab | [repo](https://github.com/DimeDataCloud/app-builder) |
-| This Portfolio | Procedural 3D portfolio on Three.js, with a custom post pass | About 151 KB gzipped, Three.js included | Live | [live](https://portfolio.dimedata.cloud), [repo](https://github.com/DimeDataCloud/portfolio) |
+| AI Voice Receptionist | Virtual agent that answers the phone, qualifies the caller and books the appointment | Under 2 s response budget | Archived | private, available on request |
+| Agent Evaluation Harness | Statistical harness on benchmarks written outside the company | About 47 hypothesis tests | Operational | private, available on request |
+| Open ClaudeOS | Claude proposes, deterministic code decides, and the user approves a card (C# on .NET 10, WinUI 3) | 434 tests | Open source, Apache-2.0 | [repo](https://github.com/DimeDataCloud/open-ClaudeOS) |
+| BrainAI Knowledge Graph | 300+ wikilinked notes in Neo4j, read by Claude over a read-only MCP server | Every Cypher statement checked and run read-only | Operational | [repo](https://github.com/DimeDataCloud/brain-graph) |
+| Self-Hosted CRM | Pipelines, funnels and a Call Room that prepares the rep before every dial | Under 10% of replies escalated to a person | Archived | [repo](https://github.com/DimeDataCloud/crm-showcase) |
+| Lead-Generation Engine | Two-axis lead scoring from free public signals | 70K domains scanned per day | Archived | [repo](https://github.com/DimeDataCloud/lead-engine-showcase) |
+| Lobby | Shared canvas where humans and AI agents post artifacts | Bot tokens scoped to one workspace | Open source, MIT | [repo](https://github.com/DimeDataCloud/lobby) |
+| Claude Modder | Fleet orchestrator for Claude Code sessions with a learning permission gate | Safety property tested over 400 random histories | Open source, MIT | [repo](https://github.com/DimeDataCloud/claude-modder) |
+| Open Waddle | Desktop AI agent drawn as a pixel-art duck that asks before it acts | Four deterministic permission tiers | Open source, MIT | [repo](https://github.com/DimeDataCloud/Open-Waddle) |
+| Jamlink | Browser-only two-player guitar jamming over WebRTC | Enforced 60 ms latency budget | Open source, MIT | [repo](https://github.com/DimeDataCloud/jamlink) |
+| Trading Bot | Paper-only research desk with pre-registered experiments. Not financial advice. | Hash-chained audit log | Paper trading only, MIT | [repo](https://github.com/DimeDataCloud/trading-bot) |
+| This Portfolio | Procedural 3D portfolio on Three.js, with a custom post pass | About 150 KB gzipped, Three.js included | Live | [live](https://portfolio.dimedata.cloud), [repo](https://github.com/DimeDataCloud/portfolio) |
 
 Private projects appear on the site with their case study text and no links.
 
@@ -106,7 +111,7 @@ public/og.png                    1200 x 630 social card (rendered by tools/og.mj
 public/_headers                  Cloudflare headers: nosniff, referrer policy, immutable cache for /assets/*
 src/main.js                      Boot: fonts, loader, entry gate, WebGL or fallback
 src/data/profile.js              Profile, headline metrics, experience, skills, contact
-src/data/projects.js             The nine projects: the single source for project copy
+src/data/projects.js             The fourteen projects: the single source for project copy
 src/experience/Stage.js          Renderer, camera, parallax, post pass
 src/experience/Carousel.js       Spiral layout, hover picking, focus
 src/experience/Holo.js           One hologram: dais, beam, caustics, motes, label

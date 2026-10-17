@@ -66,13 +66,6 @@ const geo = {
   envFlap: new THREE.ConeGeometry(0.02, 0.016, 4),
   // brainai
   wire: new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(0.125, 0)),
-  // app builder
-  pillar: new THREE.BoxGeometry(0.014, 0.34, 0.014),
-  rail: new THREE.BoxGeometry(0.32, 0.012, 0.012),
-  carriage: new THREE.BoxGeometry(0.05, 0.03, 0.05),
-  nozzle: new THREE.ConeGeometry(0.012, 0.03, 6),
-  block: new THREE.BoxGeometry(0.15, 0.068, 0.15),
-  screenBlock: new THREE.BoxGeometry(0.13, 0.075, 0.028),
   // portfolio micro-carousel
   microDais: new THREE.CylinderGeometry(0.032, 0.042, 0.012, 10),
   microBeam: new THREE.CylinderGeometry(0.024, 0.008, 0.08, 8, 1, true),
@@ -729,105 +722,6 @@ function brainai(mats) {
 }
 
 /* =====================================================================
- * 8. App Builder - idea in, app out.
- * A prompt orb descends into a gantry and dissolves; a printhead carriage
- * sweeps while blocks materialize with weight, building an app tower
- * topped by a bright screen; the tower takes a proud 360° turn, then
- * deconstructs bottom-up as the next orb arrives.
- * ===================================================================== */
-function appBuilder(mats) {
-  const g = new THREE.Group();
-  const T = 9;
-
-  const gantryMat = mats.line();
-  [[-0.15, -0.15], [0.15, -0.15], [-0.15, 0.15], [0.15, 0.15]].forEach(([x, z]) => {
-    const p = mesh(geo.pillar, gantryMat);
-    p.position.set(x, 0.22, z);
-    g.add(p);
-  });
-  [[-0.15, 0, 0], [0.15, 0, 0], [0, 0, -0.15], [0, 0, 0.15]].forEach(([x, , z], i) => {
-    const r = mesh(geo.rail, gantryMat);
-    r.position.set(x, 0.395, z);
-    if (i < 2) r.rotation.y = Math.PI / 2;
-    g.add(r);
-  });
-
-  const carMat = mats.soft();
-  const car = new THREE.Group();
-  car.add(mesh(geo.carriage, carMat));
-  const noz = mesh(geo.nozzle, carMat);
-  noz.rotation.x = Math.PI;
-  noz.position.y = -0.03;
-  car.add(noz);
-  car.position.y = 0.40;
-  g.add(car);
-
-  const orbMat = mats.bright();
-  const orb = mesh(geo.sphS, orbMat);
-  g.add(orb);
-
-  const tower = new THREE.Group();
-  g.add(tower);
-  const blockMats = [];
-  const blocks = [0, 1, 2, 3].map((i) => {
-    const m = i === 3 ? mats.bright() : mats.soft();
-    blockMats.push(m);
-    const b = mesh(i === 3 ? geo.screenBlock : geo.block, m);
-    b.userData.restY = 0.10 + i * 0.078 + (i === 3 ? 0.01 : 0);
-    tower.add(b);
-    return b;
-  });
-
-  const starts = [0.16, 0.265, 0.37, 0.475]; // per-block build windows
-
-  return {
-    group: g,
-    update(t) {
-      const u = (t / T) % 1;
-
-      // prompt orb: descend, dissolve; reappear at the very end
-      const d = seg(u, 0, 0.12);
-      const dis = seg(u, 0.10, 0.15);
-      const back = seg(u, 0.955, 1);
-      orb.position.set(0, u < 0.5 ? 0.78 - inCubic(d) * 0.36 : 0.78, 0);
-      orb.scale.setScalar(Math.max(0.001, u < 0.5 ? 1 - dis : back));
-      orbMat.uniforms.uAlpha.value = 0.95 * (u < 0.5 ? 1 - dis : back);
-
-      // carriage sweeps while building, parks after
-      const building = Math.min(seg(u, 0.13, 0.18), 1 - seg(u, 0.55, 0.62));
-      car.position.x = Math.sin(t * 2.6) * 0.11 * building;
-      carMat.uniforms.uAlpha.value = 0.3 + 0.4 * building + 0.5 * spike(dis);
-
-      // blocks materialize with weight, deconstruct bottom-up
-      const turn = inOut(seg(u, 0.58, 0.75));
-      blocks.forEach((b, i) => {
-        const grow = backOut(seg(u, starts[i], starts[i] + 0.055));
-        const seat = seg(u, starts[i] + 0.055, starts[i] + 0.12);
-        const gone = inCubic(seg(u, 0.78 + i * 0.04, 0.82 + i * 0.04));
-        const s = Math.max(0.001, grow * (1 - gone));
-        const sy = impact(seat, 0.32);
-        b.scale.set(s * (1 + (1 - sy) * 0.5), s * sy, s * (1 + (1 - sy) * 0.5));
-        b.position.y = b.userData.restY - gone * 0.03;
-        blockMats[i].uniforms.uAlpha.value = (i === 3 ? 0.95 : 0.6) * grow * (1 - gone);
-      });
-
-      // proud 360° turn (ends exactly where it began)
-      tower.rotation.y = TAU * turn;
-      gantryMat.uniforms.uAlpha.value = 0.30 * (1 - 0.55 * bump(seg(u, 0.58, 0.75)));
-
-      // secondary: whole rig sways gently
-      g.rotation.y = 0.08 * Math.sin(t * 0.33);
-    },
-    beat(t) {
-      const u = (t / T) % 1;
-      let b = 0;
-      for (let i = 0; i < 4; i++) b = Math.max(b, spike(seg(u, starts[i] + 0.05, starts[i] + 0.13)));
-      return b;
-    },
-  };
-}
-
-/* =====================================================================
  * 9. Portfolio Website - the site inside itself.
  * Five micro-projectors (dais + beam + glowing dot) on a mini helix with
  * the real focus model in miniature; the ring periodically accelerates,
@@ -1123,8 +1017,14 @@ const builders = {
   'brainai': brainai,
   'agent-eval': agentEval,
   'omni-sdr': omniSdr,
-  'app-builder': appBuilder,
   'portfolio-site': portfolioSite,
+  // new projects reuse the closest existing builder
+  'open-claudeos': omniSdr,
+  'lobby': brainai,
+  'claude-modder': haloAgentOs,
+  'open-waddle': receptionist,
+  'jamlink': generic,
+  'trading-bot': agentEval,
 };
 
 /**

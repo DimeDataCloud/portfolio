@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import staticContent from '../vite-static-content.js';
 import { contact, profile } from '../../src/data/profile.js';
+import { projects } from '../../src/data/projects.js';
 
 const EM_DASH = '\u2014';
 const template = readFileSync(fileURLToPath(new URL('../../index.html', import.meta.url)), 'utf8');
@@ -54,7 +55,7 @@ test('og and twitter descriptions mirror the meta description', () => {
 
 test('static list has one item per project and the profile article is present', () => {
   const items = output.match(/<li class="pl-item">/g) ?? [];
-  assert.equal(items.length, 9);
+  assert.equal(items.length, projects.length);
   assert.match(output, /<article class="visually-hidden" id="profile-static">/);
   assert.ok(output.includes(profile.summary), 'profile summary missing from the static article');
 });

@@ -85,3 +85,12 @@ test('the shipped project data has no small chips or small counts in prose', () 
     assert.deepEqual(smallCountProblems(p.slug, [p.statusText, p.desc, p.problem, p.built, p.result]), [], `${p.slug} prose`);
   }
 });
+
+// Case studies are described neutrally: the public repos do not say whether these are running,
+// so the record may not claim either "archived" or "in production".
+test('case studies carry the neutral "case" status and the "Case study" label', () => {
+  const cases = projects.filter((p) => p.status === 'case');
+  assert.deepEqual(cases.map((p) => p.slug).sort(), ['crm-live', 'leadgen-live', 'receptionist-live']);
+  for (const p of cases) assert.equal(p.statusText, 'Case study', `${p.slug} statusText`);
+  assert.equal(projects.find((p) => p.slug === 'halo-agent-os').statusText, 'Paused, case study');
+});

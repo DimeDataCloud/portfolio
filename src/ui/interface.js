@@ -65,6 +65,7 @@ export class Interface {
       soundOff: document.querySelector('.icon-sound-off'),
       modeMotion: document.getElementById('mode-motion'),
       modeSound: document.getElementById('mode-sound'),
+      listLive: document.getElementById('list-live'),
       webgl: document.getElementById('webgl'),
     };
 
@@ -312,6 +313,16 @@ export class Interface {
   setListFocus(pos) {
     this.el.list.classList.toggle('has-focus', pos !== null);
     this.anchors.forEach((a, j) => a.classList.toggle('focused', pos === j));
+    this.announceSelection(pos);
+  }
+
+  // Polite live region: names the selected project when the selection changes.
+  // Only changes are spoken, so repeated focus on one entry says nothing new.
+  announceSelection(pos) {
+    const title = pos !== null ? this.anchors[pos]?.querySelector('.pl-title')?.textContent.trim() : '';
+    if (!title || title === this.lastAnnounced) return;
+    this.lastAnnounced = title;
+    this.el.listLive.textContent = title;
   }
 
   /* ---------- project case study overlay ---------- */

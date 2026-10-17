@@ -71,6 +71,7 @@ let enterShown = false;
 function showEnter() {
   if (enterShown) return;
   enterShown = true;
+  if (skipRequested) { enter(); return; }
   if (returning) {
     autoEnterTimer = setTimeout(() => enter(), RETURN_ENTER_MS);
     return;
@@ -94,7 +95,25 @@ function enter() {
   document.body.classList.add('entered');
   experience?.begin();
   startDeepLinks();
+  if (skipRequested) {
+    skipRequested = false;
+    document.getElementById('project-list').focus({ preventScroll: true });
+  }
 }
+
+// "Skip to content" is the first stop on the page, before the gate. Once loading
+// is done it passes the gate and lands on the project list; if loading is still
+// running, the skip is remembered and applied when the gate is ready.
+let skipRequested = false;
+document.getElementById('skip-link').addEventListener('click', (e) => {
+  e.preventDefault();
+  if (document.body.classList.contains('entered')) {
+    document.getElementById('project-list').focus({ preventScroll: true });
+    return;
+  }
+  skipRequested = true;
+  if (enterShown) enter();
+});
 
 // Reduced motion or no WebGL: there is nothing to wait for, so the gate is
 // skipped entirely and the static project list, About and menu are the site.

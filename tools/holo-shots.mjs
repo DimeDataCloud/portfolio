@@ -1,4 +1,4 @@
-// Hologram v2 verification pass - captures each of the 9 projects
+// Hologram v2 verification pass - captures each of the 14 projects
 // front-center (arrow keys step the ring), a hover state, a mobile
 // viewport, and logs a rough fps average. Run: node tools/holo-shots.mjs [url]
 import { chromium } from 'playwright';
@@ -21,7 +21,7 @@ await page.waitForSelector('#loader-enter:not([hidden])', { timeout: 15000 });
 await page.click('#enter-btn');
 await page.waitForTimeout(2600);
 
-for (let i = 0; i < 9; i++) {
+for (let i = 0; i < 14; i++) {
   await page.screenshot({ path: `${OUT}/scene-${i}.png` });
   console.log('shot: scene-' + i);
   await page.keyboard.press('ArrowRight');

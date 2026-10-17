@@ -15,6 +15,8 @@ export const SECRETS = [
 ];
 
 export const REQUIRED_PROJECT_FIELDS = ['slug', 'title', 'desc', 'problem', 'built', 'result'];
+// Filter themes a project may carry (its `theme` array).
+export const THEMES = ['voice', 'assist', 'llm', 'retrieval', 'eval', 'data', 'infra', 'viz', 'sales'];
 
 export const hasEmDash = (line) => line.includes(EM_DASH);
 export const hasPhone = (line) => PHONE.test(line);
@@ -31,6 +33,11 @@ export function projectProblems(p, id = p?.slug ?? '?') {
     if (typeof p[k] !== 'string' || !p[k].trim()) problems.push(`${id} is missing "${k}"`);
   }
   if (!Array.isArray(p.stack) || p.stack.length === 0) problems.push(`${id} is missing "stack"`);
+  if (!Array.isArray(p.theme) || p.theme.length === 0) {
+    problems.push(`${id} is missing "theme"`);
+  } else if (p.theme.some((t) => !THEMES.includes(t))) {
+    problems.push(`${id} has a theme outside ${THEMES.join(', ')}`);
+  }
   for (const k of ['repoUrl', 'liveUrl']) {
     if (p[k] == null) continue;
     let ok = false;

@@ -53,7 +53,7 @@ Each frame in `main.js` runs `input.update`, `carousel.update`, `stage.updateCam
 
 `src/experience/Carousel.js` and `Holo.js` place the projects on a spiral.
 
-- The ring is the project list written twice, so `n = 2 × projects.length` (18 for the current nine). Each entry is a `Holo` with `dataIndex = index % (n / 2)`.
+- The ring is the project list written twice, so `n = 2 × projects.length` (28 for the current fourteen). Each entry is a `Holo` with `dataIndex = index % (n / 2)`.
 - `offset` is the accumulated position of the ring in card units. For each holo, `rel = ((index - offset) mod n)`, wrapped into the range (-n/2, n/2]. `rel` is 0 for the card at front centre.
 - Position: `angle = rel × angleStep`, `x = sin(angle) × r`, `z = cos(angle) × r`, and `y = -rel × vStep - 0.85`. During the entrance, `r` shrinks by up to 40 percent and `y` drops by up to 1.3 units, both scaled by `(1 - reveal)`.
 - Parameters, from `Carousel.js`:
